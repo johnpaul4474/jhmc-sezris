@@ -5,7 +5,7 @@ import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { ref } from "vue"
-import { Users, FileText, UserPlus } from "lucide-vue-next" // Lucide icons
+import { Users, FileText, UserPlus,  } from "lucide-vue-next" // Lucide icons
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
