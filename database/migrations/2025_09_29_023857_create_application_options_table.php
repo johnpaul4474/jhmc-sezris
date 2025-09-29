@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('value');
-            $table->integer('validity')->nullable(); // e.g., days/months, depends on use case
+            $table->text('validity')->nullable(); // e.g., days/months, depends on use case
             $table->timestamps();
         });
     }
