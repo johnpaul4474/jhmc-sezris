@@ -9,13 +9,43 @@ use App\Models\Locator\ApplicationOption;
 
 class ApplicationController extends Controller
 {
+  
     /**
      * Display a listing of the resource.
      */
     public function index()
-    {   $options= ApplicationOption::all();
-       //$applications = ApplicationModel::with('articleDetails')->get();
-       return dd($options);
+     {   
+        $application = ApplicationModel::with(['selections.option', 'selections.user'])
+            ->latest()
+            ->first();
+
+        if (!$application) {
+            return response()->json(['message' => 'No application found'], 404);
+        }
+        
+        // Format the selections
+        $selections = $application->selections->map(function($selection) {
+            $amount = $selection->amount;
+            return [
+                'option_name' => $selection->option->name,
+                'amount'      => $selection->amount,
+                'validity'    => $selection->option->validity,
+                'selected_at' => $selection->selected_at,
+                'user_name'   => $selection->user->name, // or email/id
+            ];
+        });
+        $totalAmount = $application->selections->sum('amount');
+        
+       
+        return response()->json([
+            'application' => [
+                'id'           => $application->id,
+                'form_title'   => $application->form_title,
+                'control_no'   => $application->control_number,
+                'form_number'  => $application->form_number,
+                'selections'   => $selections,
+            ]
+        ]);
     }
 
     /**

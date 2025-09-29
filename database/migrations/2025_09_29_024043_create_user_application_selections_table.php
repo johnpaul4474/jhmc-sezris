@@ -13,15 +13,27 @@ return new class extends Migration
     {
         Schema::create('user_application_selections', function (Blueprint $table) {
             $table->id();
+
+            $table->unsignedBigInteger('application_id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('option_id');
+
             $table->timestamp('selected_at')->nullable();
             $table->decimal('amount', 10, 2)->default(0.00);
             $table->timestamps();
 
             // Foreign keys
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('option_id')->references('id')->on('application_options')->onDelete('cascade');
+            $table->foreign('application_id')
+                  ->references('id')->on('application_forms')
+                  ->onDelete('cascade');
+
+            $table->foreign('user_id')
+                  ->references('id')->on('users')
+                  ->onDelete('cascade');
+
+            $table->foreign('option_id')
+                  ->references('id')->on('application_options')
+                  ->onDelete('cascade');
         });
     }
 

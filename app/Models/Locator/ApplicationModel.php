@@ -53,4 +53,12 @@ class ApplicationModel extends Model
     {
         return $this->hasMany(\App\Models\Locator\ArticleDetail::class, 'application_form_id');
     }
+    public function uploads()
+    {
+    return $this->hasMany(\App\Models\Locator\Upload::class, 'application_form_id');
+    }
+    public function selections()
+    {
+    return $this->hasMany(\App\Models\Locator\UserApplicationSelection::class, 'application_id');
+    }
 }
