@@ -158,7 +158,7 @@ const submit = () => {
         v-model="articles" 
         :title="`Article Details for Order # ${props.application_form_id}`" 
       />
-     {{ articles }}
+    
     </div>
   </locatorAppSidebarLayout>
   

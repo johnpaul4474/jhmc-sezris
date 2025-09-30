@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3' 
-import { Plus, X, Box, Save } from 'lucide-vue-next'
+import { Plus, X, Box, Save, Trash2 } from 'lucide-vue-next'
 
 // --- Props and Emits for v-model functionality ---
 const props = defineProps({
@@ -85,7 +85,7 @@ watch(() => props.modelValue, (newVal) => {
       <!-- Title -->
       <h1 class="text-3xl font-extrabold text-gray-900 border-b pb-4 flex items-center space-x-3">
         <Box class="w-7 h-7 text-indigo-600" />
-        <span>Article Submission Tracker (Form ID: {{ props.formId }})</span>
+        <span>Article Submission Tracker <code>( Form ID: {{ props.formId }})</code></span>
       </h1>
 
       <!-- Add Button -->
@@ -135,7 +135,7 @@ watch(() => props.modelValue, (newVal) => {
                   aria-label="Remove item"
                   class="p-1 rounded-full text-red-500 hover:bg-red-100 transition shadow-sm"
                 >
-                  <X class="w-4 h-4" />
+                  <Trash2 class="w-4 h-4" />
                 </button>
               </td>
             </tr>

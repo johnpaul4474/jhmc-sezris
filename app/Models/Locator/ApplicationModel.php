@@ -32,13 +32,20 @@ class ApplicationModel extends Model
             $application->control_number = $prefix . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
 
             // ✅ Generate form_number based on title (acronym + XXX)
-            $acronym = strtoupper(collect(explode(' ', $application->form_title))
-                ->map(fn($word) => mb_substr($word, 0, 1))
-                ->implode(''));
+            $acronym = strtoupper(
+    collect(explode(' ', $application->form_title))
+        ->map(fn($word) => mb_substr($word, 0, 1))
+        ->implode('')
+);
 
-            $formCount = self::where('form_title', $application->form_title)->count() + 1;
+$counter = 1;
+do {
+    $formNumber = $acronym . '-' . str_pad($counter, 4, '0', STR_PAD_LEFT);
+    $exists = self::where('form_number', $formNumber)->exists();
+    $counter++;
+} while ($exists);
 
-            $application->form_number = $acronym . '-' . str_pad($formCount, 4, '0', STR_PAD_LEFT);
+$application->form_number = $formNumber;
         });
     }
 
