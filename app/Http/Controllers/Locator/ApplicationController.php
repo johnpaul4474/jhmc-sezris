@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Locator\ApplicationModel;
 use App\Models\Locator\ApplicationOption;
+use Inertia\Inertia;
 
 class ApplicationController extends Controller
 {
@@ -53,14 +54,25 @@ class ApplicationController extends Controller
      */
     public function create()
 {
-    $application = ApplicationModel::create([
-        'form_title' => 'Gate Pass Permit',
-        'user_id'    => auth()->id(),
-    ]);
+    // $application = ApplicationModel::create([
+    //     'form_title' => 'Gate Pass Permit',
+    //     'user_id'    => auth()->id(),
+    // ]);
 
-    return response()->json([
-        'message' => 'Application created successfully!',
-        'data'    => $application,
+    // return response()->json([
+    //     'message' => 'Application created successfully!',
+    //     'data'    => $application,
+    // ]);
+   $user = auth()->user(); // or Auth::user()
+    //   $application = \App\Models\ApplicationModel::create([
+    //     'form_title' => 'Draft Application',
+    //     'user_id'    => $user->id,
+    // ]);
+   
+    return Inertia::render('Locator/Application/Create', [
+        'user' => $user,
+        'application_form_id' => null,
+        
     ]);
 }
     /**
@@ -68,20 +80,20 @@ class ApplicationController extends Controller
      */
     public function store(Request $request)
     {
-    //    $validated = $request->validate([
-    //         'form_title'      => 'required|string|max:255',
-    //         'user_id'         => 'required|exists:users,id',
-    //         'control_number'  => 'required|string|unique:applications,control_number',
-    //         'form_number'     => 'nullable|string|max:100',
-    //     ]);
+        //dd($request->input('type'));
+       $user = auth()->user();
 
-    //     // ✅ create new application
-    //     $application = Application::create($validated);
+    // Create an empty application record just to get the ID
+    $application = ApplicationModel::create([
+        'form_title' => $request->input('type') ,
+        'user_id'    => $user->id,
+    ]);
 
-    //     // ✅ redirect or return JSON
-    //     return redirect()
-    //         ->route('applications.show', $application->id)
-    //         ->with('success', 'Application created successfully!');
+    return Inertia::render('Locator/Application/Create', [
+        'user' => $user,
+        'application_form_id' => $application->id, // Pass the new ID
+    ]);
+
     }
     
 
