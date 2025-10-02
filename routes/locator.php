@@ -3,8 +3,9 @@ use App\Http\Controllers\Locator\LocatorController;
 use App\Http\Controllers\Locator\ApplicationController;
 use App\Http\Controllers\Locator\ArticleDetailController;
 use App\Http\Controllers\Locator\UploadController;
+use App\Http\Controllers\Locator\SezrisController;
 
-
+Route::get('/sezris', [SezrisController::class, 'index'])->name('sezris.index');
 Route::get('/locator', [LocatorController::class, 'index'])->name('locators.index');
 
 Route::group(['prefix' => 'loctr', 'middleware' => 'auth'], function () {

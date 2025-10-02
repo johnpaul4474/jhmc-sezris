@@ -247,20 +247,21 @@ const rightNavItems: NavItem[] = [
                                 <Avatar
                                     class="size-8 overflow-hidden rounded-full"
                                 >
-                                    <AvatarImage
+                                    <!-- <AvatarImage
                                         v-if="auth.user.avatar"
                                         :src="auth.user.avatar"
                                         :alt="auth.user.name"
-                                    />
-                                    <AvatarFallback
+                                    /> -->
+                                    <!-- <AvatarFallback
                                         class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white"
-                                    >
-                                        {{ getInitials(auth.user?.name) }}
-                                    </AvatarFallback>
+                                    > -->
+                                        <!-- {{ getInitials(auth.user?.name) }}
+                                    </AvatarFallback> -->
                                 </Avatar>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" class="w-56">
+                        
                             <UserMenuContent :user="auth.user" />
                         </DropdownMenuContent>
                     </DropdownMenu>
