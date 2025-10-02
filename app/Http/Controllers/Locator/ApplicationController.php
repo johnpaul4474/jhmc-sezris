@@ -128,4 +128,10 @@ class ApplicationController extends Controller
     {
         //
     }
+    public function pendingList(){
+        return Inertia::render('Locator/Application/Pending', []);
+    }
+    public function approvedList(){
+        return Inertia::render('Locator/Application/Approved',[]);
+    }
 }

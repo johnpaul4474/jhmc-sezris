@@ -10,5 +10,12 @@ class LocatorController extends Controller
 {
     public function index(){
         return Inertia::render('Locator/Index', []);
+       
+    }
+    public function pendingList(){
+        return Inertia::render('Locator/Application/Pending', []);
+    }
+    public function approvedList(){
+        return Inertia::render('Locator/Application/Approved',[]);
     }
 }

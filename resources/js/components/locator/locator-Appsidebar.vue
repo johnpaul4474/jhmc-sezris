@@ -17,23 +17,24 @@ import { Link } from '@inertiajs/vue3';
 import { BookOpen, Folder, LayoutGrid,SquareUserRound, Clock, Eye } from 'lucide-vue-next';
 import AppLogo from '../AppLogo.vue';
 
+
 const mainNavItems: NavItem[] = [
     {
         title: 'Locator',
-        href: dashboard(),
+        href: '/locator',
         icon: LayoutGrid,
     },
     {
         title: 'Create Appplication',
-        href: usersDashboard(),
+        href: '/loctr/applications/create',
         icon: SquareUserRound,
     },{
         title: 'Pending Application',
-        href: sezadDashboard(),
+        href: '/loctr/applications/pending',
         icon: Clock,
     },{
         title: 'Approved Applications',
-        href: bddDashboard(),
+        href: '/loctr/applications/approved',
         icon: Eye,
     },
 ];
