@@ -45,7 +45,7 @@ const closeModal = () => {
 }
 
 const submitArticle = () => {
-  form.post('/articles', {
+  form.post('/loctr/articles', {
     onSuccess: (page) => {
       // If Laravel returns JSON, grab the article from response
       const newArticle = page.props?.article || page?.article;
@@ -173,7 +173,7 @@ watch(() => props.modelValue, (newVal) => {
               <label class="block text-sm font-medium text-gray-700 mb-1">Marks and number</label>
               <input v-model="form.marks_and_number" type="text" required
                 placeholder="e.g., BOX-001 / Fragile"
-                class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-indigo-500 focus:border-indigo-500" />
+                class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400" />
               <div v-if="form.errors.marks_and_number" class="mt-1 text-red-500 text-xs">{{ form.errors.marks_and_number }}</div>
             </div>
 
@@ -181,7 +181,7 @@ watch(() => props.modelValue, (newVal) => {
               <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
               <input v-model.number="form.qty" type="number" min="1" required
                 placeholder="e.g., 10"
-                class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-indigo-500 focus:border-indigo-500" />
+                class="w-full border border-gray-300 rounded-lg p-3 text-sm text-gray-900 placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500" />
               <div v-if="form.errors.qty" class="mt-1 text-red-500 text-xs">{{ form.errors.qty }}</div>
             </div>
 
@@ -189,7 +189,7 @@ watch(() => props.modelValue, (newVal) => {
               <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
               <input v-model="form.detailed_description_of_article" type="text" required
                 placeholder="Full description (material, model, function)"
-                class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-indigo-500 focus:border-indigo-500" />
+                class="w-full border border-gray-300 rounded-lg p-3 text-sm text-gray-900 placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500" />
               <div v-if="form.errors.detailed_description_of_article" class="mt-1 text-red-500 text-xs">{{ form.errors.detailed_description_of_article }}</div>
             </div>
 
@@ -197,7 +197,7 @@ watch(() => props.modelValue, (newVal) => {
               <label class="block text-sm font-medium text-gray-700 mb-1">Gross weight (optional)</label>
               <input v-model="form.gross_weight" type="text"
                 placeholder="e.g., 50.5 kg / TEKU1234567"
-                class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-indigo-500 focus:border-indigo-500" />
+                class="w-full border border-gray-300 rounded-lg p-3 text-sm text-gray-900 placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500" />
               <div v-if="form.errors.gross_weight" class="mt-1 text-red-500 text-xs">{{ form.errors.gross_weight }}</div>
             </div>
           </div>

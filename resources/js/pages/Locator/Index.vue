@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import locatorAppSidebarLayout from '@/layouts/locator/locator-AppSidebarLayout.vue';
+import locatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue';
+import locators from '@/routes/locators';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
@@ -8,8 +9,8 @@ import { ref } from "vue"
 import { Users, FileText, UserPlus,  } from "lucide-vue-next" // Lucide icons
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
-        href: dashboard().url,
+        title: 'Locator',
+        href: locators.index.url(),
     },
 ];
 
@@ -32,6 +33,7 @@ const stats = ref({
     <Head title="Locator Dashboard" />
 
     <locatorAppSidebarLayout :breadcrumbs="breadcrumbs">
+      
      <div class="grid gap-6 md:grid-cols-4 px-4 py-4">
         <div
       class="flex flex-col items-center rounded-2xl bg-blue-500 p-4 shadow-lg transition hover:shadow-xl dark:bg-[#1b1b18]"

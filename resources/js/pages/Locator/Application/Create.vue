@@ -1,8 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
-
-import locatorAppSidebarLayout from '@/layouts/locator/locator-AppSidebarLayout.vue'
+import locators from '@/routes/locators';
+import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
 import { ChevronDown, Check } from 'lucide-vue-next'
 import DynamicFormRepeater from '@/components/locator/DynamicFormRepeater.vue'
 
@@ -13,6 +13,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {type BreadcrumbItem } from '@/types';
+import LocatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue';
+import applications from '@/routes/applications';
 
 // Props from Laravel controller
 const props = defineProps({
@@ -46,7 +49,7 @@ const applicationTypes = [
 
 // Inertia form state
 const form = useForm({
-  user_id: props.user.id,
+  user_id: props.user?.id,
   type: '',
   description: '',
 })
@@ -55,15 +58,27 @@ const form = useForm({
 const selectType = (type) => {
   form.type = type
 }
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Locator',
+        href: locators.index.url(),
+    },
+    {
+        title: 'Create Permit',
+        href: applications.create.url(),
+    },
+];
 
 const submit = () => {
-  form.post('/applications')
+  form.post('/loctr/applications')
 }
 </script>
 
 <template>
-  <locatorAppSidebarLayout>
-    <!-- Application Card -->
+  
+            
+   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
+     
     <div class="p-6 w-full mx-6 bg-white shadow-xl rounded-xl border border-gray-100">
       <h1 class="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-2">
         Create New Application
@@ -78,50 +93,53 @@ const submit = () => {
           </label>
           <input
             type="text"
-            :value="props.user.name"
+            :value="props.user?.name"
             readonly
             class="w-full bg-gray-50 border-gray-200 cursor-not-allowed text-gray-600 rounded-md p-2.5 shadow-sm focus:ring-0 focus:border-gray-200"
           />
         </div>
 
+      
         <!-- Type (Dropdown Select) -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Application Type
-          </label>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger as-child>
-              <button
-                type="button"
-                class="w-full justify-between inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
-                :class="{ 'text-gray-500': !form.type, 'border-red-500': form.errors.type }"
-              >
-                {{ form.type || 'Select an application type' }}
-                <ChevronDown class="ml-2 h-4 w-4 text-gray-400" />
-              </button>
-            </DropdownMenuTrigger>
-            
-            <DropdownMenuContent class="w-64 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
-              <DropdownMenuItem 
-                v-for="type in applicationTypes" 
-                :key="type"
-                @click="selectType(type)"
-                class="flex items-center justify-between cursor-pointer hover:bg-gray-100 p-2 transition duration-100"
-                :class="{ 'bg-gray-100 font-semibold text-blue-600': form.type === type }"
-              >
-                {{ type }}
-                <Check v-if="form.type === type" class="h-4 w-4 text-blue-600" />
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <div v-if="form.errors.type" class="text-red-500 text-sm mt-1">
-            {{ form.errors.type }}
-          </div>
-        </div>
+<div>
+  <label class="block text-sm font-medium text-gray-700 mb-1">
+    Application Type
+  </label>
 
+  <DropdownMenu>
+    <DropdownMenuTrigger as-child>
+      <button
+        type="button"
+        class="w-full justify-between inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-black shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out" 
+        
+        :class="{ 'text-gray-500': !form.type, 'border-red-500': form.errors.type }"
+      >
+        {{ form.type || 'Select an application type' }}
+        <ChevronDown class="ml-2 h-4 w-4 text-gray-400" />
+      </button>
+    </DropdownMenuTrigger>
+
+    <DropdownMenuContent class="w-64 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
+      <DropdownMenuItem 
+        v-for="type in applicationTypes" 
+        :key="type"
+        @click="selectType(type)"
+        class="flex items-center justify-between cursor-pointer hover:bg-gray-100 p-2 transition duration-100 text-black" 
+       
+        :class="{ 'bg-gray-100 font-semibold text-blue-600': form.type === type }"
+      >
+        {{ type }}
+        <Check v-if="form.type === type" class="h-4 w-4 text-blue-600" />
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+
+  <div v-if="form.errors.type" class="text-red-500 text-sm mt-1">
+    {{ form.errors.type }}
+  </div>
+</div>
         <!-- Description -->
-        <div>
+        <div class="hidden">
           <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
             Description
           </label>
@@ -160,6 +178,6 @@ const submit = () => {
       />
     
     </div>
-  </locatorAppSidebarLayout>
+     </LocatorAppSidebarLayout>
   
 </template>
