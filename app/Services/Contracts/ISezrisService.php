@@ -1,7 +1,7 @@
 <?php
 // File: app/Contracts/ISezrisService.php
 
-namespace App\Contracts;
+namespace App\Services\Contracts;
 
 interface ISezrisService
 {

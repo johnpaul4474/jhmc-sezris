@@ -157,10 +157,11 @@ const submit = () => {
         </div>
 
         <!-- Submit Button -->
-        <div class="pt-2">
+        <div class="pt-2 justify-center">
+         
           <button
             type="submit"
-            class="w-full bg-blue-600 text-white px-4 py-2.5 rounded-lg font-semibold text-base hover:bg-blue-700 disabled:opacity-50 transition duration-150"
+            class="px-5 py-2 bg-blue-600 text-white rounded-md mx-auto block"
             :disabled="form.processing"
           >
             {{ form.processing ? 'Saving...' : 'Apply' }}

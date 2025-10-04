@@ -15,7 +15,7 @@ class ArticleDetailController extends Controller
     public function index()
     {
         $article= ArticleDetail::all();
-        return dd($article);
+        return;
     }
 
     /**
@@ -29,34 +29,26 @@ class ArticleDetailController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-public function store(Request $request)
+    public function store(Request $request)
 {
     $validated = $request->validate([
-        'application_form_id'             => 'required|integer|exists:application_forms,id',
-        'marks_and_number'                => 'required|string|max:255',
-        'qty'                             => 'required|integer|min:1',
+        'application_form_id' => 'required|integer|exists:application_forms,id',
+        'marks_and_number' => 'required|string|max:255',
+        'qty' => 'required|integer|min:1',
         'detailed_description_of_article' => 'required|string|max:500',
-        'gross_weight'                    => 'nullable|string|max:255',
+        'gross_weight' => 'nullable|string|max:255',
     ]);
 
     $article = ArticleDetail::create([
-        'application_form_id'             => $validated['application_form_id'],
-        'marks_and_number'                => $validated['marks_and_number'],
-        'qty'                             => $validated['qty'],
-        'detailed_description_of_article' => $validated['detailed_description_of_article'],
-        'gross_weight'                    => $validated['gross_weight'] ?? null,
-        'user_id'                         => auth()->id(),
-    ]);
-
-    // Fetch all articles for this form
-    $articles = ArticleDetail::where('application_form_id', $validated['application_form_id'])->get();
-
-    return Inertia::render('Locator/Application/Create', [
-        'user'                => auth()->user(),
         'application_form_id' => $validated['application_form_id'],
-        'articles'            => $articles,
-        'articleDetail'       => $article, // optional: the one just created
+        'marks_and_number' => $validated['marks_and_number'],
+        'qty' => $validated['qty'],
+        'detailed_description_of_article' => $validated['detailed_description_of_article'],
+        'gross_weight' => $validated['gross_weight'] ?? null,
+        'user_id' => auth()->id(),
     ]);
+
+    return response()->json(['article' => $article]);
 }
 
     /**
@@ -86,8 +78,12 @@ public function store(Request $request)
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        //
-    }
+ public function destroy($id)
+{
+    $article = ArticleDetail::findOrFail($id);
+    $article->delete();
+
+    // Return 204 for AJAX
+    return response()->noContent(); 
+}
 }

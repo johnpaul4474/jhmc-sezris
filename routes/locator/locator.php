@@ -12,7 +12,7 @@ Route::group(['prefix' => 'loctr', 'middleware' => 'auth'], function () {
      Route::get('applications/pending', [ApplicationController::class, 'pendingList'])->name('applications.pending');
      Route::get('applications/approved', [ApplicationController::class, 'approvedList'])->name('applications.approved');
      Route::resource('applications', ApplicationController::class);
-     Route::resource('articles', ArticleDetailController::class);
+     Route::resource('articles', \App\Http\Controllers\Locator\ArticleDetailController::class);
      Route::resource('uploads', UploadController::class);
      
 });

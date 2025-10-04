@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Contracts\ISezrisService;
+use App\Services\Contracts\ISezrisService;
 
 class UploadService implements ISezrisService
 {
