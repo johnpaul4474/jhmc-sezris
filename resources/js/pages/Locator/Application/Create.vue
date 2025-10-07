@@ -1,44 +1,35 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
-import locators from '@/routes/locators';
-import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
-import { ChevronDown, Check } from 'lucide-vue-next'
+import locators from '@/routes/locators'
+import applications from '@/routes/applications'
+import LocatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue'
 import DynamicFormRepeater from '@/components/locator/DynamicFormRepeater.vue'
-
-// UI dropdown imports
+import ApplicationOptionSelect from '@/components/locator/ApplicationOptionSelect.vue'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {type BreadcrumbItem } from '@/types';
-import LocatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue';
-import applications from '@/routes/applications';
+import { type BreadcrumbItem } from '@/types'
 
-// Props from Laravel controller
 const props = defineProps({
   user: Object,
   application_form_id: [String, Number],
-  articleDetail: {
-    type: Object,
-    default: () => null,
-  },
+  articleDetail: { type: Object, default: () => null },
+  categories: { type: Array, default: () => [] },
+  options: { type: Array, default: () => [] },
 })
 
-// Local state for articles (linked with DynamicFormRepeater via v-model)
 const articles = ref([])
 
-// Watch for new article pushed back from backend
-watch(
-  () => props.articleDetail,
-  (newVal) => {
-    if (newVal) articles.value.push(newVal)
-  }
-)
+watch(() => props.articleDetail, (newVal) => {
+  if (newVal) articles.value.push(newVal)
+})
 
-// Application types
 const applicationTypes = [
   'Gate Pass',
   'Permit-to-Bring-In',
@@ -47,27 +38,17 @@ const applicationTypes = [
   'Data Pipeline',
 ]
 
-// Inertia form state
 const form = useForm({
   user_id: props.user?.id,
   type: '',
   description: '',
+  application_category_option_id: '',
 })
 
-// Handlers
-const selectType = (type) => {
-  form.type = type
-}
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Locator',
-        href: locators.index.url(),
-    },
-    {
-        title: 'Create Permit',
-        href: applications.create.url(),
-    },
-];
+  { title: 'Locator', href: locators.index.url() },
+  { title: 'Create Permit', href: applications.create.url() },
+]
 
 const submit = () => {
   form.post('/loctr/applications')
@@ -75,110 +56,99 @@ const submit = () => {
 </script>
 
 <template>
-  
-            
-   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
-     
+  <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 w-full mx-6 bg-white shadow-xl rounded-xl border border-gray-100">
       <h1 class="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-2">
         Create New Application
       </h1>
-      
+    
       <form @submit.prevent="submit" class="space-y-6">
-        
-        <!-- Creator Name (Read-only) -->
+        <!-- Application Creator -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Application Creator
-          </label>
-          <input
-            type="text"
-            :value="props.user?.name"
-            readonly
-            class="w-full bg-gray-50 border-gray-200 cursor-not-allowed text-gray-600 rounded-md p-2.5 shadow-sm focus:ring-0 focus:border-gray-200"
-          />
+          <label class="block text-sm font-medium text-gray-700 mb-1">Application Creator</label>
+          {{ props.user?.name }}
         </div>
 
-      
-        <!-- Type (Dropdown Select) -->
-<div>
-  <label class="block text-sm font-medium text-gray-700 mb-1">
-    Application Type
-  </label>
+        <!-- Application Type (Dropdown) -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Application Type</label>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="outline" class="w-full justify-between">
+                <span>{{ form.type || '-- Select an application type --' }}</span>
+                <svg
+                  class="ml-2 h-4 w-4 opacity-50"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 9l-7 7-7-7" />
+                </svg>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent class="w-full">
+              <DropdownMenuItem
+                v-for="type in applicationTypes"
+                :key="type"
+                @click="form.type = type"
+                class="cursor-pointer"
+              >
+                {{ type }}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <div v-if="form.errors.type" class="text-red-500 text-sm mt-1">
+            {{ form.errors.type }}
+          </div>
+        </div>
 
-  <DropdownMenu>
-    <DropdownMenuTrigger as-child>
-      <button
-        type="button"
-        class="w-full justify-between inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-black shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out" 
-        
-        :class="{ 'text-gray-500': !form.type, 'border-red-500': form.errors.type }"
-      >
-        {{ form.type || 'Select an application type' }}
-        <ChevronDown class="ml-2 h-4 w-4 text-gray-400" />
-      </button>
-    </DropdownMenuTrigger>
+        <!-- Declared Value & Validity (ApplicationOptionSelect Component) -->
+        <div v-if="props.application_form_id">
+          <ApplicationOptionSelect
+              v-model="form.application_category_option_id"
+              :options="props.options"
+              :application-id="props.application_form_id"
+            />
+          <div v-if="form.errors.application_category_option_id" class="text-red-500 text-sm mt-1">
+            {{ form.errors.application_category_option_id }}
+          </div>
+        </div>
 
-    <DropdownMenuContent class="w-64 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
-      <DropdownMenuItem 
-        v-for="type in applicationTypes" 
-        :key="type"
-        @click="selectType(type)"
-        class="flex items-center justify-between cursor-pointer hover:bg-gray-100 p-2 transition duration-100 text-black" 
-       
-        :class="{ 'bg-gray-100 font-semibold text-blue-600': form.type === type }"
-      >
-        {{ type }}
-        <Check v-if="form.type === type" class="h-4 w-4 text-blue-600" />
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-
-  <div v-if="form.errors.type" class="text-red-500 text-sm mt-1">
-    {{ form.errors.type }}
-  </div>
-</div>
-        <!-- Description -->
+        <!-- Description (Optional) -->
         <div class="hidden">
-          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
-            Description
-          </label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
           <textarea
-            id="description"
             v-model="form.description"
             rows="4"
             class="w-full border border-gray-300 rounded-md p-3 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 transition"
-            :class="{ 'border-red-500': form.errors.description }"
-            placeholder="Enter a detailed description of the application's purpose and features"
+            placeholder="Optional description"
           ></textarea>
           <div v-if="form.errors.description" class="text-red-500 text-sm mt-1">
             {{ form.errors.description }}
           </div>
         </div>
 
-        <!-- Submit Button -->
-        <div class="pt-2 justify-center">
-         
-          <button
+        <!-- Dynamic Article Repeater -->
+        <div v-if="props.application_form_id" class="mt-8">
+          <DynamicFormRepeater
+            :formId="props.application_form_id"
+            v-model="articles"
+            :title="`Article Details for Order # ${props.application_form_id}`"
+          />
+        </div>
+
+        <!-- Submit -->
+        <div class="pt-4 flex justify-center">
+          <Button
             type="submit"
-            class="px-5 py-2 bg-blue-600 text-white rounded-md mx-auto block"
+            class="px-5 py-2"
             :disabled="form.processing"
           >
             {{ form.processing ? 'Saving...' : 'Apply' }}
-          </button>
+          </Button>
         </div>
       </form>
     </div>
-
-    <!-- Articles Repeater -->
-    <div v-if="props.application_form_id" class="mt-8 mx-6">
-      <DynamicFormRepeater 
-        :formId="props.application_form_id" 
-        v-model="articles" 
-        :title="`Article Details for Order # ${props.application_form_id}`" 
-      />
-    
-    </div>
-     </LocatorAppSidebarLayout>
-  
+  </LocatorAppSidebarLayout>
 </template>

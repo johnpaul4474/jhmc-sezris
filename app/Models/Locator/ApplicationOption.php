@@ -1,15 +1,20 @@
 <?php
-
 namespace App\Models\Locator;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ApplicationOption extends Model
 {
-    protected $fillable = ['name', 'validity'];
+    use HasFactory;
 
-    public function selections()
-    {
-        return $this->hasMany(UserApplicationSelection::class, 'article_option_id');
-    }
+    protected $table = 'application_options';
+
+    protected $fillable = [
+        'name',
+        'value',
+        'validity',
+    ];
+
+   
 }

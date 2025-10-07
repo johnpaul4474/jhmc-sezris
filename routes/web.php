@@ -1,7 +1,10 @@
 <?php
-
+use App\Models\ApplicationCategory;
+use App\Models\ApplicationValidity;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Models\ApplicationCategoryOption;
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome');

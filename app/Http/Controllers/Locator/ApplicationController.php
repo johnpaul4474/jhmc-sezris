@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\Locator\ApplicationModel;
 use App\Models\Locator\ApplicationOption;
 use Inertia\Inertia;
+use App\Models\ApplicationCategory;
+use App\Models\Locator\UserApplicationSelection;
+
 
 class ApplicationController extends Controller
 {
@@ -82,16 +85,22 @@ class ApplicationController extends Controller
     {
         //dd($request->input('type'));
        $user = auth()->user();
-
+    $categories = ApplicationCategory::with('options.validity')->get();
+    
     // Create an empty application record just to get the ID
     $application = ApplicationModel::create([
         'form_title' => $request->input('type') ,
         'user_id'    => $user->id,
     ]);
+    // Collection of all options
+    
 
     return Inertia::render('Locator/Application/Create', [
         'user' => $user,
         'application_form_id' => $application->id, // Pass the new ID
+        'categories' => $categories,
+    'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
+
     ]);
 
     }
@@ -134,4 +143,29 @@ class ApplicationController extends Controller
     public function approvedList(){
         return Inertia::render('Locator/Application/Approved',[]);
     }
+    public function saveOptionSelection(Request $request)
+{
+    $validated = $request->validate([
+        'application_id' => 'required|exists:application_forms,id',
+        'option_id' => 'required|exists:application_options,id',
+    ]);
+
+    $selection = UserApplicationSelection::updateOrCreate(
+        [
+            'application_id' => $validated['application_id'],
+            'user_id'        => auth()->id(),
+        ],
+        [
+            'option_id'   => $validated['option_id'],
+            'selected_at' => now(),
+            'amount'      => ApplicationOption::find($validated['option_id'])->value ?? 0,
+        ]
+    );
+    $user = auth()->user();
+    return Inertia::render('Locator/Application/Create',[
+       'user' => $user,
+        'application_form_id' => $selection->application_id,
+        'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
+    ]);
+}
 }
