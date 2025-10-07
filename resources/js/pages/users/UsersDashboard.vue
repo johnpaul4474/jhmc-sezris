@@ -5,6 +5,89 @@ import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { ref, computed, reactive, onMounted } from 'vue';
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot } from '@headlessui/vue';
+import { useForm } from '@inertiajs/vue3'
+
+// --- Dropdown state ---
+const departments = ref<any[]>([]);
+const divisions = ref<any[]>([]);
+const roles = ref<any[]>([]);
+const permissions = ref<any[]>([]);
+const allPermissions = ref<any[]>([]); // keep all permissions for filtering
+const props = defineProps({
+    users: {
+        type: Array,
+        default: () => []
+    }
+})
+
+//console.log("Users from Laravel:", props.users)
+//console.log("Users from Laravel:", props.users.values)
+const users = ref<any[]>(props.users || []); // Initialize users with props
+// --- User state ---
+const newUser = reactive({
+    id: 0,
+    employee_id: "",
+    first_name: "",
+    middle_name: "",
+    last_name: "",
+    suffix: "",
+    email_address: "",
+    department_id: "",
+    division_id: "",
+    role_id: "",
+    permission_id: "",
+    position: "",
+    status: "Active",
+    birth_date: "",
+    sex: "",
+    phone: "",
+    address: {
+        region: "",
+        province: "",
+        municipality: "",
+        barangay: "",
+        street: "",
+    },
+});
+
+// --- Load dropdown data ---
+async function loadDepartments() {
+    const res = await fetch("/departments");
+    departments.value = await res.json();
+    //console.log
+}
+
+async function loadRoles() {
+    const res = await fetch("/roles");
+    roles.value = await res.json();
+}
+
+async function loadPermissions() {
+    const res = await fetch("/permissions");
+    permissions.value = await res.json();
+}
+
+// --- Handle department → divisions ---
+function onDepartmentChange() {
+    const selectedDept = departments.value.find(
+        (d) => d.id === newUser.department_id
+    );
+    divisions.value = selectedDept ? selectedDept.divisions : [];
+    newUser.division_id = ""; // reset division when department changes
+}
+async function loadRolesAndPermissions() {
+    const res = await fetch("/roles");
+    const data = await res.json();
+    roles.value = data;
+
+    // Flatten all permissions across roles
+    const allPerms = data.flatMap((role: any) => role.permissions);
+    // Remove duplicates by ID
+    const uniquePerms = Array.from(new Map(allPerms.map((p: any) => [p.id, p])).values());
+    permissions.value = uniquePerms;
+}
+
+
 
 // Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
@@ -12,52 +95,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 // --- State ---
-const users = ref([
-    {
-        id: 1,
-        employee_id: "EMP001",
-        first_name: "Juan",
-        middle_name: "Dela",
-        last_name: "Cruz",
-        email_address: "juan@example.com",
-        status: "Active",
-        department: "IT",
-        division: "Development",
-        roles: "Admin",
-        birth_date: "1990-01-01",
-        sex: "Male",
-        phone: "09171234567",
-        address: {
-            street: "123 Main St",
-            barangay: "Barangay 1",
-            municipality: "Quezon City",
-            province: "Metro Manila",
-            region: "NCR",
-        },
-    },
-    {
-        id: 2,
-        employee_id: "EMP002",
-        first_name: "Maria",
-        middle_name: "Santos",
-        last_name: "Reyes",
-        email_address: "maria@example.com",
-        status: "Inactive",
-        department: "HR",
-        division: "Recruitment",
-        roles: "User",
-        birth_date: "1992-05-12",
-        sex: "Female",
-        phone: "09987654321",
-        address: {
-            street: "456 Second St",
-            barangay: "Barangay 2",
-            municipality: "Makati",
-            province: "Metro Manila",
-            region: "NCR",
-        },
-    },
-]);
+
+
 
 // Filters
 const search = ref('');
@@ -84,11 +123,14 @@ const editableUser = reactive({
     first_name: "",
     middle_name: "",
     last_name: "",
+    suffix: "",
     email_address: "",
     status: "",
     department: "",
     division: "",
     roles: "",
+    position: "",
+    permission: "",
     birth_date: "",
     sex: "",
     phone: "",
@@ -101,11 +143,58 @@ const editableUser = reactive({
     },
 });
 
+// function setEditableUser(user: any) {
+//   Object.assign(editableUser, user)
+
+//   try {
+//     editableUser.address = JSON.parse(user.address) || {}
+//   } catch (e) {
+//     console.warn("Invalid JSON in address:", user.address)
+//     editableUser.address = {
+//         street: "",
+//         barangay: "",
+//         municipality: "",
+//         province: "",
+//         region: ""
+//     }
+//   }
+// }
 // --- Functions ---
 function openUser(user: any) {
-    Object.assign(editableUser, JSON.parse(JSON.stringify(user))); // deep copy
-    showDetails.value = true;
+    //Object.assign(editableUser, JSON.parse(JSON.stringify(user))); // deep copy
+    
+  Object.assign(editableUser, user)
+
+  // Convert JSON string to object
+  if (typeof user.address === 'string') {
+    try {
+      editableUser.address = JSON.parse(user.address)
+    } catch (e) {
+      editableUser.address = {
+        street: "",
+        barangay: "",
+        municipality: "",
+        province: "",
+        region: ""
+      }
+    }
+  }
+  //console.log(editableUser);
+  showDetails.value = true;
+  if (editableUser.address.region && editableUser.address.region !== "") {
+    loadProvinces(editableUser.address.region);
+  }
+
+  if (editableUser.address.province && editableUser.address.province !== "") {
+    loadMunicipalities(editableUser.address.province);
+  }
+
+  if (editableUser.address.municipality && editableUser.address.municipality !== "") {
+    loadBarangays(editableUser.address.municipality);
+  }
 }
+
+
 
 function updateUser() {
     const index = users.value.findIndex((u) => u.id === editableUser.id);
@@ -115,59 +204,49 @@ function updateUser() {
     showDetails.value = false;
 }
 
-// Add User
-const newUser = reactive({
-    id: 0,
-    employee_id: "",
-    first_name: "",
-    middle_name: "",
-    last_name: "",
-    email_address: "",
-    department: "",
-    division: "",
-    roles: "",
-    status: "Active",
-    birth_date: "",
-    sex: "",
-    phone: "",
-    address: {
-        region: "",
-        province: "",
-        municipality: "",
-        barangay: "",
-        street: "",
-    },
-});
 
+
+const form = useForm({
+    employee_id: '',
+    first_name: '',
+    middle_name: '',
+    last_name: '',
+    suffix: '',
+    email_address: '',
+    department_id: '',
+    division_id: '',
+    role_id: '',
+    permission_id: '',
+    position: '',
+    status: 'Active',
+    birth_date: '',
+    sex: '',
+    phone: '',
+    address: {
+        region: '',
+        province: '',
+        municipality: '',
+        barangay: '',
+        street: '',
+    },
+})
+
+// save function
 function addUser() {
-    newUser.id = users.value.length ? Math.max(...users.value.map(u => u.id)) + 1 : 1;
-    users.value.push(JSON.parse(JSON.stringify(newUser)));
-    Object.assign(newUser, {
-        id: 0,
-        employee_id: "",
-        first_name: "",
-        middle_name: "",
-        last_name: "",
-        email_address: "",
-        department: "",
-        division: "",
-        roles: "",
-        status: "Active",
-        birth_date: "",
-        sex: "",
-        phone: "",
-        address: {
-            region: "",
-            province: "",
-            municipality: "",
-            barangay: "",
-            street: "",
+
+    form.post('/user/addUser', {
+
+        onSuccess: () => {
+            alert('✅ User saved successfully!')
         },
-    });
-    showAddUser.value = false;
+        onError: (errors) => {
+            console.error(errors)
+            alert('⚠️ Validation failed, check console.')
+        },
+    })
 }
 
-// Pagination
+
 const currentPage = ref(1);
 const pageSize = ref(5);
 
@@ -247,6 +326,12 @@ const barangays = ref<any[]>([]);
 onMounted(async () => {
     const res = await fetch("https://psgc.cloud/api/regions");
     regions.value = await res.json();
+    await loadDepartments();
+    await loadRoles();
+    await loadPermissions();
+    console.log(editableUser.address)
+
+
 });
 
 // When region changes → fetch provinces
@@ -256,9 +341,10 @@ async function loadProvinces(regionCode: string) {
     newUser.address.barangay = "";
     municipalities.value = [];
     barangays.value = [];
-
+    
     const res = await fetch(`https://psgc.cloud/api/regions/${regionCode}/provinces`);
     provinces.value = await res.json();
+    console.log(provinces.value);
 }
 
 // When province changes → fetch municipalities
@@ -269,6 +355,8 @@ async function loadMunicipalities(provinceCode: string) {
 
     const res = await fetch(`https://psgc.cloud/api/provinces/${provinceCode}/cities-municipalities`);
     municipalities.value = await res.json();
+    console.log(municipalities.value);
+
 }
 
 // When municipality changes → fetch barangays
@@ -276,7 +364,11 @@ async function loadBarangays(muniCode: string) {
     newUser.address.barangay = "";
     const res = await fetch(`https://psgc.cloud/api/cities-municipalities/${muniCode}/barangays`);
     barangays.value = await res.json();
+    console.log(barangays.value);
 }
+
+
+
 </script>
 
 
@@ -347,16 +439,15 @@ async function loadBarangays(muniCode: string) {
                                 class="cursor-pointer odd:bg-white even:bg-gray-50 hover:bg-blue-50"
                                 @click="openUser(user)">
                                 <td class="px-4 py-3 font-medium text-gray-800">
-                                    {{ user.first_name }} {{ user.last_name }}
+                                    {{ user.first_name }} {{ user.middle_name }} {{ user.last_name }}
                                 </td>
                                 <td class="px-4 py-3 text-gray-600">{{ user.email_address }}</td>
                                 <td class="px-4 py-3">{{ user.department }}</td>
                                 <td class="px-4 py-3">{{ user.division }}</td>
                                 <td class="px-4 py-3">{{ user.roles }}</td>
                                 <td>
-                                    <span class="inline-block rounded-full px-3 py-1 text-xs font-medium"
-                                        :class="user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
-                                        {{ user.status }}
+                                    <span :class="user.status == 1 ? 'text-green-600' : 'text-red-600'">
+                                        {{ user.status == 1 ? 'Active' : 'Inactive' }}
                                     </span>
                                 </td>
                             </tr>
@@ -424,21 +515,40 @@ async function loadBarangays(muniCode: string) {
                                                 class="w-full rounded-md border-gray-300 shadow-sm" />
                                         </div>
                                         <div>
+                                            <label class="block font-medium">Suffix</label>
+                                            <input v-model="editableUser.suffix" type="text"
+                                                class="w-full rounded-md border-gray-300 shadow-sm" />
+                                        </div>
+                                        <div>
                                             <label class="block font-medium">Email</label>
                                             <input v-model="editableUser.email_address" type="email"
                                                 class="w-full rounded-md border-gray-300 shadow-sm" />
+                                        </div>
+                                        <div>
+                                            <label class="block font-medium">Sex</label>
+                                            <select v-model="editableUser.sex"
+                                                class="w-full rounded-md border-gray-300 shadow-sm">
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                            </select>
                                         </div>
                                     </div>
 
                                     <!-- Column 2 -->
                                     <div class="space-y-3">
+                                        <!-- Status Dropdown -->
                                         <div>
-                                            <label class="block font-medium">Status</label>
+                                            <label class="block text-sm font-medium text-gray-700">Status</label>
                                             <select v-model="editableUser.status"
                                                 class="w-full rounded-md border-gray-300 shadow-sm">
-                                                <option value="Active">Active</option>
-                                                <option value="Inactive">Inactive</option>
+                                                <option :value="1">Active</option>
+                                                <option :value="0">Inactive</option>
                                             </select>
+
+                                            <!-- Default value preview -->
+                                            <!-- <span :class="editableUser.status == 1 ? 'text-green-600' : 'text-red-600'">
+                                                {{ editableUser.status == 1 ? 'Active' : 'Inactive' }}
+                                            </span> -->
                                         </div>
                                         <div>
                                             <label class="block font-medium">Department</label>
@@ -451,8 +561,18 @@ async function loadBarangays(muniCode: string) {
                                                 class="w-full rounded-md border-gray-300 shadow-sm" />
                                         </div>
                                         <div>
+                                            <label class="block font-medium">Position</label>
+                                            <input v-model="editableUser.position" type="text"
+                                                class="w-full rounded-md border-gray-300 shadow-sm" />
+                                        </div>
+                                        <div>
                                             <label class="block font-medium">Role</label>
                                             <input v-model="editableUser.roles" type="text"
+                                                class="w-full rounded-md border-gray-300 shadow-sm" />
+                                        </div>
+                                        <div>
+                                            <label class="block font-medium">Permission</label>
+                                            <input v-model="editableUser.permission" type="text"
                                                 class="w-full rounded-md border-gray-300 shadow-sm" />
                                         </div>
                                         <div>
@@ -460,48 +580,78 @@ async function loadBarangays(muniCode: string) {
                                             <input v-model="editableUser.birth_date" type="date"
                                                 class="w-full rounded-md border-gray-300 shadow-sm" />
                                         </div>
+
                                     </div>
 
                                     <!-- Column 3 -->
                                     <div class="space-y-3">
                                         <div>
-                                            <label class="block font-medium">Sex</label>
-                                            <select v-model="editableUser.sex"
-                                                class="w-full rounded-md border-gray-300 shadow-sm">
-                                                <option value="Male">Male</option>
-                                                <option value="Female">Female</option>
-                                            </select>
-                                        </div>
-                                        <div>
                                             <label class="block font-medium">Phone</label>
                                             <input v-model="editableUser.phone" type="text"
                                                 class="w-full rounded-md border-gray-300 shadow-sm" />
                                         </div>
+<!-- Region -->
+<div>
+  <label class="block font-medium">Region</label>
+  <select v-model="editableUser.address.region"
+          @change="loadProvinces(editableUser.address.region)"
+          class="w-full rounded-md border-gray-300 shadow-sm">
+    <!-- <option value="">{{editableUser.address.region}}</option> -->
+    <option v-for="region in regions" :key="region.code" :value="region.code">
+      {{ region.name }}
+    </option>
+  </select>
+</div>
+
+<!-- Province -->
+<div>
+  <label class="block font-medium">Province</label>
+  <select v-model="editableUser.address.province"
+          @change="loadMunicipalities(editableUser.address.province)"
+          class="w-full rounded-md border-gray-300 shadow-sm">
+    <option value="">Select Province</option>
+    <option v-for="prov in provinces" :key="prov.code" :value="prov.code">
+      {{ prov.name }} 
+    </option>
+  </select>
+</div>
+
+<!-- Municipality -->
+<div>
+  <label class="block font-medium">Municipality</label>
+  <select v-model="editableUser.address.municipality"
+          @change="loadBarangays(editableUser.address.municipality)"
+          class="w-full rounded-md border-gray-300 shadow-sm">
+    <option value="">Select Municipality</option>
+    <option v-for="muni in municipalities" :key="muni.code" :value="muni.code">
+      {{ muni.name }} 
+    </option>
+  </select>
+</div>
+
+<!-- Barangay -->
+<div>
+  <label class="block font-medium">Barangay</label>
+  <select v-model="editableUser.address.barangay"
+          class="w-full rounded-md border-gray-300 shadow-sm">
+    <option value="">Select Barangay</option>
+    <option v-for="brgy in barangays" :key="brgy.code" :value="brgy.code">
+      {{ brgy.name }}
+    </option>
+  </select>
+</div>
+
+
+
                                         <div>
                                             <label class="block font-medium">Street</label>
                                             <input v-model="editableUser.address.street" type="text"
                                                 class="w-full rounded-md border-gray-300 shadow-sm" />
                                         </div>
-                                        <div>
-                                            <label class="block font-medium">Barangay</label>
-                                            <input v-model="editableUser.address.barangay" type="text"
-                                                class="w-full rounded-md border-gray-300 shadow-sm" />
-                                        </div>
-                                        <div>
-                                            <label class="block font-medium">Municipality</label>
-                                            <input v-model="editableUser.address.municipality" type="text"
-                                                class="w-full rounded-md border-gray-300 shadow-sm" />
-                                        </div>
-                                        <div>
-                                            <label class="block font-medium">Province</label>
-                                            <input v-model="editableUser.address.province" type="text"
-                                                class="w-full rounded-md border-gray-300 shadow-sm" />
-                                        </div>
-                                        <div>
-                                            <label class="block font-medium">Region</label>
-                                            <input v-model="editableUser.address.region" type="text"
-                                                class="w-full rounded-md border-gray-300 shadow-sm" />
-                                        </div>
+
+
+
+
                                     </div>
                                 </div>
 
@@ -526,79 +676,173 @@ async function loadBarangays(muniCode: string) {
             <TransitionRoot appear :show="showAddUser" as="template">
                 <Dialog as="div" class="relative z-50" @close="showAddUser = false">
                     <div class="fixed inset-0 bg-black/30" />
-                    <div class="fixed inset-0 flex items-center justify-center p-4">
-                        <DialogPanel class="w-full max-w-5xl rounded-lg bg-white p-6 shadow-xl">
-                            <DialogTitle class="text-lg font-bold mb-4">Add User</DialogTitle>
+                    <div class="fixed inset-0 flex items-center justify-center p-2">
+                        <DialogPanel class="w-full max-w-6xl rounded-lg bg-white p-4 shadow-xl text-sm">
+                            <DialogTitle class="text-base font-semibold mb-3">Add User</DialogTitle>
 
-                            <form @submit.prevent="addUser" class="grid grid-cols-3 gap-4">
-                                <!-- Basic Info -->
-                                <input v-model="newUser.employee_id" placeholder="Employee ID"
-                                    class="border px-2 py-1 rounded" />
-                                <input v-model="newUser.email_address" type="email" placeholder="Email"
-                                    class="border px-2 py-1 rounded" />
-                                <select v-model="newUser.status" class="border px-2 py-1 rounded">
-                                    <option value="">Select Status</option>
-                                    <option>Active</option>
-                                    <option>Inactive</option>
-                                </select>
+                            <form @submit.prevent="addUser" class="grid grid-cols-3 gap-2">
 
-                                <input v-model="newUser.first_name" placeholder="First Name"
-                                    class="border px-2 py-1 rounded" />
-                                <input v-model="newUser.middle_name" placeholder="Middle Name"
-                                    class="border px-2 py-1 rounded" />
-                                <input v-model="newUser.last_name" placeholder="Last Name"
-                                    class="border px-2 py-1 rounded" />
-
-                                <input v-model="newUser.department" placeholder="Department"
-                                    class="border px-2 py-1 rounded" />
-                                <input v-model="newUser.division" placeholder="Division"
-                                    class="border px-2 py-1 rounded" />
-                                <input v-model="newUser.roles" placeholder="Role" class="border px-2 py-1 rounded" />
-
-                                <input v-model="newUser.birth_date" type="date" class="border px-2 py-1 rounded" />
-                                <input v-model="newUser.sex" placeholder="Sex" class="border px-2 py-1 rounded" />
-                                <input v-model="newUser.phone" placeholder="Phone" class="border px-2 py-1 rounded" />
-
-                                <!-- Address -->
-                                <select v-model="newUser.address.region" @change="loadProvinces(newUser.address.region)"
-                                    class="border px-2 py-1 rounded col-span-1">
-                                    <option value="">Select Region</option>
-                                    <option v-for="r in regions" :key="r.code" :value="r.code">{{ r.name }}</option>
-                                </select>
-
-                                <select v-model="newUser.address.province"
-                                    @change="loadMunicipalities(newUser.address.province)"
-                                    class="border px-2 py-1 rounded col-span-1" :disabled="!provinces.length">
-                                    <option value="">Select Province</option>
-                                    <option v-for="p in provinces" :key="p.code" :value="p.code">{{ p.name }}</option>
-                                </select>
-
-                                <select v-model="newUser.address.municipality"
-                                    @change="loadBarangays(newUser.address.municipality)"
-                                    class="border px-2 py-1 rounded col-span-1" :disabled="!municipalities.length">
-                                    <option value="">Select Municipality</option>
-                                    <option v-for="m in municipalities" :key="m.code" :value="m.code">{{ m.name }}
-                                    </option>
-                                </select>
-
-                                <select v-model="newUser.address.barangay" class="border px-2 py-1 rounded col-span-1"
-                                    :disabled="!barangays.length">
-                                    <option value="">Select Barangay</option>
-                                    <option v-for="b in barangays" :key="b.code" :value="b.name">{{ b.name }}</option>
-                                </select>
-
-                                <input v-model="newUser.address.street" placeholder="Street"
-                                    class="border px-2 py-1 rounded col-span-2" />
-
-                                <!-- Buttons -->
-                                <div class="col-span-3 flex justify-end mt-4">
-                                    <button type="button" @click="showAddUser = false"
-                                        class="px-4 py-2 bg-gray-300 rounded-md mr-2">Cancel</button>
-                                    <button type="submit"
-                                        class="px-4 py-2 bg-[#0F75BC] text-white rounded-md">Save</button>
+                                <!-- BASIC INFO -->
+                                <div class="col-span-3 font-medium text-gray-600 mb-1">Basic Information</div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Employee ID <span
+                                            class="text-red-500">*</span></label>
+                                    <input v-model="form.employee_id" required
+                                        class="w-full border px-2 py-1 rounded" />
                                 </div>
-                            </form>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Email <span
+                                            class="text-red-500">*</span></label>
+                                    <input v-model="form.email_address" required type="email"
+                                        class="w-full border px-2 py-1 rounded" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Status</label>
+                                    <select v-model="form.status" class="w-full border px-2 py-1 rounded">
+                                        <option value="">Select</option>
+                                        <option>Active</option>
+                                        <option>Inactive</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">First Name <span
+                                            class="text-red-500">*</span></label>
+                                    <input v-model="form.first_name" required class="w-full border px-2 py-1 rounded" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Middle Name</label>
+                                    <input v-model="form.middle_name" class="w-full border px-2 py-1 rounded" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Last Name <span
+                                            class="text-red-500">*</span></label>
+                                    <input v-model="form.last_name" required class="w-full border px-2 py-1 rounded" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Suffix</label>
+                                    <input v-model="form.suffix" class="w-full border px-2 py-1 rounded" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Birth Date</label>
+                                    <input v-model="form.birth_date" type="date"
+                                        class="w-full border px-2 py-1 rounded" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Sex</label>
+                                    <select v-model="form.sex" class="w-full border px-2 py-1 rounded">
+                                        <option disabled value="">Select</option>
+                                        <option>Male</option>
+                                        <option>Female</option>
+                                    </select>
+                                </div>
 
+                                <!-- WORK DETAILS -->
+                                <div class="col-span-3 font-medium text-gray-600 mt-2 mb-1">Work Details</div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Position</label>
+                                    <input v-model="form.position" class="w-full border px-2 py-1 rounded" />
+                                </div>
+                                <!-- Department Select -->
+                                <!-- Department Select -->
+                                <div>
+                                    <label class="block text-xs text-gray-500">Department</label>
+                                    <select v-model="newUser.department_id" @change="onDepartmentChange"
+                                        class="border p-2 rounded w-full">
+                                        <option disabled value="">-- Select Department --</option>
+                                        <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+                                            {{ dept.department_name }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Division Select (always visible, disabled if none) -->
+                                <div>
+                                    <label class="block text-xs text-gray-500">Division</label>
+                                    <select v-model="newUser.division_id" class="border p-2 rounded w-full bg-gray-100"
+                                        :disabled="!divisions.length">
+                                        <option disabled value="">
+                                            {{ divisions.length ? '-- Select Division --' : 'No divisions available' }}
+                                        </option>
+                                        <option v-for="div in divisions" :key="div.id" :value="div.id">
+                                            {{ div.division_name }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs text-gray-500">Role</label>
+                                    <select v-model="form.role_id" class="w-full border px-2 py-1 rounded">
+                                        <option value="">Select</option>
+                                        <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Permission</label>
+                                    <select v-model="form.permission_id" class="w-full border px-2 py-1 rounded">
+                                        <option value="">Select</option>
+                                        <option v-for="perm in permissions" :key="perm.id" :value="perm.id">{{ perm.name
+                                            }}</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Phone</label>
+                                    <input v-model="form.phone" class="w-full border px-2 py-1 rounded" />
+                                </div>
+
+                                <!-- ADDRESS -->
+                                <div class="col-span-3 font-medium text-gray-600 mt-2 mb-1">Address</div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Region</label>
+                                    <select v-model="form.address.region" @change="loadProvinces(form.address.region)"
+                                        class="w-full border px-2 py-1 rounded">
+                                        <option value="">Select</option>
+                                        <option v-for="r in regions" :key="r.code" :value="r.code">{{ r.name }}</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Province</label>
+                                    <select v-model="form.address.province"
+                                        @change="loadMunicipalities(form.address.province)"
+                                        class="w-full border px-2 py-1 rounded" :disabled="!provinces.length">
+                                        <option value="">Select</option>
+                                        <option v-for="p in provinces" :key="p.code" :value="p.code">{{ p.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Municipality</label>
+                                    <select v-model="form.address.municipality"
+                                        @change="loadBarangays(form.address.municipality)"
+                                        class="w-full border px-2 py-1 rounded" :disabled="!municipalities.length">
+                                        <option value="">Select</option>
+                                        <option v-for="m in municipalities" :key="m.code" :value="m.code">{{ m.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500">Barangay</label>
+                                    <select v-model="form.address.barangay" class="w-full border px-2 py-1 rounded"
+                                        :disabled="!barangays.length">
+                                        <option value="">Select</option>
+                                        <option v-for="b in barangays" :key="b.code" :value="b.name">{{ b.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="block text-xs text-gray-500">Street</label>
+                                    <input v-model="form.address.street" class="w-full border px-2 py-1 rounded" />
+                                </div>
+
+                                <!-- ACTION BUTTONS -->
+                                <div class="col-span-3 flex justify-end mt-3">
+                                    <button type="button" @click="showAddUser = false"
+                                        class="px-3 py-1 bg-gray-300 rounded-md mr-2 text-sm">Cancel</button>
+                                    <button type="submit"
+                                        class="px-3 py-1 bg-[#0F75BC] text-white rounded-md text-sm">Save</button>
+                                </div>
+
+                            </form>
                         </DialogPanel>
                     </div>
                 </Dialog>
