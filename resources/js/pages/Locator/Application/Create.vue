@@ -6,6 +6,7 @@ import applications from '@/routes/applications'
 import LocatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue'
 import DynamicFormRepeater from '@/components/locator/DynamicFormRepeater.vue'
 import ApplicationOptionSelect from '@/components/locator/ApplicationOptionSelect.vue'
+import UploadAttachment from '@/components/locator/UploadAttachment.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -150,5 +151,6 @@ const submit = () => {
         </div>
       </form>
     </div>
+    <UploadAttachment />
   </LocatorAppSidebarLayout>
 </template>
