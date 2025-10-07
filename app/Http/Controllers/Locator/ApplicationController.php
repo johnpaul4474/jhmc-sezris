@@ -143,8 +143,14 @@ class ApplicationController extends Controller
     public function approvedList(){
         return Inertia::render('Locator/Application/Approved',[]);
     }
+    /**
+     * Request $request are application_id and option_id selected by the locator
+     * this function saves selected option to user_application_selected Table
+     * 
+     * **/
     public function saveOptionSelection(Request $request)
-{
+    {    
+    $user = auth()->user();
     $validated = $request->validate([
         'application_id' => 'required|exists:application_forms,id',
         'option_id' => 'required|exists:application_options,id',
@@ -161,11 +167,12 @@ class ApplicationController extends Controller
             'amount'      => ApplicationOption::find($validated['option_id'])->value ?? 0,
         ]
     );
-    $user = auth()->user();
+    
     return Inertia::render('Locator/Application/Create',[
        'user' => $user,
         'application_form_id' => $selection->application_id,
         'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
     ]);
-}
+    
+    }
 }
