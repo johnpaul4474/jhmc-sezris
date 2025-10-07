@@ -11,6 +11,8 @@ use App\Http\Controllers\Controller;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ChangePasswordMail;
 
 class UserDetailsController extends Controller
 {
@@ -70,47 +72,21 @@ class UserDetailsController extends Controller
         //     'data' => $user,
         // ], 201);
         
+       
         return redirect()->back()->with('success', 'User saved successfully!');
     }
-    public function sendTestEmail()
-{
-    $token = Session::get('google_token');
+    public function sendChangePassword()
+    {
+        $data = ['name' => 'John Paul Arce',
+                 'temp_password' => 'Temp@1234',
+                 'change_password_link' => 'http://localhost/settings/password'];
 
-    if (!$token) {
-        return redirect('/auth/google'); // Redirect to login if no token
+        try {
+            Mail::to('johnpaularce.jhmc@gmail.com')->send(new ChangePasswordMail($data));
+
+            return response()->json(['message' => 'Email sent successfully!']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
-
-    $client = new Client();
-    $client->setClientId(config('services.google.client_id'));
-    $client->setClientSecret(config('services.google.client_secret'));
-    $client->setRedirectUri(config('services.google.redirect'));
-    $client->addScope('https://www.googleapis.com/auth/gmail.send');
-    $client->setAccessToken($token);
-
-    if ($client->isAccessTokenExpired()) {
-        return redirect('/auth/google'); // Re-authenticate
-    }
-
-    $gmail = new Gmail($client);
-
-    $to = 'johnpaularce.jhmc@gmail.com'; // Change this to a valid email
-    $subject = 'Test Email from Laravel + Gmail API';
-    $body = '<p>This is a test email sent via Gmail API using OAuth2 in Laravel.</p>';
-
-    $rawMessage = "To: $to\r\n";
-    $rawMessage .= "Subject: $subject\r\n";
-    $rawMessage .= "MIME-Version: 1.0\r\n";
-    $rawMessage .= "Content-Type: text/html; charset=utf-8\r\n\r\n";
-    $rawMessage .= $body;
-
-    $encodedMessage = new Message();
-    $encodedMessage->setRaw(rtrim(strtr(base64_encode($rawMessage), '+/', '-_'), '='));
-
-    try {
-        $gmail->users_messages->send('me', $encodedMessage);
-        return redirect()->back()->with('success', 'Test email sent successfully!');
-    } catch (\Exception $e) {
-        return redirect()->back()->withErrors(['error' => 'Failed to send email: ' . $e->getMessage()]);
-    }
-}
 }

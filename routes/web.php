@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Auth\GoogleOAuthController;
 
 
-Route::get('/oauth/google', [GoogleOAuthController::class, 'redirectToGoogle']);
-Route::get('/oauth/google/callback', [GoogleOAuthController::class, 'handleGoogleCallback']);
-Route::get('/send-test-email', [UserDetailsController::class, 'sendTestEmail']);
+// Route::get('/oauth/google', [GoogleOAuthController::class, 'redirectToGoogle']);
+// Route::get('/oauth/google/callback', [GoogleOAuthController::class, 'handleGoogleCallback']);
+// Route::get('/send-test-email', [UserDetailsController::class, 'sendTestEmail']);
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -53,6 +53,10 @@ Route::get('/departments', [LookupController::class, 'departments'])->middleware
 Route::get('/divisions', [LookupController::class, 'divisions'])->middleware(['auth', 'verified'])->name('divisions');
 Route::get('/roles', [LookupController::class, 'roles'])->middleware(['auth', 'verified'])->name('roles');
 Route::get('/permissions', [LookupController::class, 'permissions'])->middleware(['auth', 'verified'])->name('permissions');
+
+
+//Email
+Route::get('/sendChangePassword', [UserDetailsController::class, 'sendChangePassword'])->middleware(['auth', 'verified'])->name('sendChangePassword');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
