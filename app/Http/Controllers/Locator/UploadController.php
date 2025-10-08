@@ -3,97 +3,100 @@
 namespace App\Http\Controllers\Locator;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Locator\Upload;
-use App\Models\Locator\ApplicationModel;
 
 class UploadController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * List all uploads for a given application (or user).
      */
-    public function index()
+    public function index(Request $request)
     {
-        $app = ApplicationModel::with('uploads')->find(1);
-        return dd($app);
-    }
+        $applicationId = $request->input('application_form_id');
+        if (!$applicationId) {
+            return response()->json(['error' => 'application_form_id required'], 400);
+        }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+        $uploads = Upload::where('user_id', Auth::id())
+            ->where('application_form_id', $applicationId)
+            ->get();
 
-    /**
-     * Store a newly created resource in storage.
-     */
- public function store(Request $request)
-{
-    $request->validate([
-        'file' => 'required_without:files|file|max:5120',
-        'files.*' => 'sometimes|file|max:5120',
-        'application_form_id' => 'required|exists:application_forms,id',
-    ]);
-
-    $savedFiles = [];
-
-    $files = $request->file('files') ?? [$request->file('file')];
-
-    foreach ($files as $file) {
-        if (!$file) continue;
-
-        $storedPath = $file->store('loctr', 'public');
-
-        $upload = Upload::create([
-            'file_name'            => $file->getClientOriginalName(),
-            'file_path'            => $storedPath,
-            'file_type'            => $file->getClientMimeType(),
-            'file_size'            => $file->getSize(),
-            'description'          => $request->input('description'),
-            'user_id'              => Auth::id(),
-            'application_form_id'  => $request->input('application_form_id'),
+        // Add public URLs
+        $uploads->transform(fn($upload) => [
+            'id' => $upload->id,
+            'file_name' => $upload->file_name,
+            'file_path' => $upload->file_path,
+            'url' => Storage::url($upload->file_path),
+            'file_type' => $upload->file_type,
+            'file_size' => $upload->file_size,
         ]);
 
-        $savedFiles[] = $upload;
+        return response()->json([
+            'uploads' => $uploads
+        ]);
     }
 
-    return response()->json([
-        'message' => 'Files uploaded successfully!',
-        'uploads' => $savedFiles
-    ], 201);
-}
     /**
-     * Display the specified resource.
+     * Store uploaded files.
      */
-    public function show(string $id)
+    public function store(Request $request)
     {
-        //
+        $request->validate([
+            'file' => 'required_without:files|file|max:5120',
+            'files.*' => 'sometimes|file|max:5120',
+            'application_form_id' => 'required|exists:application_forms,id',
+        ]);
+
+        $savedFiles = [];
+        $files = $request->file('files') ?? [$request->file('file')];
+
+        foreach ($files as $file) {
+            if (!$file) continue;
+
+            $storedPath = $file->store('loctr', 'public');
+
+            $upload = Upload::create([
+                'file_name' => $file->getClientOriginalName(),
+                'file_path' => $storedPath,
+                'file_type' => $file->getClientMimeType(),
+                'file_size' => $file->getSize(),
+                'description' => $request->input('description'),
+                'user_id' => Auth::id(),
+                'application_form_id' => $request->input('application_form_id'),
+            ]);
+
+            // Add public URL
+            $upload->url = Storage::url($storedPath);
+
+            $savedFiles[] = $upload;
+        }
+
+        return response()->json([
+            'message' => 'File(s) uploaded successfully',
+            'files' => $savedFiles,
+        ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
+     * Delete a specific upload.
      */
     public function destroy(string $id)
     {
-        //
+        $upload = Upload::findOrFail($id);
+
+        if ($upload->user_id !== Auth::id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if (Storage::disk('public')->exists($upload->file_path)) {
+            Storage::disk('public')->delete($upload->file_path);
+        }
+
+        $upload->delete();
+
+        return response()->json(['message' => 'Upload deleted successfully']);
     }
 }

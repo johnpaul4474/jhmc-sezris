@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import locators from '@/routes/locators'
 import applications from '@/routes/applications'
@@ -21,7 +21,7 @@ const props = defineProps({
   application_form_id: [String, Number],
   articleDetail: { type: Object, default: () => null },
   categories: { type: Array, default: () => [] },
-  options: { type: Array, default: () => [] }, // Declared values list
+  options: { type: Array, default: () => [] },
   expired_at: { type: String, default: null },
   control_number: [String, Number],
   form_number: [String, Number],
@@ -29,6 +29,7 @@ const props = defineProps({
 })
 
 const articles = ref([])
+const uploadedFiles = ref([]) // store all uploaded files
 
 watch(
   () => props.articleDetail,
@@ -41,7 +42,7 @@ const form = useForm({
   user_id: props.user?.id,
   type: '',
   description: '',
-  application_category_option_id: '', // declared value id
+  application_category_option_id: '',
 })
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -51,27 +52,41 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const applicationTypes = [
   'Gate Pass',
-  'Permit-to-Bring-In',
-  'Permit-to-Bring-out',
+  'Permit to Bring In',
+  'Permit to Bring Out',
   'Internal Tool',
   'Data Pipeline',
 ]
 
-const onUploaded = (res: any) => {
-  console.log('✅ Uploaded:', res)
-}
-const onUploadError = (err: any) => {
-  console.error('❌ Upload error:', err)
-}
-
-// 🧠 Find selected declared value from props.options
 const selectedDeclaredValue = computed(() => {
   if (!props.options || !form.application_category_option_id) return null
-
   return props.options.find(
     (opt) => Number(opt.id) === Number(form.application_category_option_id)
   )
 })
+
+// Fetch all previously uploaded files for this application
+const fetchUploads = async () => {
+  if (!props.application_form_id) return
+  try {
+    const res = await fetch(`/loctr/uploads?application_form_id=${props.application_form_id}`)
+    const data = await res.json()
+    uploadedFiles.value = data.uploads
+  } catch (err) {
+    console.error('Failed to fetch uploads', err)
+  }
+}
+
+onMounted(fetchUploads)
+
+const onUploaded = (res: any) => {
+  console.log('Uploaded:', res)
+  uploadedFiles.value.push(...res.files) // add newly uploaded files
+}
+
+const onUploadError = (err: any) => {
+  console.error('Upload error:', err)
+}
 
 const submit = () => {
   form.post('/loctr/applications')
@@ -121,12 +136,7 @@ const submit = () => {
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 9l-7 7-7-7"
-                  />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </Button>
             </DropdownMenuTrigger>
@@ -158,17 +168,25 @@ const submit = () => {
           </div>
         </div>
 
-        <!-- Description (Hidden) -->
-        <div class="hidden">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea
-            v-model="form.description"
-            rows="4"
-            class="w-full border border-gray-300 rounded-md p-3 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 transition"
-            placeholder="Optional description"
-          ></textarea>
-          <div v-if="form.errors.description" class="text-red-500 text-sm mt-1">
-            {{ form.errors.description }}
+        <!-- Upload Attachments -->
+        <div v-if="props.expired_at" class="space-y-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Upload Attachments</label>
+          <UploadAttachment
+            :application-form-id="props.application_form_id"
+            upload-url="/loctr/uploads"
+            accept="image/*"
+            multiple
+            @uploaded="onUploaded"
+            @error="onUploadError"
+          />
+
+          <!-- Show uploaded files -->
+          <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+            <div v-for="file in uploadedFiles" :key="file.id" class="border rounded p-2 bg-gray-50">
+              <a :href="file.url" target="_blank" class="text-blue-600 hover:underline">
+                {{ file.file_name }}
+              </a>
+            </div>
           </div>
         </div>
 
@@ -179,19 +197,6 @@ const submit = () => {
             v-model="articles"
             :title="`Article Details for Order # ${props.application_form_id}`"
           />
-        </div>
-
-        <!-- Upload Attachment -->
-        <div v-if="props.expired_at" class="text-sm text-gray-500">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Upload Attachment</label>
-          <UploadAttachment
-  :application-form-id="props.application_form_id"
-  upload-url="/loctr/uploads"
-  accept="image/*"
-  multiple
-  @uploaded="onUploaded"
-  @error="onUploadError"
-/>
         </div>
 
         <!-- Submit -->
