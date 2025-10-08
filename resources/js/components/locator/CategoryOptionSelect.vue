@@ -15,7 +15,7 @@
       <select v-model="selectedOption" class="w-full border border-gray-300 p-2">
         <option value="">-- Select Option --</option>
         <option v-for="opt in options" :key="opt.id" :value="opt.id">
-          {{ opt.value }} - {{ opt.validity.label }}
+           {{ opt.validity.label }}
         </option>
       </select>
     </div>

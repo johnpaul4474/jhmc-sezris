@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Locator;
 
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Locator\Upload;
@@ -29,11 +30,41 @@ class UploadController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        //
+ public function store(Request $request)
+{
+    $request->validate([
+        'file' => 'required_without:files|file|max:5120',
+        'files.*' => 'sometimes|file|max:5120',
+        'application_form_id' => 'required|exists:application_forms,id',
+    ]);
+
+    $savedFiles = [];
+
+    $files = $request->file('files') ?? [$request->file('file')];
+
+    foreach ($files as $file) {
+        if (!$file) continue;
+
+        $storedPath = $file->store('loctr', 'public');
+
+        $upload = Upload::create([
+            'file_name'            => $file->getClientOriginalName(),
+            'file_path'            => $storedPath,
+            'file_type'            => $file->getClientMimeType(),
+            'file_size'            => $file->getSize(),
+            'description'          => $request->input('description'),
+            'user_id'              => Auth::id(),
+            'application_form_id'  => $request->input('application_form_id'),
+        ]);
+
+        $savedFiles[] = $upload;
     }
 
+    return response()->json([
+        'message' => 'Files uploaded successfully!',
+        'uploads' => $savedFiles
+    ], 201);
+}
     /**
      * Display the specified resource.
      */

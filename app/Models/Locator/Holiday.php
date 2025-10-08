@@ -4,18 +4,15 @@ namespace App\Models\Locator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ApplicationOption extends Model
+class Holiday extends Model
 {
     use HasFactory;
 
-    protected $table = 'application_options';
-
     protected $fillable = [
         'name',
-        'value',
-        'validity',
-        'Expired_at',
+        'date',
+        'is_recurring',
+        'type',
+        'notes',
     ];
-
-   
 }

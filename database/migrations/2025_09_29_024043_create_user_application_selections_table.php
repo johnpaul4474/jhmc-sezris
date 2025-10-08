@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('application_id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('option_id');
-
+            $table->timestamp('Expired_at')->nullable();
             $table->timestamp('selected_at')->nullable();
             $table->decimal('amount', 10, 2)->default(0.00);
             $table->timestamps();

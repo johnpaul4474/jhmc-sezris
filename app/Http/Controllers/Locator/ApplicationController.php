@@ -9,6 +9,8 @@ use App\Models\Locator\ApplicationOption;
 use Inertia\Inertia;
 use App\Models\ApplicationCategory;
 use App\Models\Locator\UserApplicationSelection;
+use App\Helpers\PermitHelper;
+use App\Models\User;
 
 
 class ApplicationController extends Controller
@@ -85,7 +87,7 @@ class ApplicationController extends Controller
     {
         //dd($request->input('type'));
        $user = auth()->user();
-    $categories = ApplicationCategory::with('options.validity')->get();
+    //$categories = ApplicationCategory::with('options.validity')->get();
     
     // Create an empty application record just to get the ID
     $application = ApplicationModel::create([
@@ -93,12 +95,13 @@ class ApplicationController extends Controller
         'user_id'    => $user->id,
     ]);
     // Collection of all options
-    
-
+   
     return Inertia::render('Locator/Application/Create', [
         'user' => $user,
         'application_form_id' => $application->id, // Pass the new ID
-        'categories' => $categories,
+        'control_number' => $application->control_number,
+        'form_number' => $application->form_number,
+        'form_title' => $application->form_title,
     'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
 
     ]);
@@ -149,13 +152,17 @@ class ApplicationController extends Controller
      * 
      * **/
     public function saveOptionSelection(Request $request)
-    {    
+    { 
+     
     $user = auth()->user();
     $validated = $request->validate([
         'application_id' => 'required|exists:application_forms,id',
         'option_id' => 'required|exists:application_options,id',
     ]);
-
+    $validity= ApplicationOption::find($validated['option_id'])->value ?? null;  
+    $application = ApplicationModel::findOrFail($validated['application_id'])->first();
+    $expireddate= PermitHelper::computeValidity((int)$validity);
+    
     $selection = UserApplicationSelection::updateOrCreate(
         [
             'application_id' => $validated['application_id'],
@@ -163,15 +170,20 @@ class ApplicationController extends Controller
         ],
         [
             'option_id'   => $validated['option_id'],
+            'Expired_at'  => PermitHelper::computeValidity((int)$validity),
             'selected_at' => now(),
             'amount'      => ApplicationOption::find($validated['option_id'])->value ?? 0,
         ]
     );
-    
+     
     return Inertia::render('Locator/Application/Create',[
        'user' => $user,
         'application_form_id' => $selection->application_id,
         'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
+        'expired_at'=> $expireddate,
+        'form_number' =>$application->form_number,
+        'control_number' =>$application->control_number,
+        'form_title' => $application->form_title,
     ]);
     
     }

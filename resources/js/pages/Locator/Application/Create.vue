@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import locators from '@/routes/locators'
 import applications from '@/routes/applications'
@@ -8,7 +8,6 @@ import DynamicFormRepeater from '@/components/locator/DynamicFormRepeater.vue'
 import ApplicationOptionSelect from '@/components/locator/ApplicationOptionSelect.vue'
 import UploadAttachment from '@/components/locator/UploadAttachment.vue'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,14 +21,33 @@ const props = defineProps({
   application_form_id: [String, Number],
   articleDetail: { type: Object, default: () => null },
   categories: { type: Array, default: () => [] },
-  options: { type: Array, default: () => [] },
+  options: { type: Array, default: () => [] }, // Declared values list
+  expired_at: { type: String, default: null },
+  control_number: [String, Number],
+  form_number: [String, Number],
+  form_title: [String],
 })
 
 const articles = ref([])
 
-watch(() => props.articleDetail, (newVal) => {
-  if (newVal) articles.value.push(newVal)
+watch(
+  () => props.articleDetail,
+  (newVal) => {
+    if (newVal) articles.value.push(newVal)
+  }
+)
+
+const form = useForm({
+  user_id: props.user?.id,
+  type: '',
+  description: '',
+  application_category_option_id: '', // declared value id
 })
+
+const breadcrumbs: BreadcrumbItem[] = [
+  { title: 'Locator', href: locators.index.url() },
+  { title: 'Create Permit', href: applications.create.url() },
+]
 
 const applicationTypes = [
   'Gate Pass',
@@ -39,17 +57,21 @@ const applicationTypes = [
   'Data Pipeline',
 ]
 
-const form = useForm({
-  user_id: props.user?.id,
-  type: '',
-  description: '',
-  application_category_option_id: '',
-})
+const onUploaded = (res: any) => {
+  console.log('✅ Uploaded:', res)
+}
+const onUploadError = (err: any) => {
+  console.error('❌ Upload error:', err)
+}
 
-const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Locator', href: locators.index.url() },
-  { title: 'Create Permit', href: applications.create.url() },
-]
+// 🧠 Find selected declared value from props.options
+const selectedDeclaredValue = computed(() => {
+  if (!props.options || !form.application_category_option_id) return null
+
+  return props.options.find(
+    (opt) => Number(opt.id) === Number(form.application_category_option_id)
+  )
+})
 
 const submit = () => {
   form.post('/loctr/applications')
@@ -60,9 +82,25 @@ const submit = () => {
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 w-full mx-6 bg-white shadow-xl rounded-xl border border-gray-100">
       <h1 class="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-2">
-        Create New Application
+        {{ props.form_title ? `Applying for ${props.form_title}` : 'Create New Application' }}
       </h1>
-    
+
+      <!-- Top Right Info -->
+      <div v-if="props.application_form_id" class="text-right space-y-1 mb-4">
+        <p v-if="props.form_number" class="text-sm text-gray-500">
+          <b>Form Number:</b> {{ props.form_number }}
+        </p>
+        <p v-if="props.control_number" class="text-sm text-gray-500">
+          <b>Control Number:</b> {{ props.control_number }}
+        </p>
+        <p v-if="selectedDeclaredValue" class="text-sm text-gray-500">
+          <b>Declared Value:</b> {{ selectedDeclaredValue.name || selectedDeclaredValue.value }}
+        </p>
+        <p v-if="props.expired_at" class="text-sm text-gray-500">
+          <b>Expires on:</b> {{ new Date(props.expired_at).toLocaleDateString() }}
+        </p>
+      </div>
+
       <form @submit.prevent="submit" class="space-y-6">
         <!-- Application Creator -->
         <div>
@@ -70,8 +108,8 @@ const submit = () => {
           {{ props.user?.name }}
         </div>
 
-        <!-- Application Type (Dropdown) -->
-        <div>
+        <!-- Application Type -->
+        <div v-if="!props.form_title">
           <label class="block text-sm font-medium text-gray-700 mb-1">Application Type</label>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
@@ -83,8 +121,12 @@ const submit = () => {
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 9l-7 7-7-7" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </Button>
             </DropdownMenuTrigger>
@@ -104,19 +146,19 @@ const submit = () => {
           </div>
         </div>
 
-        <!-- Declared Value & Validity (ApplicationOptionSelect Component) -->
+        <!-- Declared Value & Validity -->
         <div v-if="props.application_form_id">
           <ApplicationOptionSelect
-              v-model="form.application_category_option_id"
-              :options="props.options"
-              :application-id="props.application_form_id"
-            />
+            v-model="form.application_category_option_id"
+            :options="props.options"
+            :application-id="props.application_form_id"
+          />
           <div v-if="form.errors.application_category_option_id" class="text-red-500 text-sm mt-1">
             {{ form.errors.application_category_option_id }}
           </div>
         </div>
 
-        <!-- Description (Optional) -->
+        <!-- Description (Hidden) -->
         <div class="hidden">
           <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
           <textarea
@@ -139,18 +181,26 @@ const submit = () => {
           />
         </div>
 
+        <!-- Upload Attachment -->
+        <div v-if="props.expired_at" class="text-sm text-gray-500">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Upload Attachment</label>
+          <UploadAttachment
+  :application-form-id="props.application_form_id"
+  upload-url="/loctr/uploads"
+  accept="image/*"
+  multiple
+  @uploaded="onUploaded"
+  @error="onUploadError"
+/>
+        </div>
+
         <!-- Submit -->
-        <div class="pt-4 flex justify-center">
-          <Button
-            type="submit"
-            class="px-5 py-2"
-            :disabled="form.processing"
-          >
+        <div v-if="!props.control_number" class="pt-4 flex justify-center">
+          <Button type="submit" class="px-5 py-2" :disabled="form.processing">
             {{ form.processing ? 'Saving...' : 'Apply' }}
           </Button>
         </div>
       </form>
     </div>
-    <UploadAttachment />
   </LocatorAppSidebarLayout>
 </template>
