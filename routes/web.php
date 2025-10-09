@@ -8,6 +8,7 @@ use App\Http\Controllers\Utilities\LookupController;
 use App\Services\GmailService;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Auth\GoogleOAuthController;
+use App\Mail\ChangePasswordMail;
 
 
 // Route::get('/oauth/google', [GoogleOAuthController::class, 'redirectToGoogle']);

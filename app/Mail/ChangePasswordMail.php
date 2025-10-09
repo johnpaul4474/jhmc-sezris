@@ -8,6 +8,8 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class ChangePasswordMail extends Mailable
 {
@@ -17,6 +19,8 @@ class ChangePasswordMail extends Mailable
     /**
      * Create a new message instance.
      */
+    
+
     public function __construct($data)
     {
          $this->data = $data;

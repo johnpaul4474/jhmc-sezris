@@ -7,6 +7,7 @@ import { ref, computed, reactive, onMounted } from 'vue';
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot } from '@headlessui/vue';
 import { useForm } from '@inertiajs/vue3'
 
+
 // --- Dropdown state ---
 const departments = ref<any[]>([]);
 const divisions = ref<any[]>([]);
@@ -20,8 +21,28 @@ const props = defineProps({
     }
 })
 
-//console.log("Users from Laravel:", props.users)
-//console.log("Users from Laravel:", props.users.values)
+//-- Toast -->
+const showToast = ref(false)
+const toastType = ref<'success' | 'error'>('success')
+const toastTitle = ref('')
+const toastMessage = ref('')
+const submitForm = async () => {
+  form.post('/users/addUser', {
+    onSuccess: () => {
+      toastType.value = 'success'
+      toastTitle.value = 'Success!'
+      toastMessage.value = 'User has been added successfully.'
+      showToast.value = true
+    },
+    onError: () => {
+      toastType.value = 'error'
+      toastTitle.value = 'Error'
+      toastMessage.value = 'Failed to create user. Please check inputs.'
+      showToast.value = true
+    },
+  })
+}
+
 const users = ref<any[]>(props.users || []); // Initialize users with props
 // --- User state ---
 const newUser = reactive({
@@ -162,36 +183,36 @@ const editableUser = reactive({
 // --- Functions ---
 function openUser(user: any) {
     //Object.assign(editableUser, JSON.parse(JSON.stringify(user))); // deep copy
-    
-  Object.assign(editableUser, user)
 
-  // Convert JSON string to object
-  if (typeof user.address === 'string') {
-    try {
-      editableUser.address = JSON.parse(user.address)
-    } catch (e) {
-      editableUser.address = {
-        street: "",
-        barangay: "",
-        municipality: "",
-        province: "",
-        region: ""
-      }
+    Object.assign(editableUser, user)
+
+    // Convert JSON string to object
+    if (typeof user.address === 'string') {
+        try {
+            editableUser.address = JSON.parse(user.address)
+        } catch (e) {
+            editableUser.address = {
+                street: "",
+                barangay: "",
+                municipality: "",
+                province: "",
+                region: ""
+            }
+        }
     }
-  }
-  //console.log(editableUser);
-  showDetails.value = true;
-  if (editableUser.address.region && editableUser.address.region !== "") {
-    loadProvinces(editableUser.address.region);
-  }
+    //console.log(editableUser);
+    showDetails.value = true;
+    if (editableUser.address.region && editableUser.address.region !== "") {
+        loadProvinces(editableUser.address.region);
+    }
 
-  if (editableUser.address.province && editableUser.address.province !== "") {
-    loadMunicipalities(editableUser.address.province);
-  }
+    if (editableUser.address.province && editableUser.address.province !== "") {
+        loadMunicipalities(editableUser.address.province);
+    }
 
-  if (editableUser.address.municipality && editableUser.address.municipality !== "") {
-    loadBarangays(editableUser.address.municipality);
-  }
+    if (editableUser.address.municipality && editableUser.address.municipality !== "") {
+        loadBarangays(editableUser.address.municipality);
+    }
 }
 
 
@@ -218,7 +239,7 @@ const form = useForm({
     role_id: '',
     permission_id: '',
     position: '',
-    status: 'Active',
+    status: '1',
     birth_date: '',
     sex: '',
     phone: '',
@@ -233,7 +254,8 @@ const form = useForm({
 
 // save function
 function addUser() {
-
+    form.department_id = newUser.department_id;
+    form.division_id = newUser.division_id;
     form.post('/user/addUser', {
 
         onSuccess: () => {
@@ -336,24 +358,29 @@ onMounted(async () => {
 
 // When region changes → fetch provinces
 async function loadProvinces(regionCode: string) {
+
+    const regionObject = JSON.parse(regionCode);
+    console.log("Region code:", regionObject.code);
+    console.log("Region name:", regionObject.name);
     newUser.address.province = "";
     newUser.address.municipality = "";
     newUser.address.barangay = "";
     municipalities.value = [];
     barangays.value = [];
-    
-    const res = await fetch(`https://psgc.cloud/api/regions/${regionCode}/provinces`);
+
+    const res = await fetch(`https://psgc.cloud/api/regions/${regionObject.code}/provinces`);
     provinces.value = await res.json();
     console.log(provinces.value);
 }
 
 // When province changes → fetch municipalities
 async function loadMunicipalities(provinceCode: string) {
+    const provinceObject = JSON.parse(provinceCode);
     newUser.address.municipality = "";
     newUser.address.barangay = "";
     barangays.value = [];
 
-    const res = await fetch(`https://psgc.cloud/api/provinces/${provinceCode}/cities-municipalities`);
+    const res = await fetch(`https://psgc.cloud/api/provinces/${provinceObject.code}/cities-municipalities`);
     municipalities.value = await res.json();
     console.log(municipalities.value);
 
@@ -361,12 +388,12 @@ async function loadMunicipalities(provinceCode: string) {
 
 // When municipality changes → fetch barangays
 async function loadBarangays(muniCode: string) {
+    const muniObject = JSON.parse(muniCode);
     newUser.address.barangay = "";
-    const res = await fetch(`https://psgc.cloud/api/cities-municipalities/${muniCode}/barangays`);
+    const res = await fetch(`https://psgc.cloud/api/cities-municipalities/${muniObject.code}/barangays`);
     barangays.value = await res.json();
     console.log(barangays.value);
 }
-
 
 
 </script>
@@ -476,6 +503,7 @@ async function loadBarangays(muniCode: string) {
                 </div>
             </div>
 
+            
             <!-- User Details Modal (3-column layout) -->
             <TransitionRoot appear :show="showDetails" as="template">
                 <Dialog as="div" class="relative z-50" @close="showDetails = false">
@@ -590,56 +618,58 @@ async function loadBarangays(muniCode: string) {
                                             <input v-model="editableUser.phone" type="text"
                                                 class="w-full rounded-md border-gray-300 shadow-sm" />
                                         </div>
-<!-- Region -->
-<div>
-  <label class="block font-medium">Region</label>
-  <select v-model="editableUser.address.region"
-          @change="loadProvinces(editableUser.address.region)"
-          class="w-full rounded-md border-gray-300 shadow-sm">
-    <!-- <option value="">{{editableUser.address.region}}</option> -->
-    <option v-for="region in regions" :key="region.code" :value="region.code">
-      {{ region.name }}
-    </option>
-  </select>
-</div>
+                                        <!-- Region -->
+                                        <div>
+                                            <label class="block font-medium">Region</label>
+                                            <select v-model="editableUser.address.region"
+                                                @change="loadProvinces(editableUser.address.region)"
+                                                class="w-full rounded-md border-gray-300 shadow-sm">
+                                                <!-- <option value="">{{editableUser.address.region}}</option> -->
+                                                <option v-for="region in regions" :key="region.code"
+                                                    :value="region.code">
+                                                    {{ region.name }}
+                                                </option>
+                                            </select>
+                                        </div>
 
-<!-- Province -->
-<div>
-  <label class="block font-medium">Province</label>
-  <select v-model="editableUser.address.province"
-          @change="loadMunicipalities(editableUser.address.province)"
-          class="w-full rounded-md border-gray-300 shadow-sm">
-    <option value="">Select Province</option>
-    <option v-for="prov in provinces" :key="prov.code" :value="prov.code">
-      {{ prov.name }} 
-    </option>
-  </select>
-</div>
+                                        <!-- Province -->
+                                        <div>
+                                            <label class="block font-medium">Province</label>
+                                            <select v-model="editableUser.address.province"
+                                                @change="loadMunicipalities(editableUser.address.province)"
+                                                class="w-full rounded-md border-gray-300 shadow-sm">
+                                                <option value="">Select Province</option>
+                                                <option v-for="prov in provinces" :key="prov.code" :value="prov.code">
+                                                    {{ prov.name }}
+                                                </option>
+                                            </select>
+                                        </div>
 
-<!-- Municipality -->
-<div>
-  <label class="block font-medium">Municipality</label>
-  <select v-model="editableUser.address.municipality"
-          @change="loadBarangays(editableUser.address.municipality)"
-          class="w-full rounded-md border-gray-300 shadow-sm">
-    <option value="">Select Municipality</option>
-    <option v-for="muni in municipalities" :key="muni.code" :value="muni.code">
-      {{ muni.name }} 
-    </option>
-  </select>
-</div>
+                                        <!-- Municipality -->
+                                        <div>
+                                            <label class="block font-medium">Municipality</label>
+                                            <select v-model="editableUser.address.municipality"
+                                                @change="loadBarangays(editableUser.address.municipality)"
+                                                class="w-full rounded-md border-gray-300 shadow-sm">
+                                                <option value="">Select Municipality</option>
+                                                <option v-for="muni in municipalities" :key="muni.code"
+                                                    :value="muni.code">
+                                                    {{ muni.name }}
+                                                </option>
+                                            </select>
+                                        </div>
 
-<!-- Barangay -->
-<div>
-  <label class="block font-medium">Barangay</label>
-  <select v-model="editableUser.address.barangay"
-          class="w-full rounded-md border-gray-300 shadow-sm">
-    <option value="">Select Barangay</option>
-    <option v-for="brgy in barangays" :key="brgy.code" :value="brgy.code">
-      {{ brgy.name }}
-    </option>
-  </select>
-</div>
+                                        <!-- Barangay -->
+                                        <div>
+                                            <label class="block font-medium">Barangay</label>
+                                            <select v-model="editableUser.address.barangay"
+                                                class="w-full rounded-md border-gray-300 shadow-sm">
+                                                <option value="">Select Barangay</option>
+                                                <option v-for="brgy in barangays" :key="brgy.code" :value="brgy.code">
+                                                    {{ brgy.name }}
+                                                </option>
+                                            </select>
+                                        </div>
 
 
 
@@ -699,9 +729,9 @@ async function loadBarangays(muniCode: string) {
                                 <div>
                                     <label class="block text-xs text-gray-500">Status</label>
                                     <select v-model="form.status" class="w-full border px-2 py-1 rounded">
-                                        <option value="">Select</option>
-                                        <option>Active</option>
-                                        <option>Inactive</option>
+                                        <option disabled value="">Select</option>
+                                        <option :value="1">Active</option>
+                                        <option :value="0">Inactive</option>
                                     </select>
                                 </div>
                                 <div>
@@ -782,7 +812,7 @@ async function loadBarangays(muniCode: string) {
                                     <select v-model="form.permission_id" class="w-full border px-2 py-1 rounded">
                                         <option value="">Select</option>
                                         <option v-for="perm in permissions" :key="perm.id" :value="perm.id">{{ perm.name
-                                            }}</option>
+                                        }}</option>
                                     </select>
                                 </div>
                                 <div>
@@ -797,7 +827,9 @@ async function loadBarangays(muniCode: string) {
                                     <select v-model="form.address.region" @change="loadProvinces(form.address.region)"
                                         class="w-full border px-2 py-1 rounded">
                                         <option value="">Select</option>
-                                        <option v-for="r in regions" :key="r.code" :value="r.code">{{ r.name }}</option>
+                                        <option v-for="r in regions" :key="r.code"
+                                            :value="JSON.stringify({ code: r.code, name: r.name })">{{ r.name }}
+                                        </option>
                                     </select>
                                 </div>
                                 <div>
@@ -806,7 +838,8 @@ async function loadBarangays(muniCode: string) {
                                         @change="loadMunicipalities(form.address.province)"
                                         class="w-full border px-2 py-1 rounded" :disabled="!provinces.length">
                                         <option value="">Select</option>
-                                        <option v-for="p in provinces" :key="p.code" :value="p.code">{{ p.name }}
+                                        <option v-for="p in provinces" :key="p.code"
+                                            :value="JSON.stringify({ code: p.code, name: p.name })">{{ p.name }}
                                         </option>
                                     </select>
                                 </div>
@@ -816,7 +849,8 @@ async function loadBarangays(muniCode: string) {
                                         @change="loadBarangays(form.address.municipality)"
                                         class="w-full border px-2 py-1 rounded" :disabled="!municipalities.length">
                                         <option value="">Select</option>
-                                        <option v-for="m in municipalities" :key="m.code" :value="m.code">{{ m.name }}
+                                        <option v-for="m in municipalities" :key="m.code"
+                                            :value="JSON.stringify({ code: m.code, name: m.name })">{{ m.name }}
                                         </option>
                                     </select>
                                 </div>
@@ -825,7 +859,8 @@ async function loadBarangays(muniCode: string) {
                                     <select v-model="form.address.barangay" class="w-full border px-2 py-1 rounded"
                                         :disabled="!barangays.length">
                                         <option value="">Select</option>
-                                        <option v-for="b in barangays" :key="b.code" :value="b.name">{{ b.name }}
+                                        <option v-for="b in barangays" :key="b.code"
+                                            :value="JSON.stringify({ code: b.code, name: b.name })">{{ b.name }}
                                         </option>
                                     </select>
                                 </div>
