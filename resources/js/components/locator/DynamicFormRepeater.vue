@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import axios from 'axios'
-import { Plus, X, Trash2, Save, Box } from 'lucide-vue-next'
+import { Plus, X, Trash2, Save, FilePenLine, ShieldX } from 'lucide-vue-next'
 
 // --- Props & Emits ---
 const props = defineProps({
@@ -19,6 +19,15 @@ const form = ref({
   application_form_id: props.formId,
   marks_and_number: '',
   qty: null,
+  detailed_description_of_article: '',
+  gross_weight: ''
+})
+
+// --- Inline Edit State ---
+const editingId = ref<number | null>(null)
+const editableRow = ref({
+  marks_and_number: '',
+  qty: null as number | null,
   detailed_description_of_article: '',
   gross_weight: ''
 })
@@ -63,6 +72,55 @@ const removeArticle = async (id: number) => {
   }
 }
 
+// --- Inline Edit Handlers ---
+const startEdit = (article: any) => {
+  editingId.value = article.id
+  editableRow.value = {
+    marks_and_number: article.marks_and_number,
+    qty: article.qty,
+    detailed_description_of_article: article.detailed_description_of_article,
+    gross_weight: article.gross_weight
+  }
+}
+
+const cancelEdit = () => {
+  editingId.value = null
+}
+
+const updateArticle = async (id: number) => {
+  try {
+    const original = savedArticles.value.find(a => a.id === id)
+    if (!original) return
+
+    const changedData: any = {}
+    for (const key in editableRow.value) {
+      if (editableRow.value[key] !== original[key]) {
+        changedData[key] = editableRow.value[key]
+      }
+    }
+
+    if (Object.keys(changedData).length === 0) {
+      editingId.value = null
+      return
+    }
+
+    const res = await axios.put(`/loctr/articles/${id}`, changedData)
+
+    // Determine how the backend returns updated data
+    const updatedArticle = res.data.article || res.data
+
+    if (updatedArticle) {
+      const index = savedArticles.value.findIndex(a => a.id === id)
+      if (index !== -1) savedArticles.value[index] = { ...original, ...updatedArticle }
+      emit('update:modelValue', savedArticles.value)
+    }
+
+    editingId.value = null
+  } catch (err) {
+    console.error(err.response?.data?.errors || err)
+    alert('Failed to update article')
+  }
+}
 // --- Sync with parent ---
 watch(() => props.modelValue, (newVal) => {
   if (JSON.stringify(newVal) !== JSON.stringify(savedArticles.value)) {
@@ -78,7 +136,7 @@ watch(() => props.modelValue, (newVal) => {
       class="flex items-center space-x-2 px-3 py-1 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition">
       <Plus class="w-5 h-5" />
       <span>list Article</span>
-      </button>
+    </button>
 
     <!-- Article Table -->
     <div class="overflow-x-auto shadow-lg rounded-xl border border-gray-200">
@@ -99,11 +157,42 @@ watch(() => props.modelValue, (newVal) => {
           </tr>
           <tr v-for="(article, index) in savedArticles" :key="article.id" class="hover:bg-gray-50">
             <td class="px-4 py-3">{{ index + 1 }}</td>
-            <td class="px-4 py-3 font-semibold text-blue-800">{{ article.marks_and_number }}</td>
-            <td class="px-4 py-3">{{ article.qty }}</td>
-            <td class="px-4 py-3 max-w-xs truncate">{{ article.detailed_description_of_article }}</td>
-            <td class="px-4 py-3">{{ article.gross_weight || '—' }}</td>
-            <td class="px-4 py-3 text-right">
+
+            <!-- Marks & Number -->
+            <td class="px-4 py-3 font-semibold text-blue-800">
+              <span v-if="editingId !== article.id">{{ article.marks_and_number }}</span>
+              <input v-else v-model="editableRow.marks_and_number" class="border p-1 rounded w-full" />
+            </td>
+
+            <!-- Quantity -->
+            <td class="px-4 py-3">
+              <span v-if="editingId !== article.id">{{ article.qty }}</span>
+              <input v-else type="number" v-model.number="editableRow.qty" class="border p-1 rounded w-full" />
+            </td>
+
+            <!-- Description -->
+            <td class="px-4 py-3 max-w-xs truncate">
+              <span v-if="editingId !== article.id">{{ article.detailed_description_of_article }}</span>
+              <input v-else v-model="editableRow.detailed_description_of_article" class="border p-1 rounded w-full" />
+            </td>
+
+            <!-- Weight -->
+            <td class="px-4 py-3">
+              <span v-if="editingId !== article.id">{{ article.gross_weight || '—' }}</span>
+              <input v-else v-model="editableRow.gross_weight" class="border p-1 rounded w-full" />
+            </td>
+
+            <!-- Actions -->
+            <td class="px-4 py-3 text-right flex justify-end space-x-1">
+              <button v-if="editingId !== article.id" @click="startEdit(article)" class="p-1 rounded-full text-blue-500 hover:bg-blue-100">
+                <FilePenLine class="w-4 h-4"/>
+              </button>
+              <button v-else @click="updateArticle(article.id)" class="p-1 rounded-full text-green-500 hover:bg-green-100">
+              <Save class="w-4 h-4"/>
+              </button>
+              <button v-if="editingId === article.id" @click="cancelEdit" class="p-1 rounded-full text-gray-500 hover:bg-gray-100">
+                <ShieldX class="w-4 h-4"/>
+              </button>
               <button type="button" @click="removeArticle(article.id)" class="p-1 rounded-full text-red-500 hover:bg-red-100">
                 <Trash2 class="w-4 h-4" />
               </button>

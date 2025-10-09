@@ -102,6 +102,7 @@ class ApplicationController extends Controller
         'control_number' => $application->control_number,
         'form_number' => $application->form_number,
         'form_title' => $application->form_title,
+        'start_date' => $application->created_at,
     'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
 
     ]);
@@ -153,7 +154,6 @@ class ApplicationController extends Controller
      * **/
     public function saveOptionSelection(Request $request)
     { 
-     
     $user = auth()->user();
     $validated = $request->validate([
         'application_id' => 'required|exists:application_forms,id',
@@ -184,6 +184,7 @@ class ApplicationController extends Controller
         'form_number' =>$application->form_number,
         'control_number' =>$application->control_number,
         'form_title' => $application->form_title,
+        'start_date' => $application->created_at,
     ]);
     
     }

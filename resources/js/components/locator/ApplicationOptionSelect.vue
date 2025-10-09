@@ -1,57 +1,76 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { computed } from 'vue'
+import { useForm } from '@inertiajs/vue3'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
-const props = defineProps<{
-  options: Array<{ id: number; name: string; value: number; validity: string }>
-  modelValue: string | number | null
-  applicationId: number | string
-}>()
+const props = defineProps({
+  modelValue: [String, Number],
+  options: { type: Array, default: () => [] },
+  applicationId: [String, Number],
+})
 
 const emit = defineEmits(['update:modelValue'])
 
-const onSelect = (event: Event) => {
-  const target = event.target as HTMLSelectElement
-  const selectedValue = target.value
+const selectedOption = computed(() => {
+  return props.options.find(opt => Number(opt.id) === Number(props.modelValue)) || null
+})
 
-  emit('update:modelValue', selectedValue)
+const handleSelect = (option: any) => {
+  emit('update:modelValue', option.id)
 
-  if (selectedValue) {
-    router.post('/loctr/applications/option-selection', {
-      application_id: props.applicationId,
-      option_id: selectedValue,
-    }, {
-      preserveScroll: true,
-      preserveState: true,
-      onSuccess: () => {
-        console.log('✅ Option selection saved')
-      },
-      onError: (errors) => {
-        console.error('❌ Error saving selection:', errors)
-      }
-    })
-  }
+  const form = useForm({
+    application_id: props.applicationId,
+    option_id: option.id,
+  })
+
+  form.post('/loctr/applications/option-selection', {
+    preserveScroll: true,
+    onSuccess: () => {
+      console.log('✅ Declared value & validity saved automatically.')
+    },
+    onError: (errors) => {
+      console.error('❌ Failed to save option selection:', errors)
+    },
+  })
 }
 </script>
 
 <template>
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">
-      Declared Value & Validity
-    </label>
-    <select
-      :value="modelValue"
-      @change="onSelect"
-      class="w-full border border-gray-300 py-3 px-2 text-gray-800 focus:ring focus:ring-blue-300"
-    >
-      <option value="">-- Select an option --</option>
-      <option
-        v-for="option in options"
-        :key="option.id"
-        :value="option.id"
+  <DropdownMenu>
+    <DropdownMenuTrigger as-child>
+      <button
+        type="button"
+        class="w-[4/12] text-left px-3 py-1 bg-gray-100 border border-gray-400 rounded focus:outline-none focus:ring-1"
       >
-        {{ option.name }} - {{ option.value }} ({{ option.validity }})
-      </option>
-    </select>
-  </div>
+        <span v-if="selectedOption">{{ selectedOption.name }}</span>
+        <span v-else class="text-gray-600 italic">-- Select option --</span>
+      </button>
+    </DropdownMenuTrigger>
+
+    <DropdownMenuContent
+      align="start"
+      class="w-[var(--radix-dropdown-menu-trigger-width)] bg-white shadow-md rounded-md border border-gray-200/50"
+    >
+      <DropdownMenuItem
+        v-for="option in props.options"
+        :key="option.id"
+        @click="handleSelect(option)"
+        class="hover:bg-gray-100 cursor-pointer px-3 py-2 transition-colors"
+      >
+        {{ option.name }}-{{ option.validity }}
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
 </template>
+
+<style scoped>
+button:focus {
+  outline: none;
+  box-shadow: none;
+}
+</style>

@@ -25,7 +25,7 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Create Appplication',
+        title: 'Create Application',
         href: '/loctr/applications/create',
         icon: SquareUserRound,
     },{

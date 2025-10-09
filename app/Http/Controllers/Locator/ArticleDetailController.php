@@ -70,10 +70,21 @@ class ArticleDetailController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+    public function update(Request $request, $id)
+{
+    $article = ArticleDetail::findOrFail($id);
+
+    $validated = $request->validate([
+        'marks_and_number' => 'sometimes|required|string',
+        'qty' => 'sometimes|required|integer|min:1',
+        'detailed_description_of_article' => 'sometimes|required|string',
+        'gross_weight' => 'sometimes|nullable|string',
+    ]);
+
+    $article->update($validated);
+
+    return response()->json(['article' => $article]);
+}
 
     /**
      * Remove the specified resource from storage.

@@ -7,6 +7,7 @@ import LocatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.v
 import DynamicFormRepeater from '@/components/locator/DynamicFormRepeater.vue'
 import ApplicationOptionSelect from '@/components/locator/ApplicationOptionSelect.vue'
 import UploadAttachment from '@/components/locator/UploadAttachment.vue'
+import Alert from '@/components/locator/Alert.vue'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -26,10 +27,12 @@ const props = defineProps({
   control_number: [String, Number],
   form_number: [String, Number],
   form_title: [String],
+  start_date: [String],
+
 })
 
 const articles = ref([])
-const uploadedFiles = ref([]) // store all uploaded files
+const uploadedFiles = ref([])
 
 watch(
   () => props.articleDetail,
@@ -49,13 +52,13 @@ const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Locator', href: locators.index.url() },
   { title: 'Create Permit', href: applications.create.url() },
 ]
-
+// need to have db table
 const applicationTypes = [
-  'Gate Pass',
-  'Permit to Bring In',
-  'Permit to Bring Out',
-  'Internal Tool',
-  'Data Pipeline',
+  'Gate Clearance',
+  'Bring In Clearance',
+  'Bring Out Clearance',
+  'Temporary Bring Out Clearance',
+  'Local Purchase',
 ]
 
 const selectedDeclaredValue = computed(() => {
@@ -65,7 +68,6 @@ const selectedDeclaredValue = computed(() => {
   )
 })
 
-// Fetch all previously uploaded files for this application
 const fetchUploads = async () => {
   if (!props.application_form_id) return
   try {
@@ -80,8 +82,7 @@ const fetchUploads = async () => {
 onMounted(fetchUploads)
 
 const onUploaded = (res: any) => {
-  console.log('Uploaded:', res)
-  uploadedFiles.value.push(...res.files) // add newly uploaded files
+  uploadedFiles.value.push(...res.files)
 }
 
 const onUploadError = (err: any) => {
@@ -100,20 +101,47 @@ const submit = () => {
         {{ props.form_title ? `Applying for ${props.form_title}` : 'Create New Application' }}
       </h1>
 
-      <!-- Top Right Info -->
+
+      <!-- Alerts + Info -->
       <div v-if="props.application_form_id" class="text-right space-y-1 mb-4">
+        <Alert
+          message="You can now choose your Declared value and Validity Period"
+          type="Success"
+          :duration="10000"
+        />
+        <div v-if="selectedDeclaredValue">
+          <Alert
+            message="You can now Upload/ Attach Supporting Documents"
+            type="info"
+            :duration="10000"
+          />
+        </div>
+        <div v-if="uploadedFiles && uploadedFiles.length > 0">
+          <Alert
+            message="You have attached Supporting Documents. You can now add Article Details."
+            type="success"
+            :duration="10000"
+          />
+        </div>
         <p v-if="props.form_number" class="text-sm text-gray-500">
           <b>Form Number:</b> {{ props.form_number }}
         </p>
         <p v-if="props.control_number" class="text-sm text-gray-500">
           <b>Control Number:</b> {{ props.control_number }}
         </p>
-        <p v-if="selectedDeclaredValue" class="text-sm text-gray-500">
-          <b>Declared Value:</b> {{ selectedDeclaredValue.name || selectedDeclaredValue.value }}
+        <p v-if="selectedDeclaredValue" class="text-sm text-gray-500 leading-5">
+  <b>Declared Value:</b> {{ selectedDeclaredValue.name || selectedDeclaredValue.value }}<br>
+  <b>Validity:</b> {{ selectedDeclaredValue?.validity }}
+</p>
+
+        <p v-if="props.start_date" class="text-sm text-gray-500">
+          <b>Started Date:</b> {{ new Date(props?.start_date).toLocaleDateString() }}
         </p>
         <p v-if="props.expired_at" class="text-sm text-gray-500">
           <b>Expires on:</b> {{ new Date(props.expired_at).toLocaleDateString() }}
         </p>
+        
+        
       </div>
 
       <form @submit.prevent="submit" class="space-y-6">
@@ -128,14 +156,12 @@ const submit = () => {
           <label class="block text-sm font-medium text-gray-700 mb-1">Application Type</label>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <Button variant="outline" class="w-full justify-between">
+              <Button
+                variant="ghost"
+                class="w-full justify-between text-gray-800 bg-transparent hover:bg-gray-100 focus:outline-none focus:ring-0"
+              >
                 <span>{{ form.type || '-- Select an application type --' }}</span>
-                <svg
-                  class="ml-2 h-4 w-4 opacity-50"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg class="ml-2 h-4 w-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </Button>
@@ -145,7 +171,7 @@ const submit = () => {
                 v-for="type in applicationTypes"
                 :key="type"
                 @click="form.type = type"
-                class="cursor-pointer"
+                class="cursor-pointer text-sm px-4 py-2 hover:bg-gray-100"
               >
                 {{ type }}
               </DropdownMenuItem>
@@ -156,16 +182,16 @@ const submit = () => {
           </div>
         </div>
 
-        <!-- Declared Value & Validity -->
-        <div v-if="props.application_form_id">
-          <ApplicationOptionSelect
-            v-model="form.application_category_option_id"
-            :options="props.options"
-            :application-id="props.application_form_id"
-          />
-          <div v-if="form.errors.application_category_option_id" class="text-red-500 text-sm mt-1">
-            {{ form.errors.application_category_option_id }}
-          </div>
+        <!-- Declared Value & Validity (borderless ApplicationOptionSelect) -->
+         <div v-if="application_form_id">
+        <ApplicationOptionSelect
+          v-model="form.application_category_option_id"
+          :options="props.options"
+          :application-id="props.application_form_id"
+        />
+      </div>
+        <div v-if="form.errors.application_category_option_id" class="text-red-500 text-sm mt-1">
+          {{ form.errors.application_category_option_id }}
         </div>
 
         <!-- Upload Attachments -->
@@ -179,10 +205,8 @@ const submit = () => {
             @uploaded="onUploaded"
             @error="onUploadError"
           />
-
-          <!-- Show uploaded files -->
           <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-            <div v-for="file in uploadedFiles" :key="file.id" class="border rounded p-2 bg-gray-50">
+            <div v-for="file in uploadedFiles" :key="file.id" class="rounded p-2 bg-gray-50">
               <a :href="file.url" target="_blank" class="text-blue-600 hover:underline">
                 {{ file.file_name }}
               </a>
@@ -190,7 +214,7 @@ const submit = () => {
           </div>
         </div>
 
-        <!-- Dynamic Article Repeater -->
+        <!-- Dynamic Repeater -->
         <div v-if="props.application_form_id" class="mt-8">
           <DynamicFormRepeater
             :formId="props.application_form_id"
@@ -206,6 +230,9 @@ const submit = () => {
           </Button>
         </div>
       </form>
+      <p v-if="props.start_date" class="text-sm text-gray-500">
+          <b>Validity Date:</b> `{{ new Date(props?.start_date).toLocaleDateString() }} to {{ new Date(props?.expired_at).toLocaleDateString() }} `
+        </p>
     </div>
   </LocatorAppSidebarLayout>
 </template>
