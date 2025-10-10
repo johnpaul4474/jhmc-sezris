@@ -9,9 +9,9 @@ Route::get('/locator', [LocatorController::class, 'index'])->name('locators.inde
 
 Route::group(['prefix' => 'loctr', 'middleware' => 'auth'], function () {
     //route for pending view
-    Route::get('applications/pending', [ApplicationController::class, 'pendingList'])->name('applications.pending');
+    Route::get('applications/pending', [LocatorController::class, 'pendingList'])->name('applications.pending');
     //route for approved 
-    Route::get('applications/approved', [ApplicationController::class, 'approvedList'])->name('applications.approved');
+    Route::get('applications/approved', [LocatorController::class, 'approvedList'])->name('applications.approved');
     //route for creating application (crud) 
     Route::resource('applications', ApplicationController::class);
     //route articles(crud) 

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('form_title');
             $table->unsignedBigInteger('user_id');
-            $table->string('control_number')->unique();
+            $table->string('control_number')->nullable()->unique();
             $table->string('form_number', 100)->unique()->nullable();
             $table->timestamps();
 

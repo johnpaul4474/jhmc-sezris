@@ -14,13 +14,14 @@ const props = defineProps({
   applicationId: [String, Number],
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'price-updated'])
 
 const selectedOption = computed(() => {
   return props.options.find(opt => Number(opt.id) === Number(props.modelValue)) || null
 })
 
 const handleSelect = (option: any) => {
+  // Update v-model
   emit('update:modelValue', option.id)
 
   const form = useForm({
@@ -30,8 +31,14 @@ const handleSelect = (option: any) => {
 
   form.post('/loctr/applications/option-selection', {
     preserveScroll: true,
-    onSuccess: () => {
-      console.log('✅ Declared value & validity saved automatically.')
+    onSuccess: (page) => {
+      console.log('✅ Option saved successfully')
+
+      // Emit price to parent if available
+      const updatedPrice = option.price ?? option.value ?? null
+      if (updatedPrice !== null) {
+        emit('price-updated', updatedPrice)
+      }
     },
     onError: (errors) => {
       console.error('❌ Failed to save option selection:', errors)
@@ -58,11 +65,11 @@ const handleSelect = (option: any) => {
     >
       <DropdownMenuItem
         v-for="option in props.options"
-        :key="option.id"
+        :key="option?.id"
         @click="handleSelect(option)"
         class="hover:bg-gray-100 cursor-pointer px-3 py-2 transition-colors"
       >
-        {{ option.name }}-{{ option.validity }}
+        {{ option?.name }} - {{ option?.validity }}
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>

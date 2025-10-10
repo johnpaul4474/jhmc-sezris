@@ -23,13 +23,13 @@ class ApplicationModel extends Model
     {
         static::creating(function ($application) {
             // ✅ Generate control_number (YYYY-MM-XXX)
-            $prefix = now()->format('Y-m');
+            // $prefix = now()->format('Y-m');
 
-            $count = self::whereYear('created_at', now()->year)
-                        ->whereMonth('created_at', now()->month)
-                        ->count() + 1;
+            // $count = self::whereYear('created_at', now()->year)
+            //             ->whereMonth('created_at', now()->month)
+            //             ->count() + 1;
 
-            $application->control_number = $prefix . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
+            // $application->control_number = $prefix . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
 
             // ✅ Generate form_number based on title (acronym + XXX)
             $acronym = strtoupper(

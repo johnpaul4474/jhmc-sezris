@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use App\Models\Locator\ApplicationModel;
 
 class User extends Authenticatable
 {
@@ -46,4 +47,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function applications()
+{
+    return $this->hasMany(ApplicationModel::class, 'user_id');
+}
 }

@@ -175,7 +175,8 @@ class ApplicationController extends Controller
             'amount'      => ApplicationOption::find($validated['option_id'])->value ?? 0,
         ]
     );
-     
+    $price = ApplicationOption::find($validated['option_id'])->price;
+//dd($price);
     return Inertia::render('Locator/Application/Create',[
        'user' => $user,
         'application_form_id' => $selection->application_id,
@@ -185,6 +186,8 @@ class ApplicationController extends Controller
         'control_number' =>$application->control_number,
         'form_title' => $application->form_title,
         'start_date' => $application->created_at,
+        'price' => $price,
+        
     ]);
     
     }

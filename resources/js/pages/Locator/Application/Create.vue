@@ -28,11 +28,12 @@ const props = defineProps({
   form_number: [String, Number],
   form_title: [String],
   start_date: [String],
-
+  price: [String, Number],
 })
 
 const articles = ref([])
 const uploadedFiles = ref([])
+const localPrice = ref(props.price ?? null)
 
 watch(
   () => props.articleDetail,
@@ -52,7 +53,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Locator', href: locators.index.url() },
   { title: 'Create Permit', href: applications.create.url() },
 ]
-// need to have db table
+
 const applicationTypes = [
   'Gate Clearance',
   'Bring In Clearance',
@@ -89,6 +90,10 @@ const onUploadError = (err: any) => {
   console.error('Upload error:', err)
 }
 
+const handlePriceUpdated = (price: number) => {
+  localPrice.value = price
+}
+
 const submit = () => {
   form.post('/loctr/applications')
 }
@@ -101,12 +106,11 @@ const submit = () => {
         {{ props.form_title ? `Applying for ${props.form_title}` : 'Create New Application' }}
       </h1>
 
-
-      <!-- Alerts + Info -->
+      <!-- Alerts & Info -->
       <div v-if="props.application_form_id" class="text-right space-y-1 mb-4">
         <Alert
           message="You can now choose your Declared value and Validity Period"
-          type="Success"
+          type="success"
           :duration="10000"
         />
         <div v-if="selectedDeclaredValue">
@@ -116,13 +120,14 @@ const submit = () => {
             :duration="10000"
           />
         </div>
-        <div v-if="uploadedFiles && uploadedFiles.length > 0">
+        <div v-if="uploadedFiles.length > 0">
           <Alert
             message="You have attached Supporting Documents. You can now add Article Details."
             type="success"
             :duration="10000"
           />
         </div>
+
         <p v-if="props.form_number" class="text-sm text-gray-500">
           <b>Form Number:</b> {{ props.form_number }}
         </p>
@@ -130,18 +135,18 @@ const submit = () => {
           <b>Control Number:</b> {{ props.control_number }}
         </p>
         <p v-if="selectedDeclaredValue" class="text-sm text-gray-500 leading-5">
-  <b>Declared Value:</b> {{ selectedDeclaredValue.name || selectedDeclaredValue.value }}<br>
-  <b>Validity:</b> {{ selectedDeclaredValue?.validity }}
-</p>
-
+          <b>Declared Value:</b> {{ selectedDeclaredValue.name || selectedDeclaredValue.value }}<br>
+          <b>Validity:</b> {{ selectedDeclaredValue?.validity }}
+        </p>
+        <p v-if="localPrice" class="text-sm text-gray-500">
+          <b>Amount:</b> ₱{{ price }}
+        </p>
         <p v-if="props.start_date" class="text-sm text-gray-500">
-          <b>Started Date:</b> {{ new Date(props?.start_date).toLocaleDateString() }}
+          <b>Started Date:</b> {{ new Date(props.start_date).toLocaleDateString() }}
         </p>
         <p v-if="props.expired_at" class="text-sm text-gray-500">
           <b>Expires on:</b> {{ new Date(props.expired_at).toLocaleDateString() }}
         </p>
-        
-        
       </div>
 
       <form @submit.prevent="submit" class="space-y-6">
@@ -182,14 +187,15 @@ const submit = () => {
           </div>
         </div>
 
-        <!-- Declared Value & Validity (borderless ApplicationOptionSelect) -->
-         <div v-if="application_form_id">
-        <ApplicationOptionSelect
-          v-model="form.application_category_option_id"
-          :options="props.options"
-          :application-id="props.application_form_id"
-        />
-      </div>
+        <!-- Declared Value & Validity -->
+        <div v-if="props.application_form_id">
+          <ApplicationOptionSelect
+            v-model="form.application_category_option_id"
+            :options="props.options"
+            :application-id="props.application_form_id"
+            @price-updated="handlePriceUpdated"
+          />
+        </div>
         <div v-if="form.errors.application_category_option_id" class="text-red-500 text-sm mt-1">
           {{ form.errors.application_category_option_id }}
         </div>
@@ -224,15 +230,13 @@ const submit = () => {
         </div>
 
         <!-- Submit -->
-        <div v-if="!props.control_number" class="pt-4 flex justify-center">
+        <div v-if="!props.form_number" class="pt-4 flex justify-center">
           <Button type="submit" class="px-5 py-2" :disabled="form.processing">
             {{ form.processing ? 'Saving...' : 'Apply' }}
           </Button>
         </div>
+        <Button disabled class="pt-4 flex px-2 py-2 justify-center">Generate form for printing</Button>
       </form>
-      <p v-if="props.start_date" class="text-sm text-gray-500">
-          <b>Validity Date:</b> `{{ new Date(props?.start_date).toLocaleDateString() }} to {{ new Date(props?.expired_at).toLocaleDateString() }} `
-        </p>
     </div>
   </LocatorAppSidebarLayout>
 </template>
