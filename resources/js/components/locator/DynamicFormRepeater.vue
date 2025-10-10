@@ -3,7 +3,6 @@ import { ref, watch } from 'vue'
 import axios from 'axios'
 import { Plus, X, Trash2, Save, FilePenLine, ShieldX } from 'lucide-vue-next'
 
-// --- Props & Emits ---
 const props = defineProps({
   modelValue: { type: Array, default: () => [] },
   title: { type: String, default: 'Submit New Shipping Article' },
@@ -12,7 +11,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-// --- State ---
 const savedArticles = ref([...props.modelValue])
 const isOpen = ref(false)
 const form = ref({
@@ -23,7 +21,6 @@ const form = ref({
   gross_weight: ''
 })
 
-// --- Inline Edit State ---
 const editingId = ref<number | null>(null)
 const editableRow = ref({
   marks_and_number: '',
@@ -32,14 +29,18 @@ const editableRow = ref({
   gross_weight: ''
 })
 
-// --- Modal Handlers ---
 const openModal = () => {
-  form.value = { application_form_id: props.formId, marks_and_number: '', qty: null, detailed_description_of_article: '', gross_weight: '' }
+  form.value = {
+    application_form_id: props.formId,
+    marks_and_number: '',
+    qty: null,
+    detailed_description_of_article: '',
+    gross_weight: ''
+  }
   isOpen.value = true
 }
 const closeModal = () => { isOpen.value = false }
 
-// --- Submit Article ---
 const submitArticle = async () => {
   try {
     const res = await axios.post('/loctr/articles', form.value)
@@ -55,7 +56,6 @@ const submitArticle = async () => {
   }
 }
 
-// --- Remove Article ---
 const removeArticle = async (id: number) => {
   const index = savedArticles.value.findIndex(a => a.id === id)
   if (index === -1) return
@@ -72,7 +72,6 @@ const removeArticle = async (id: number) => {
   }
 }
 
-// --- Inline Edit Handlers ---
 const startEdit = (article: any) => {
   editingId.value = article.id
   editableRow.value = {
@@ -82,10 +81,7 @@ const startEdit = (article: any) => {
     gross_weight: article.gross_weight
   }
 }
-
-const cancelEdit = () => {
-  editingId.value = null
-}
+const cancelEdit = () => { editingId.value = null }
 
 const updateArticle = async (id: number) => {
   try {
@@ -105,8 +101,6 @@ const updateArticle = async (id: number) => {
     }
 
     const res = await axios.put(`/loctr/articles/${id}`, changedData)
-
-    // Determine how the backend returns updated data
     const updatedArticle = res.data.article || res.data
 
     if (updatedArticle) {
@@ -121,7 +115,7 @@ const updateArticle = async (id: number) => {
     alert('Failed to update article')
   }
 }
-// --- Sync with parent ---
+
 watch(() => props.modelValue, (newVal) => {
   if (JSON.stringify(newVal) !== JSON.stringify(savedArticles.value)) {
     savedArticles.value = [...newVal]
@@ -132,68 +126,90 @@ watch(() => props.modelValue, (newVal) => {
 <template>
   <div class="space-y-6">
     <!-- Add Button -->
-    <button @click="openModal"
-      class="flex items-center space-x-2 px-3 py-1 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition">
+    <button
+      @click="openModal"
+      class="flex items-center space-x-2 px-3 py-1 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition"
+    >
       <Plus class="w-5 h-5" />
-      <span>list Article</span>
+      <span>List Article</span>
     </button>
 
-    <!-- Article Table -->
-    <div class="overflow-x-auto shadow-lg rounded-xl border border-gray-200">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-indigo-50">
+    <!-- Table -->
+    <div class="overflow-x-auto shadow-lg rounded-xl border border-gray-200 dark:border-gray-700">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-indigo-50 dark:bg-gray-800">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-bold text-indigo-700 uppercase">#</th>
-            <th class="px-4 py-3 text-left text-xs font-bold text-indigo-700 uppercase">Marks & Number</th>
-            <th class="px-4 py-3 text-left text-xs font-bold text-indigo-700 uppercase">Quantity</th>
-            <th class="px-4 py-3 text-left text-xs font-bold text-indigo-700 uppercase">Description</th>
-            <th class="px-4 py-3 text-left text-xs font-bold text-indigo-700 uppercase">Weight</th>
-            <th class="px-4 py-3 text-right text-xs font-bold text-indigo-700 uppercase">Actions</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-indigo-700 dark:text-indigo-300 uppercase">#</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-indigo-700 dark:text-indigo-300 uppercase">Marks & Number</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-indigo-700 dark:text-indigo-300 uppercase">Quantity</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-indigo-700 dark:text-indigo-300 uppercase">Description</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-indigo-700 dark:text-indigo-300 uppercase">Weight</th>
+            <th class="px-4 py-3 text-right text-xs font-bold text-indigo-700 dark:text-indigo-300 uppercase">Actions</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
           <tr v-if="savedArticles.length === 0">
-            <td colspan="6" class="px-4 py-8 text-center text-gray-500 italic">No articles yet.</td>
+            <td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400 italic">
+              No articles yet.
+            </td>
           </tr>
-          <tr v-for="(article, index) in savedArticles" :key="article.id" class="hover:bg-gray-50">
-            <td class="px-4 py-3">{{ index + 1 }}</td>
 
-            <!-- Marks & Number -->
-            <td class="px-4 py-3 font-semibold text-blue-800">
+          <tr v-for="(article, index) in savedArticles" :key="article.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+            <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ index + 1 }}</td>
+
+            <!-- Marks -->
+            <td class="px-4 py-3 font-semibold text-blue-800 dark:text-blue-300">
               <span v-if="editingId !== article.id">{{ article.marks_and_number }}</span>
-              <input v-else v-model="editableRow.marks_and_number" class="border p-1 rounded w-full" />
+              <input
+                v-else
+                v-model="editableRow.marks_and_number"
+                class="border p-1 rounded w-full bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
+              />
             </td>
 
-            <!-- Quantity -->
-            <td class="px-4 py-3">
+            <!-- Qty -->
+            <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
               <span v-if="editingId !== article.id">{{ article.qty }}</span>
-              <input v-else type="number" v-model.number="editableRow.qty" class="border p-1 rounded w-full" />
+              <input
+                v-else
+                type="number"
+                v-model.number="editableRow.qty"
+                class="border p-1 rounded w-full bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
+              />
             </td>
 
             <!-- Description -->
-            <td class="px-4 py-3 max-w-xs truncate">
+            <td class="px-4 py-3 max-w-xs truncate text-gray-900 dark:text-gray-100">
               <span v-if="editingId !== article.id">{{ article.detailed_description_of_article }}</span>
-              <input v-else v-model="editableRow.detailed_description_of_article" class="border p-1 rounded w-full" />
+              <input
+                v-else
+                v-model="editableRow.detailed_description_of_article"
+                class="border p-1 rounded w-full bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
+              />
             </td>
 
             <!-- Weight -->
-            <td class="px-4 py-3">
+            <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
               <span v-if="editingId !== article.id">{{ article.gross_weight || '—' }}</span>
-              <input v-else v-model="editableRow.gross_weight" class="border p-1 rounded w-full" />
+              <input
+                v-else
+                v-model="editableRow.gross_weight"
+                class="border p-1 rounded w-full bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
+              />
             </td>
 
             <!-- Actions -->
             <td class="px-4 py-3 text-right flex justify-end space-x-1">
-              <button v-if="editingId !== article.id" @click="startEdit(article)" class="p-1 rounded-full text-blue-500 hover:bg-blue-100">
-                <FilePenLine class="w-4 h-4"/>
+              <button v-if="editingId !== article.id" @click="startEdit(article)" class="p-1 rounded-full text-blue-500 hover:bg-blue-100 dark:hover:bg-gray-700">
+                <FilePenLine class="w-4 h-4" />
               </button>
-              <button v-else @click="updateArticle(article.id)" class="p-1 rounded-full text-green-500 hover:bg-green-100">
-              <Save class="w-4 h-4"/>
+              <button v-else @click="updateArticle(article.id)" class="p-1 rounded-full text-green-500 hover:bg-green-100 dark:hover:bg-gray-700">
+                <Save class="w-4 h-4" />
               </button>
-              <button v-if="editingId === article.id" @click="cancelEdit" class="p-1 rounded-full text-gray-500 hover:bg-gray-100">
-                <ShieldX class="w-4 h-4"/>
+              <button v-if="editingId === article.id" @click="cancelEdit" class="p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <ShieldX class="w-4 h-4" />
               </button>
-              <button type="button" @click="removeArticle(article.id)" class="p-1 rounded-full text-red-500 hover:bg-red-100">
+              <button type="button" @click="removeArticle(article.id)" class="p-1 rounded-full text-red-500 hover:bg-red-100 dark:hover:bg-gray-700">
                 <Trash2 class="w-4 h-4" />
               </button>
             </td>
@@ -204,37 +220,39 @@ watch(() => props.modelValue, (newVal) => {
 
     <!-- Modal -->
     <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70" @click.self="closeModal">
-      <div class="relative w-full max-w-xl max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-2xl" @click.stop>
+      <div class="relative w-full max-w-xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 rounded-xl shadow-2xl" @click.stop>
         <form @submit.prevent="submitArticle" class="p-6 space-y-6">
-          <div class="flex justify-between items-center border-b pb-4">
-            <h2 class="text-2xl font-extrabold text-gray-900">{{ title }}</h2>
-            <button type="button" @click="closeModal" class="p-2 rounded-full text-gray-500 hover:bg-gray-100">
+          <div class="flex justify-between items-center border-b dark:border-gray-700 pb-4">
+            <h2 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100">{{ title }}</h2>
+            <button type="button" @click="closeModal" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">
               <X class="w-6 h-6" />
             </button>
           </div>
 
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Marks and number</label>
-              <input v-model="form.marks_and_number" type="text" required class="w-full border p-3 rounded-lg" placeholder="e.g., BOX-001 / Fragile" />
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Marks and number</label>
+              <input v-model="form.marks_and_number" type="text" required class="w-full border p-3 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-              <input v-model.number="form.qty" type="number" min="1" required class="w-full border p-3 rounded-lg" placeholder="e.g., 10" />
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantity</label>
+              <input v-model.number="form.qty" type="number" min="1" required class="w-full border p-3 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-              <input v-model="form.detailed_description_of_article" type="text" required class="w-full border p-3 rounded-lg" placeholder="Full description" />
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+              <input v-model="form.detailed_description_of_article" type="text" required class="w-full border p-3 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Gross weight (optional)</label>
-              <input v-model="form.gross_weight" type="text" class="w-full border p-3 rounded-lg" placeholder="e.g., 50.5 kg" />
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gross weight (optional)</label>
+              <input v-model="form.gross_weight" type="text" class="w-full border p-3 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600" />
             </div>
           </div>
 
-          <div class="pt-4 border-t flex justify-end space-x-3">
-            <button type="button" @click="closeModal" class="px-1 py-1 bg-gray-500 text-white rounded-lg">Close</button>
-            <button type="submit" class="px-1 py-1 bg-green-600 text-white rounded-lg flex items-center space-x-2">
+          <div class="pt-4 border-t dark:border-gray-700 flex justify-end space-x-3">
+            <button type="button" @click="closeModal" class="px-2 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+              Close
+            </button>
+            <button type="submit" class="px-2 py-1 bg-green-600 text-white rounded-lg flex items-center space-x-2 hover:bg-green-700">
               <Save class="w-4 h-4" />
               <span>Save Article</span>
             </button>

@@ -21,7 +21,6 @@ const selectedOption = computed(() => {
 })
 
 const handleSelect = (option: any) => {
-  // Update v-model
   emit('update:modelValue', option.id)
 
   const form = useForm({
@@ -31,10 +30,8 @@ const handleSelect = (option: any) => {
 
   form.post('/loctr/applications/option-selection', {
     preserveScroll: true,
-    onSuccess: (page) => {
+    onSuccess: () => {
       console.log('✅ Option saved successfully')
-
-      // Emit price to parent if available
       const updatedPrice = option.price ?? option.value ?? null
       if (updatedPrice !== null) {
         emit('price-updated', updatedPrice)
@@ -52,22 +49,27 @@ const handleSelect = (option: any) => {
     <DropdownMenuTrigger as-child>
       <button
         type="button"
-        class="w-[4/12] text-left px-3 py-1 bg-gray-100 border border-gray-400 rounded focus:outline-none focus:ring-1"
+        class="w-[4/12] text-left px-3 py-1 bg-gray-100 border border-gray-400 rounded
+               focus:outline-none focus:ring-1 focus:ring-gray-300
+               dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:focus:ring-gray-500"
       >
         <span v-if="selectedOption">{{ selectedOption.name }}</span>
-        <span v-else class="text-gray-600 italic">-- Select option --</span>
+        <span v-else class="text-gray-600 italic dark:text-gray-400">-- Select option --</span>
       </button>
     </DropdownMenuTrigger>
 
     <DropdownMenuContent
       align="start"
-      class="w-[var(--radix-dropdown-menu-trigger-width)] bg-white shadow-md rounded-md border border-gray-200/50"
+      class="w-[var(--radix-dropdown-menu-trigger-width)]
+             bg-white shadow-md rounded-md border border-gray-200/50
+             dark:bg-gray-800 dark:border-gray-700 dark:shadow-black/40"
     >
       <DropdownMenuItem
         v-for="option in props.options"
         :key="option?.id"
         @click="handleSelect(option)"
-        class="hover:bg-gray-100 cursor-pointer px-3 py-2 transition-colors"
+        class="hover:bg-gray-100 cursor-pointer px-3 py-2 transition-colors
+               dark:hover:bg-gray-700 dark:text-gray-100"
       >
         {{ option?.name }} - {{ option?.validity }}
       </DropdownMenuItem>

@@ -101,8 +101,14 @@ const submit = () => {
 
 <template>
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
-    <div class="p-6 w-full mx-6 bg-white shadow-xl rounded-xl border border-gray-100">
-      <h1 class="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-2">
+    <div
+      class="p-6 w-full mx-6 bg-white shadow-xl rounded-xl border border-gray-100
+             dark:bg-gray-900 dark:border-gray-700"
+    >
+      <h1
+        class="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-2
+               dark:text-gray-100 dark:border-gray-700"
+      >
         {{ props.form_title ? `Applying for ${props.form_title}` : 'Create New Application' }}
       </h1>
 
@@ -128,23 +134,23 @@ const submit = () => {
           />
         </div>
 
-        <p v-if="props.form_number" class="text-sm text-gray-500">
+        <p v-if="props.form_number" class="text-sm text-gray-500 dark:text-gray-400">
           <b>Form Number:</b> {{ props.form_number }}
         </p>
-        <p v-if="props.control_number" class="text-sm text-gray-500">
+        <p v-if="props.control_number" class="text-sm text-gray-500 dark:text-gray-400">
           <b>Control Number:</b> {{ props.control_number }}
         </p>
-        <p v-if="selectedDeclaredValue" class="text-sm text-gray-500 leading-5">
+        <p v-if="selectedDeclaredValue" class="text-sm text-gray-500 dark:text-gray-400 leading-5">
           <b>Declared Value:</b> {{ selectedDeclaredValue.name || selectedDeclaredValue.value }}<br>
           <b>Validity:</b> {{ selectedDeclaredValue?.validity }}
         </p>
-        <p v-if="localPrice" class="text-sm text-gray-500">
+        <p v-if="localPrice" class="text-sm text-gray-500 dark:text-gray-400">
           <b>Amount:</b> ₱{{ price }}
         </p>
-        <p v-if="props.start_date" class="text-sm text-gray-500">
+        <p v-if="props.start_date" class="text-sm text-gray-500 dark:text-gray-400">
           <b>Started Date:</b> {{ new Date(props.start_date).toLocaleDateString() }}
         </p>
-        <p v-if="props.expired_at" class="text-sm text-gray-500">
+        <p v-if="props.expired_at" class="text-sm text-gray-500 dark:text-gray-400">
           <b>Expires on:</b> {{ new Date(props.expired_at).toLocaleDateString() }}
         </p>
       </div>
@@ -152,18 +158,24 @@ const submit = () => {
       <form @submit.prevent="submit" class="space-y-6">
         <!-- Application Creator -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Application Creator</label>
-          {{ props.user?.name }}
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Application Creator
+          </label>
+          <span class="text-gray-900 dark:text-gray-100">{{ props.user?.name }}</span>
         </div>
 
         <!-- Application Type -->
         <div v-if="!props.form_title">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Application Type</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Application Type
+          </label>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <Button
                 variant="ghost"
-                class="w-full justify-between text-gray-800 bg-transparent hover:bg-gray-100 focus:outline-none focus:ring-0"
+                class="w-full justify-between text-gray-800 bg-transparent hover:bg-gray-100
+                       focus:outline-none focus:ring-0
+                       dark:text-gray-100 dark:hover:bg-gray-800"
               >
                 <span>{{ form.type || '-- Select an application type --' }}</span>
                 <svg class="ml-2 h-4 w-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,12 +183,12 @@ const submit = () => {
                 </svg>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent class="w-full">
+            <DropdownMenuContent class="w-full bg-white dark:bg-gray-800 border dark:border-gray-700">
               <DropdownMenuItem
                 v-for="type in applicationTypes"
                 :key="type"
                 @click="form.type = type"
-                class="cursor-pointer text-sm px-4 py-2 hover:bg-gray-100"
+                class="cursor-pointer text-sm px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-100"
               >
                 {{ type }}
               </DropdownMenuItem>
@@ -202,7 +214,9 @@ const submit = () => {
 
         <!-- Upload Attachments -->
         <div v-if="props.expired_at" class="space-y-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Upload Attachments</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Upload Attachments
+          </label>
           <UploadAttachment
             :application-form-id="props.application_form_id"
             upload-url="/loctr/uploads"
@@ -212,8 +226,16 @@ const submit = () => {
             @error="onUploadError"
           />
           <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-            <div v-for="file in uploadedFiles" :key="file.id" class="rounded p-2 bg-gray-50">
-              <a :href="file.url" target="_blank" class="text-blue-600 hover:underline">
+            <div
+              v-for="file in uploadedFiles"
+              :key="file.id"
+              class="rounded p-2 bg-gray-50 dark:bg-gray-800"
+            >
+              <a
+                :href="file.url"
+                target="_blank"
+                class="text-blue-600 hover:underline dark:text-blue-400"
+              >
                 {{ file.file_name }}
               </a>
             </div>
@@ -235,7 +257,9 @@ const submit = () => {
             {{ form.processing ? 'Saving...' : 'Apply' }}
           </Button>
         </div>
-        <Button disabled class="pt-4 flex px-2 py-2 justify-center">Generate form for printing</Button>
+        <Button disabled class="pt-4 flex px-2 py-2 justify-center">
+          Generate form for printing
+        </Button>
       </form>
     </div>
   </LocatorAppSidebarLayout>
