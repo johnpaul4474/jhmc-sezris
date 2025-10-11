@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Locator\ApplicationModel;
+use Illuminate\Support\Facades\Auth;
+
+
 
 class LocatorController extends Controller
 {
     public function index(){
-        $applications = auth()->user()->applications()->with('user')->get();
+        $applications = auth()->user()->applications;
         return Inertia::render('Locator/Index', [
             'applications' => $applications,
         ]);
@@ -21,7 +24,9 @@ class LocatorController extends Controller
     }
     public function pendingList()
     {
-        $applications = ApplicationModel::where('status', 'pending')->get();
+        $applications = ApplicationModel::where('user_id', Auth::id())
+    ->where('status', 'pending')
+    ->get();
         
         return Inertia::render('Locator/Application/Pending', [
             'applications' => $applications,
@@ -29,9 +34,9 @@ class LocatorController extends Controller
     }
 
     public function approvedList(){
-        $applications = ApplicationModel::where('status', 'approved')
-         ->where('control_number', '!=', '')
-        ->get();
+        $applications = ApplicationModel::where('user_id', Auth::id())
+    ->where('status', 'approved')
+    ->get();
 
         return Inertia::render('Locator/Application/Approved', [
             'applications' => $applications,
