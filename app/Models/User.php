@@ -48,7 +48,14 @@ class User extends Authenticatable
         ];
     }
     public function applications()
-{
+    {
     return $this->hasMany(ApplicationModel::class, 'user_id');
-}
+    }
+    public function approverGroups()
+    {
+    return $this->belongsToMany(\App\Models\ApproverGroup::class, 'approver_group_approver', 'approver_id', 'approver_group_id')
+                ->withPivot('sequence')
+                ->orderBy('pivot_sequence', 'asc');
+    }
+
 }
