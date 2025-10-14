@@ -53,7 +53,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Locator', href: locators.index.url() },
   { title: 'Create Permit', href: applications.create.url() },
 ]
-
+var buttonVisible = ref(true)
 const applicationTypes = [
   'Gate Clearance',
   'Bring In Clearance',
@@ -95,7 +95,21 @@ const handlePriceUpdated = (price: number) => {
 }
 
 const submit = () => {
-  form.post('/loctr/applications')
+  form.processing = true
+
+  form.post('/loctr/applications', {
+    onSuccess: () => {
+      // Permanently hide the button
+      buttonVisible.value = false
+    },
+    onError: () => {
+      // Keep the button visible so user can retry
+      buttonVisible.value = true
+    },
+    onFinish: () => {
+      form.processing = false
+    },
+  })
 }
 </script>
 
@@ -252,14 +266,11 @@ const submit = () => {
         </div>
 
         <!-- Submit -->
-        <div v-if="!props.form_number" class="pt-4 flex justify-center">
+        <div v-if="form.type && buttonVisible" class="pt-4 flex justify-center">
           <Button type="submit" class="px-5 py-2" :disabled="form.processing">
             {{ form.processing ? 'Saving...' : 'Apply' }}
           </Button>
         </div>
-        <Button disabled class="pt-4 flex px-2 py-2 justify-center">
-          Generate form for printing
-        </Button>
       </form>
     </div>
   </LocatorAppSidebarLayout>
