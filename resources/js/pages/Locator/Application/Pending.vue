@@ -5,6 +5,7 @@ import locators from '@/routes/locators'
 import applications from '@/routes/applications'
 import ApplicationTable from '@/components/common/ApplicationTable.vue'
 import TopCard from '@/components/common/TopCard.vue'
+import Approver from '@/components/locator/Approver.vue'
 
 const props = defineProps({
   applications: {
@@ -45,5 +46,6 @@ function handleDelete(app: any) {
       @edit="handleEdit"
       @delete="handleDelete"
     />
+    <Approver />
   </LocatorAppSidebarLayout>
 </template>
