@@ -3,6 +3,8 @@
 namespace App\Models\UserDetails;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+
 
 class UserDetail extends Model
 {
@@ -24,10 +26,17 @@ class UserDetail extends Model
         'division_id',
         'role_id',
         'permission_id',
-        'birth_date',
+        //'birth_date',
         'location_id',
         'sex',
+        'user_function_id',
+        //'phone',
         'created_at',
         'updated_at'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

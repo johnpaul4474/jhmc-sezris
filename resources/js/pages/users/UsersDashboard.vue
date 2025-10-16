@@ -3,9 +3,14 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { usersDashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
-import { ref, computed, reactive, onMounted } from 'vue';
+import { ref, computed, reactive, onMounted, watch } from 'vue';
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot } from '@headlessui/vue';
 import { useForm } from '@inertiajs/vue3'
+import { Toaster, toast } from 'vue-sonner'
+import 'vue-sonner/style.css'
+import { show } from '@/routes/two-factor';
+
+
 
 
 // --- Dropdown state ---
@@ -18,30 +23,14 @@ const props = defineProps({
     users: {
         type: Array,
         default: () => []
+    },
+    userFunctions: {
+        type: Array,
+        default: () => []
     }
 })
 
-//-- Toast -->
-const showToast = ref(false)
-const toastType = ref<'success' | 'error'>('success')
-const toastTitle = ref('')
-const toastMessage = ref('')
-const submitForm = async () => {
-  form.post('/users/addUser', {
-    onSuccess: () => {
-      toastType.value = 'success'
-      toastTitle.value = 'Success!'
-      toastMessage.value = 'User has been added successfully.'
-      showToast.value = true
-    },
-    onError: () => {
-      toastType.value = 'error'
-      toastTitle.value = 'Error'
-      toastMessage.value = 'Failed to create user. Please check inputs.'
-      showToast.value = true
-    },
-  })
-}
+
 
 const users = ref<any[]>(props.users || []); // Initialize users with props
 // --- User state ---
@@ -69,7 +58,10 @@ const newUser = reactive({
         barangay: "",
         street: "",
     },
+    user_function_id: "",
 });
+
+console.log(props.users);
 
 // --- Load dropdown data ---
 async function loadDepartments() {
@@ -95,7 +87,9 @@ function onDepartmentChange() {
     );
     divisions.value = selectedDept ? selectedDept.divisions : [];
     newUser.division_id = ""; // reset division when department changes
+    newUser.user_function_id = ""; // reset division when department changes
 }
+
 async function loadRolesAndPermissions() {
     const res = await fetch("/roles");
     const data = await res.json();
@@ -138,6 +132,7 @@ function sortBy(field: string) {
 // --- Modal state ---
 const showDetails = ref(false);
 const showAddUser = ref(false);
+
 const editableUser = reactive({
     id: null as number | null,
     employee_id: "",
@@ -152,16 +147,17 @@ const editableUser = reactive({
     roles: "",
     position: "",
     permission: "",
-    birth_date: "",
+    user_function_id: "",
+    //birth_date: "",
     sex: "",
-    phone: "",
-    address: {
-        street: "",
-        barangay: "",
-        municipality: "",
-        province: "",
-        region: "",
-    },
+    //phone: "",
+    // address: {
+    //     street: "",
+    //     barangay: "",
+    //     municipality: "",
+    //     province: "",
+    //     region: "",
+    // },
 });
 
 // function setEditableUser(user: any) {
@@ -187,32 +183,32 @@ function openUser(user: any) {
     Object.assign(editableUser, user)
 
     // Convert JSON string to object
-    if (typeof user.address === 'string') {
-        try {
-            editableUser.address = JSON.parse(user.address)
-        } catch (e) {
-            editableUser.address = {
-                street: "",
-                barangay: "",
-                municipality: "",
-                province: "",
-                region: ""
-            }
-        }
-    }
+    // if (typeof user.address === 'string') {
+    //     try {
+    //         editableUser.address = JSON.parse(user.address)
+    //     } catch (e) {
+    //         editableUser.address = {
+    //             street: "",
+    //             barangay: "",
+    //             municipality: "",
+    //             province: "",
+    //             region: ""
+    //         }
+    //     }
+    // }
     //console.log(editableUser);
     showDetails.value = true;
-    if (editableUser.address.region && editableUser.address.region !== "") {
-        loadProvinces(editableUser.address.region);
-    }
+    // if (editableUser.address.region && editableUser.address.region !== "") {
+    //     loadProvinces(editableUser.address.region);
+    // }
 
-    if (editableUser.address.province && editableUser.address.province !== "") {
-        loadMunicipalities(editableUser.address.province);
-    }
+    // if (editableUser.address.province && editableUser.address.province !== "") {
+    //     loadMunicipalities(editableUser.address.province);
+    // }
 
-    if (editableUser.address.municipality && editableUser.address.municipality !== "") {
-        loadBarangays(editableUser.address.municipality);
-    }
+    // if (editableUser.address.municipality && editableUser.address.municipality !== "") {
+    //     loadBarangays(editableUser.address.municipality);
+    // }
 }
 
 
@@ -240,33 +236,45 @@ const form = useForm({
     permission_id: '',
     position: '',
     status: '1',
-    birth_date: '',
+    user_function_id: '',
+    // birth_date: '',
     sex: '',
-    phone: '',
-    address: {
-        region: '',
-        province: '',
-        municipality: '',
-        barangay: '',
-        street: '',
-    },
+    // phone: '',
+    // address: {
+    //     region: '',
+    //     province: '',
+    //     municipality: '',
+    //     barangay: '',
+    //     street: '',
+    // },
 })
 
 // save function
 function addUser() {
     form.department_id = newUser.department_id;
     form.division_id = newUser.division_id;
-    form.post('/user/addUser', {
 
+    form.post('/user/addUser', {
         onSuccess: () => {
-            alert('✅ User saved successfully!')
+            toast.success('✅ User saved successfully!', {
+                class: 'text-lg px-6 py-4 w-[400px]',
+                duration: 1000, // 2 seconds before reload
+            });
+
+            // Wait a bit for toast to show before refreshing
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
         },
         onError: (errors) => {
-            console.error(errors)
-            alert('⚠️ Validation failed, check console.')
+            console.error(errors);
+            toast.error('⚠️ Validation failed. Please check your inputs.', {
+                class: 'text-lg px-6 py-4 w-[400px]'
+            });
         },
-    })
+    });
 }
+
 
 
 const currentPage = ref(1);
@@ -346,56 +354,73 @@ const barangays = ref<any[]>([]);
 
 // Fetch regions on load
 onMounted(async () => {
-    const res = await fetch("https://psgc.cloud/api/regions");
-    regions.value = await res.json();
+    //const res = await fetch("https://psgc.cloud/api/regions");
+    //regions.value = await res.json();
     await loadDepartments();
     await loadRoles();
     await loadPermissions();
-    console.log(editableUser.address)
+    //console.log(editableUser.address)
+    handleDepartmentChange();
+    console.log(form);
 
 
 });
 
 // When region changes → fetch provinces
-async function loadProvinces(regionCode: string) {
+// async function loadProvinces(regionCode: string) {
 
-    const regionObject = JSON.parse(regionCode);
-    console.log("Region code:", regionObject.code);
-    console.log("Region name:", regionObject.name);
-    newUser.address.province = "";
-    newUser.address.municipality = "";
-    newUser.address.barangay = "";
-    municipalities.value = [];
-    barangays.value = [];
+//     const regionObject = JSON.parse(regionCode);
+//     console.log("Region code:", regionObject.code);
+//     console.log("Region name:", regionObject.name);
+//     newUser.address.province = "";
+//     newUser.address.municipality = "";
+//     newUser.address.barangay = "";
+//     municipalities.value = [];
+//     barangays.value = [];
 
-    const res = await fetch(`https://psgc.cloud/api/regions/${regionObject.code}/provinces`);
-    provinces.value = await res.json();
-    console.log(provinces.value);
+//     const res = await fetch(`https://psgc.cloud/api/regions/${regionObject.code}/provinces`);
+//     provinces.value = await res.json();
+//     console.log(provinces.value);
+// }
+
+// // When province changes → fetch municipalities
+// async function loadMunicipalities(provinceCode: string) {
+//     const provinceObject = JSON.parse(provinceCode);
+//     newUser.address.municipality = "";
+//     newUser.address.barangay = "";
+//     barangays.value = [];
+
+//     const res = await fetch(`https://psgc.cloud/api/provinces/${provinceObject.code}/cities-municipalities`);
+//     municipalities.value = await res.json();
+//     console.log(municipalities.value);
+
+// }
+
+// // When municipality changes → fetch barangays
+// async function loadBarangays(muniCode: string) {
+//     const muniObject = JSON.parse(muniCode);
+//     newUser.address.barangay = "";
+//     const res = await fetch(`https://psgc.cloud/api/cities-municipalities/${muniObject.code}/barangays`);
+//     barangays.value = await res.json();
+//     console.log(barangays.value);
+// }
+
+
+const userFunctions = ref<any[]>(props.userFunctions || []);
+
+
+
+// Automatically set Division to “User Functions” when Department is 12 (Special Economic Zone)
+const handleDepartmentChange = () => {
+    if (editableUser.department == '12' || editableUser.department === 'Special Economic Zone') {
+        editableUser.division = 'User Functions';
+    }
+};
+
+const getFunctionName = (id: number | string) => {
+    const found = userFunctions.value.find(f => f.id === Number(id))
+    return found ? found.function : 'Unknown Function'
 }
-
-// When province changes → fetch municipalities
-async function loadMunicipalities(provinceCode: string) {
-    const provinceObject = JSON.parse(provinceCode);
-    newUser.address.municipality = "";
-    newUser.address.barangay = "";
-    barangays.value = [];
-
-    const res = await fetch(`https://psgc.cloud/api/provinces/${provinceObject.code}/cities-municipalities`);
-    municipalities.value = await res.json();
-    console.log(municipalities.value);
-
-}
-
-// When municipality changes → fetch barangays
-async function loadBarangays(muniCode: string) {
-    const muniObject = JSON.parse(muniCode);
-    newUser.address.barangay = "";
-    const res = await fetch(`https://psgc.cloud/api/cities-municipalities/${muniObject.code}/barangays`);
-    barangays.value = await res.json();
-    console.log(barangays.value);
-}
-
-
 </script>
 
 
@@ -408,6 +433,11 @@ async function loadBarangays(muniCode: string) {
             <div class="relative min-h-[100vh] flex-1 rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div class="flex items-center justify-between border-b px-6 py-4">
                     <h2 class="text-xl font-bold text-gray-800">👥 Users Dashboard</h2>
+
+
+                    <Toaster position="top-right" richColors /> <!-- ✅ enables color themes -->
+
+
                     <button @click="showAddUser = true"
                         class="flex items-center gap-2 rounded-md bg-[#0F75BC] px-4 py-2 text-white shadow hover:bg-blue-700 transition">
                         ➕ Add User
@@ -503,13 +533,13 @@ async function loadBarangays(muniCode: string) {
                 </div>
             </div>
 
-            
+
             <!-- User Details Modal (3-column layout) -->
             <TransitionRoot appear :show="showDetails" as="template">
                 <Dialog as="div" class="relative z-50" @close="showDetails = false">
                     <div class="fixed inset-0 bg-black/40" />
                     <div class="fixed inset-0 flex items-center justify-center p-4">
-                        <DialogPanel class="w-full max-w-6xl rounded-lg bg-white shadow-xl">
+                        <DialogPanel class="w-full max-w-5xl rounded-lg bg-white shadow-xl">
                             <!-- Header -->
                             <div class="flex items-center justify-between border-b px-6 py-4">
                                 <DialogTitle class="text-lg font-bold">✏️ Edit User</DialogTitle>
@@ -519,7 +549,8 @@ async function loadBarangays(muniCode: string) {
 
                             <!-- Form -->
                             <form v-if="editableUser" @submit.prevent="updateUser">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 text-sm">
+                                <!-- 2 Columns -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 text-sm">
                                     <!-- Column 1 -->
                                     <div class="space-y-3">
                                         <div>
@@ -556,15 +587,14 @@ async function loadBarangays(muniCode: string) {
                                             <label class="block font-medium">Sex</label>
                                             <select v-model="editableUser.sex"
                                                 class="w-full rounded-md border-gray-300 shadow-sm">
-                                                <option value="Male">Male</option>
-                                                <option value="Female">Female</option>
+                                                <option value="male">Male</option>
+                                                <option value="female">Female</option>
                                             </select>
                                         </div>
                                     </div>
 
                                     <!-- Column 2 -->
                                     <div class="space-y-3">
-                                        <!-- Status Dropdown -->
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">Status</label>
                                             <select v-model="editableUser.status"
@@ -572,116 +602,78 @@ async function loadBarangays(muniCode: string) {
                                                 <option :value="1">Active</option>
                                                 <option :value="0">Inactive</option>
                                             </select>
-
-                                            <!-- Default value preview -->
-                                            <!-- <span :class="editableUser.status == 1 ? 'text-green-600' : 'text-red-600'">
-                                                {{ editableUser.status == 1 ? 'Active' : 'Inactive' }}
-                                            </span> -->
                                         </div>
+
                                         <div>
                                             <label class="block font-medium">Department</label>
                                             <input v-model="editableUser.department" type="text"
+                                                @change="handleDepartmentChange"
                                                 class="w-full rounded-md border-gray-300 shadow-sm" />
                                         </div>
+
                                         <div>
                                             <label class="block font-medium">Division</label>
                                             <input v-model="editableUser.division" type="text"
                                                 class="w-full rounded-md border-gray-300 shadow-sm" />
                                         </div>
                                         <div>
+                                            <label class="block font-medium">User function</label>
+                                            
+                                            <select v-model="newUser.user_function_id"
+                                                class="w-full rounded-md border-gray-300 shadow-sm"
+                                                :disabled="Number(editableUser.department) == 12">
+                                                <!-- Show current function name from DB -->
+                                                <option disabled value="">
+                                                    {{
+                                                        editableUser.user_function_id
+                                                            ? getFunctionName(editableUser.user_function_id)
+                                                    : '-- Select User Function --'
+                                                    }}
+                                                </option>
+
+                                                <!-- Show full list if department is 12 -->
+                                                <option v-for="func in userFunctions" :key="func.id" :value="func.id">
+                                                    {{ func.function }}
+                                                </option>
+                                            </select>
+
+                                        </div>
+
+                                        <div>
                                             <label class="block font-medium">Position</label>
                                             <input v-model="editableUser.position" type="text"
                                                 class="w-full rounded-md border-gray-300 shadow-sm" />
                                         </div>
+
                                         <div>
                                             <label class="block font-medium">Role</label>
                                             <input v-model="editableUser.roles" type="text"
                                                 class="w-full rounded-md border-gray-300 shadow-sm" />
                                         </div>
+
                                         <div>
                                             <label class="block font-medium">Permission</label>
                                             <input v-model="editableUser.permission" type="text"
                                                 class="w-full rounded-md border-gray-300 shadow-sm" />
                                         </div>
-                                        <div>
-                                            <label class="block font-medium">Birth Date</label>
-                                            <input v-model="editableUser.birth_date" type="date"
-                                                class="w-full rounded-md border-gray-300 shadow-sm" />
-                                        </div>
 
-                                    </div>
+                                        <!-- Commented out: Birth Date -->
+                                        <!-- 
+              <div>
+                <label class="block font-medium">Birth Date</label>
+                <input v-model="editableUser.birth_date" type="date"
+                  class="w-full rounded-md border-gray-300 shadow-sm" />
+              </div>
+              -->
 
-                                    <!-- Column 3 -->
-                                    <div class="space-y-3">
-                                        <div>
-                                            <label class="block font-medium">Phone</label>
-                                            <input v-model="editableUser.phone" type="text"
-                                                class="w-full rounded-md border-gray-300 shadow-sm" />
-                                        </div>
-                                        <!-- Region -->
-                                        <div>
-                                            <label class="block font-medium">Region</label>
-                                            <select v-model="editableUser.address.region"
-                                                @change="loadProvinces(editableUser.address.region)"
-                                                class="w-full rounded-md border-gray-300 shadow-sm">
-                                                <!-- <option value="">{{editableUser.address.region}}</option> -->
-                                                <option v-for="region in regions" :key="region.code"
-                                                    :value="region.code">
-                                                    {{ region.name }}
-                                                </option>
-                                            </select>
-                                        </div>
-
-                                        <!-- Province -->
-                                        <div>
-                                            <label class="block font-medium">Province</label>
-                                            <select v-model="editableUser.address.province"
-                                                @change="loadMunicipalities(editableUser.address.province)"
-                                                class="w-full rounded-md border-gray-300 shadow-sm">
-                                                <option value="">Select Province</option>
-                                                <option v-for="prov in provinces" :key="prov.code" :value="prov.code">
-                                                    {{ prov.name }}
-                                                </option>
-                                            </select>
-                                        </div>
-
-                                        <!-- Municipality -->
-                                        <div>
-                                            <label class="block font-medium">Municipality</label>
-                                            <select v-model="editableUser.address.municipality"
-                                                @change="loadBarangays(editableUser.address.municipality)"
-                                                class="w-full rounded-md border-gray-300 shadow-sm">
-                                                <option value="">Select Municipality</option>
-                                                <option v-for="muni in municipalities" :key="muni.code"
-                                                    :value="muni.code">
-                                                    {{ muni.name }}
-                                                </option>
-                                            </select>
-                                        </div>
-
-                                        <!-- Barangay -->
-                                        <div>
-                                            <label class="block font-medium">Barangay</label>
-                                            <select v-model="editableUser.address.barangay"
-                                                class="w-full rounded-md border-gray-300 shadow-sm">
-                                                <option value="">Select Barangay</option>
-                                                <option v-for="brgy in barangays" :key="brgy.code" :value="brgy.code">
-                                                    {{ brgy.name }}
-                                                </option>
-                                            </select>
-                                        </div>
-
-
-
-                                        <div>
-                                            <label class="block font-medium">Street</label>
-                                            <input v-model="editableUser.address.street" type="text"
-                                                class="w-full rounded-md border-gray-300 shadow-sm" />
-                                        </div>
-
-
-
-
+                                        <!-- Commented out: Phone -->
+                                        <!-- 
+              <div>
+                <label class="block font-medium">Phone</label>
+                <input v-model="editableUser.phone" type="text"
+                  class="w-full rounded-md border-gray-300 shadow-sm" />
+              </div>
+              -->
                                     </div>
                                 </div>
 
@@ -713,7 +705,10 @@ async function loadBarangays(muniCode: string) {
                             <form @submit.prevent="addUser" class="grid grid-cols-3 gap-2">
 
                                 <!-- BASIC INFO -->
-                                <div class="col-span-3 font-medium text-gray-600 mb-1">Basic Information</div>
+                                <div class="col-span-3 font-medium text-gray-600 mb-1">Basic Information |
+                                    <span class="text-red-500">*</span> Required
+                                </div>
+
                                 <div>
                                     <label class="block text-xs text-gray-500">Employee ID <span
                                             class="text-red-500">*</span></label>
@@ -727,8 +722,9 @@ async function loadBarangays(muniCode: string) {
                                         class="w-full border px-2 py-1 rounded" />
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-gray-500">Status</label>
-                                    <select v-model="form.status" class="w-full border px-2 py-1 rounded">
+                                    <label class="block text-xs text-gray-500">Status <span
+                                            class="text-red-500">*</span></label>
+                                    <select v-model="form.status" class="w-full border px-2 py-1 rounded" required>
                                         <option disabled value="">Select</option>
                                         <option :value="1">Active</option>
                                         <option :value="0">Inactive</option>
@@ -752,14 +748,18 @@ async function loadBarangays(muniCode: string) {
                                     <label class="block text-xs text-gray-500">Suffix</label>
                                     <input v-model="form.suffix" class="w-full border px-2 py-1 rounded" />
                                 </div>
+                                <!-- <div>
+                                    <label class="block text-xs text-gray-500">Birth Date
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <input v-model="form.birth_date" type="date" class="w-full border px-2 py-1 rounded"
+                                        required />
+                                </div> -->
                                 <div>
-                                    <label class="block text-xs text-gray-500">Birth Date</label>
-                                    <input v-model="form.birth_date" type="date"
-                                        class="w-full border px-2 py-1 rounded" />
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-500">Sex</label>
-                                    <select v-model="form.sex" class="w-full border px-2 py-1 rounded">
+                                    <label class="block text-xs text-gray-500">Sex
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <select v-model="form.sex" class="w-full border px-2 py-1 rounded" required>
                                         <option disabled value="">Select</option>
                                         <option>Male</option>
                                         <option>Female</option>
@@ -769,15 +769,18 @@ async function loadBarangays(muniCode: string) {
                                 <!-- WORK DETAILS -->
                                 <div class="col-span-3 font-medium text-gray-600 mt-2 mb-1">Work Details</div>
                                 <div>
-                                    <label class="block text-xs text-gray-500">Position</label>
-                                    <input v-model="form.position" class="w-full border px-2 py-1 rounded" />
+                                    <label class="block text-xs text-gray-500">Position<span
+                                            class="text-red-500">*</span></label>
+                                    <input v-model="form.position" class="w-full border px-2 py-1 rounded" required />
                                 </div>
                                 <!-- Department Select -->
                                 <!-- Department Select -->
                                 <div>
-                                    <label class="block text-xs text-gray-500">Department</label>
+                                    <label class="block text-xs text-gray-500">Department
+                                        <span class="text-red-500">*</span>
+                                    </label>
                                     <select v-model="newUser.department_id" @change="onDepartmentChange"
-                                        class="border p-2 rounded w-full">
+                                        class="border p-2 rounded w-full" required>
                                         <option disabled value="">-- Select Department --</option>
                                         <option v-for="dept in departments" :key="dept.id" :value="dept.id">
                                             {{ dept.department_name }}
@@ -787,10 +790,12 @@ async function loadBarangays(muniCode: string) {
 
                                 <!-- Division Select (always visible, disabled if none) -->
                                 <div>
-                                    <label class="block text-xs text-gray-500">Division</label>
-                                    <select v-model="newUser.division_id" class="border p-2 rounded w-full bg-gray-100"
-                                        :disabled="!divisions.length">
-                                        <option disabled value="">
+                                    <label class="block text-xs text-gray-500">
+                                        Division
+                                    </label>
+                                    <!-- Otherwise show Division Dropdown -->
+                                    <select class="border p-2 rounded w-full bg-gray-100" :disabled="!divisions.length">
+                                        <option value="">
                                             {{ divisions.length ? '-- Select Division --' : 'No divisions available' }}
                                         </option>
                                         <option v-for="div in divisions" :key="div.id" :value="div.id">
@@ -799,33 +804,55 @@ async function loadBarangays(muniCode: string) {
                                     </select>
                                 </div>
 
+
                                 <div>
-                                    <label class="block text-xs text-gray-500">Role</label>
-                                    <select v-model="form.role_id" class="w-full border px-2 py-1 rounded">
+                                    <label class="block text-xs text-gray-500">Role
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <select v-model="form.role_id" class="w-full border px-2 py-1 rounded" required>
                                         <option value="">Select</option>
                                         <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}
                                         </option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-gray-500">Permission</label>
-                                    <select v-model="form.permission_id" class="w-full border px-2 py-1 rounded">
+                                    <label class="block text-xs text-gray-500">Permission
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <select v-model="form.permission_id" class="w-full border px-2 py-1 rounded"
+                                        required>
                                         <option value="">Select</option>
                                         <option v-for="perm in permissions" :key="perm.id" :value="perm.id">{{ perm.name
                                         }}</option>
                                     </select>
                                 </div>
                                 <div>
+                                    <label class="block text-xs text-gray-500">
+                                        User Function
+                                    </label>
+
+                                    <select v-model="newUser.user_function_id"
+                                        class="border p-2 rounded w-full bg-gray-100"
+                                        :disabled="Number(newUser.department_id) !== 12" required>
+                                        <option disabled value="">-- Select User Function --</option>
+                                        <option v-for="func in userFunctions" :key="func.id" :value="func.id">
+                                            {{ func.function }}
+                                        </option>
+                                    </select>
+
+                                </div>
+                                <!-- <div>
                                     <label class="block text-xs text-gray-500">Phone</label>
                                     <input v-model="form.phone" class="w-full border px-2 py-1 rounded" />
-                                </div>
+                                </div> -->
 
                                 <!-- ADDRESS -->
-                                <div class="col-span-3 font-medium text-gray-600 mt-2 mb-1">Address</div>
+                                <!-- <div class="col-span-3 font-medium text-gray-600 mt-2 mb-1">Address</div>
                                 <div>
-                                    <label class="block text-xs text-gray-500">Region</label>
+                                    <label class="block text-xs text-gray-500">Region <span
+                                            class="text-red-500">*</span></label>
                                     <select v-model="form.address.region" @change="loadProvinces(form.address.region)"
-                                        class="w-full border px-2 py-1 rounded">
+                                        class="w-full border px-2 py-1 rounded" required>
                                         <option value="">Select</option>
                                         <option v-for="r in regions" :key="r.code"
                                             :value="JSON.stringify({ code: r.code, name: r.name })">{{ r.name }}
@@ -833,10 +860,11 @@ async function loadBarangays(muniCode: string) {
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-gray-500">Province</label>
+                                    <label class="block text-xs text-gray-500">Province <span
+                                            class="text-red-500">*</span></label>
                                     <select v-model="form.address.province"
                                         @change="loadMunicipalities(form.address.province)"
-                                        class="w-full border px-2 py-1 rounded" :disabled="!provinces.length">
+                                        class="w-full border px-2 py-1 rounded" :disabled="!provinces.length" required>
                                         <option value="">Select</option>
                                         <option v-for="p in provinces" :key="p.code"
                                             :value="JSON.stringify({ code: p.code, name: p.name })">{{ p.name }}
@@ -844,10 +872,12 @@ async function loadBarangays(muniCode: string) {
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-gray-500">Municipality</label>
+                                    <label class="block text-xs text-gray-500">Municipality <span
+                                            class="text-red-500">*</span></label>
                                     <select v-model="form.address.municipality"
                                         @change="loadBarangays(form.address.municipality)"
-                                        class="w-full border px-2 py-1 rounded" :disabled="!municipalities.length">
+                                        class="w-full border px-2 py-1 rounded" :disabled="!municipalities.length"
+                                        required>
                                         <option value="">Select</option>
                                         <option v-for="m in municipalities" :key="m.code"
                                             :value="JSON.stringify({ code: m.code, name: m.name })">{{ m.name }}
@@ -855,9 +885,10 @@ async function loadBarangays(muniCode: string) {
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-gray-500">Barangay</label>
+                                    <label class="block text-xs text-gray-500">Barangay <span
+                                            class="text-red-500">*</span></label>
                                     <select v-model="form.address.barangay" class="w-full border px-2 py-1 rounded"
-                                        :disabled="!barangays.length">
+                                        :disabled="!barangays.length" required>">
                                         <option value="">Select</option>
                                         <option v-for="b in barangays" :key="b.code"
                                             :value="JSON.stringify({ code: b.code, name: b.name })">{{ b.name }}
@@ -867,14 +898,18 @@ async function loadBarangays(muniCode: string) {
                                 <div class="col-span-2">
                                     <label class="block text-xs text-gray-500">Street</label>
                                     <input v-model="form.address.street" class="w-full border px-2 py-1 rounded" />
-                                </div>
+                                </div> -->
 
                                 <!-- ACTION BUTTONS -->
                                 <div class="col-span-3 flex justify-end mt-3">
                                     <button type="button" @click="showAddUser = false"
                                         class="px-3 py-1 bg-gray-300 rounded-md mr-2 text-sm">Cancel</button>
-                                    <button type="submit"
-                                        class="px-3 py-1 bg-[#0F75BC] text-white rounded-md text-sm">Save</button>
+                                    <!-- <button type="submit"
+                                        class="px-3 py-1 bg-[#0F75BC] text-white rounded-md text-sm">Save</button> -->
+                                    <button type="button" @click="addUser"
+                                        class="px-3 py-1 bg-[#0F75BC] text-white rounded-md text-sm">
+                                        Save
+                                    </button>
                                 </div>
 
                             </form>

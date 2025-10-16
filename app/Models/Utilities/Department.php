@@ -18,4 +18,8 @@ class Department extends Model
     {
         return $this->hasMany(Division::class,'department_id');
     }
+     public function userFunctions()
+    {
+        return $this->hasMany(UserFunction::class,'department_id');
+    }
 }
