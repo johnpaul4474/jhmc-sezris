@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { type BreadcrumbItem } from '@/types';
-import { isTemplateExpression } from 'typescript';
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
@@ -20,12 +19,6 @@ const breadcrumbItems: BreadcrumbItem[] = [
         href: edit().url,
     },
 ];
-
-const props = defineProps<{
-    tempPassword?: string
-}>();
-
-
 
 const passwordInput = ref<HTMLInputElement | null>(null);
 const currentPasswordInput = ref<HTMLInputElement | null>(null);
@@ -59,7 +52,6 @@ const currentPasswordInput = ref<HTMLInputElement | null>(null);
                     <div class="grid gap-2">
                         <Label for="current_password">Current password</Label>
                         <Input
-                            
                             id="current_password"
                             ref="currentPasswordInput"
                             name="current_password"
@@ -67,8 +59,6 @@ const currentPasswordInput = ref<HTMLInputElement | null>(null);
                             class="mt-1 block w-full"
                             autocomplete="current-password"
                             placeholder="Current password"
-                            :modelValue="props.tempPassword"
-                            
                         />
                         <InputError :message="errors.current_password" />
                     </div>

@@ -19,14 +19,5 @@ class DatabaseSeeder extends Seeder
         $this->call(ApplicationOptionsSeeder::class);
         $this->call(HolidaySeeder::class);
         
-        // User::factory(10)->create();
-
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-        //$this->call(DepartmentsTableSeeder::class);
-        //$this->call(RolesTableSeeder::class);
-        $this->call(UserFunctionSeeder::class);
     }
 }
