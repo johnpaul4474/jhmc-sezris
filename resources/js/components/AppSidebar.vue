@@ -19,6 +19,26 @@ import AppLogo from './AppLogo.vue';
 import { usePage } from '@inertiajs/vue3'
 import type { PageProps } from '@inertiajs/core'
 
+const mainNavItems: NavItem[] = [
+    {
+        title: 'Dashboard',
+        href: dashboard(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Users',
+        href: usersDashboard(),
+        icon: SquareUserRound,
+    },{
+        title: 'SEZAD Account',
+        href: sezadDashboard(),
+        icon: LayoutGrid,
+    },{
+        title: 'BDD Account',
+        href: bddDashboard(),
+        icon: LayoutGrid,
+    },
+];
 interface UserDetails {
   permission_id: number
   role_id: number

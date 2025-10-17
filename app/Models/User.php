@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use App\Models\Locator\ApplicationModel;
 use App\Models\UserDetails\UserDetail;
 use App\Models\UserDetails\Department;
 use App\Models\UserDetails\Division;
@@ -55,6 +56,17 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function applications()
+    {
+    return $this->hasMany(ApplicationModel::class, 'user_id');
+    }
+    public function approverGroups()
+    {
+    return $this->belongsToMany(\App\Models\ApproverGroup::class, 'approver_group_approver', 'approver_id', 'approver_group_id')
+                ->withPivot('sequence')
+                ->orderBy('pivot_sequence', 'asc');
+    }
+
 
     public function details()
     {
