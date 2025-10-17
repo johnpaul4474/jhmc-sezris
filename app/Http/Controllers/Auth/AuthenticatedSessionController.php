@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Fortify\Features;
+use Illuminate\Support\Facades\DB;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -31,7 +32,11 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $user = $request->validateCredentials();
-
+        $user_details = DB::table('user_details')
+            ->where('user_id', $user->id)
+            ->first();
+        $request->session()->put('user_details', $user_details);    
+        
         if (Features::enabled(Features::twoFactorAuthentication()) && $user->hasEnabledTwoFactorAuthentication()) {
             $request->session()->put([
                 'login.id' => $user->getKey(),
@@ -44,8 +49,23 @@ class AuthenticatedSessionController extends Controller
         Auth::login($user, $request->boolean('remember'));
 
         $request->session()->regenerate();
-
-        return redirect()->intended(route('dashboard', absolute: false));
+        if($user_details && $user_details->department_id == 9
+                && $user_details->division_id == 3
+                && $user_details->role_id == 1
+                && $user_details->permission_id == 1)
+        {
+            return redirect()->intended(route('dashboard', absolute: false));
+            
+        }else if($user_details && $user_details->department_id == 12
+                && $user_details->division_id == null
+                && $user_details->role_id == 2
+                && $user_details->permission_id == 2)
+        {
+            return redirect()->intended('/sezad');
+        }else {
+            return redirect()->intended(route('bddDashboard', absolute: false));
+        }
+        
     }
 
     /**
