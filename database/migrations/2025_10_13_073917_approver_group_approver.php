@@ -29,7 +29,7 @@ return new class extends Migration
 
             // To determine the order of approval (1 = first approver, 2 = second approver, etc.)
             $table->integer('sequence')->default(1);
-
+            
             // Optional: status or role of the approver in the group
             $table->string('role')->nullable(); // e.g. 'Primary', 'Backup', 'Final'
 

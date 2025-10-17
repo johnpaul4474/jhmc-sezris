@@ -3,10 +3,11 @@ use App\Http\Controllers\Locator\LocatorController;
 use App\Http\Controllers\Locator\ApplicationController;
 use App\Http\Controllers\Locator\ArticleDetailController;
 use App\Http\Controllers\Locator\UploadController;
+use App\Http\Controllers\Locator\ApplicationForApprovalController;
 
 
 Route::get('/locator', [LocatorController::class, 'index'])->name('locators.index');
-
+Route::resource('approval', ApplicationForApprovalController::class);
 Route::group(['prefix' => 'loctr', 'middleware' => 'auth'], function () {
     //route for pending view
     Route::get('applications/pending', [LocatorController::class, 'pendingList'])->name('applications.pending');

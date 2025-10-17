@@ -1,22 +1,21 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue'
 import { useForm } from '@inertiajs/vue3'
-import locators from '@/routes/locators'
-import applications from '@/routes/applications'
+
 import LocatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue'
 import DynamicFormRepeater from '@/components/locator/DynamicFormRepeater.vue'
 import ApplicationOptionSelect from '@/components/locator/ApplicationOptionSelect.vue'
 import UploadAttachment from '@/components/locator/UploadAttachment.vue'
 import Alert from '@/components/locator/Alert.vue'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import TopCard from '@/components/common/TopCard.vue'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
+
+import locators from '@/routes/locators'
+import applications from '@/routes/applications'
 import { type BreadcrumbItem } from '@/types'
 
+// 🧭 Props
 const props = defineProps({
   user: Object,
   application_form_id: [String, Number],
@@ -29,12 +28,47 @@ const props = defineProps({
   form_title: [String],
   start_date: [String],
   price: [String, Number],
+  form: { type: Object, default: () => null },
+  forms: { type: Array, default: () => [] },
+  approverGroupId: [String, Number],
 })
 
-const articles = ref([])
-const uploadedFiles = ref([])
+// 📌 State
+const articles = ref<any[]>([])
+const uploadedFiles = ref<any[]>([])
 const localPrice = ref(props.price ?? null)
+const buttonVisible = ref(true)
+const approverGroupId = ref(props.approverGroupId)
+const applicationId = ref(props.application_form_id)
 
+// 📌 Forms
+const createForm = useForm({
+  user_id: props.user?.id,
+  type: props.form?.name ?? '',
+  description: '',
+  application_category_option_id: '',
+})
+
+const approvalForm = useForm({
+  application_id: props.application_form_id,
+  approver_group_id: approverGroupId.value,
+  status: 'pending',
+})
+
+// 🧠 Computed
+const selectedDeclaredValue = computed(() => {
+  if (!props.options || !createForm.application_category_option_id) return null
+  return props.options.find(
+    opt => Number(opt.id) === Number(createForm.application_category_option_id)
+  )
+})
+
+const breadcrumbs: BreadcrumbItem[] = [
+  { title: 'Locator', href: locators.index.url() },
+  { title: 'Create Permit', href: applications.create.url() },
+]
+
+// 👂 Watchers
 watch(
   () => props.articleDetail,
   (newVal) => {
@@ -42,37 +76,18 @@ watch(
   }
 )
 
-const form = useForm({
-  user_id: props.user?.id,
-  type: '',
-  description: '',
-  application_category_option_id: '',
+// 🧭 Lifecycle
+onMounted(() => {
+  applicationId.value = props.application_form_id
+  approvalForm.application_id = props.application_form_id
+  fetchUploads()
 })
 
-const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Locator', href: locators.index.url() },
-  { title: 'Create Permit', href: applications.create.url() },
-]
-var buttonVisible = ref(true)
-const applicationTypes = [
-  'Gate Clearance',
-  'Bring In Clearance',
-  'Bring Out Clearance',
-  'Temporary Bring Out Clearance',
-  'Local Purchase',
-]
-
-const selectedDeclaredValue = computed(() => {
-  if (!props.options || !form.application_category_option_id) return null
-  return props.options.find(
-    (opt) => Number(opt.id) === Number(form.application_category_option_id)
-  )
-})
-
-const fetchUploads = async () => {
-  if (!props.application_form_id) return
+// 🌐 Fetch Uploads
+async function fetchUploads() {
+  if (!applicationId.value) return
   try {
-    const res = await fetch(`/loctr/uploads?application_form_id=${props.application_form_id}`)
+    const res = await fetch(`/loctr/uploads?application_form_id=${applicationId.value}`)
     const data = await res.json()
     uploadedFiles.value = data.uploads
   } catch (err) {
@@ -80,157 +95,140 @@ const fetchUploads = async () => {
   }
 }
 
-onMounted(fetchUploads)
-
-const onUploaded = (res: any) => {
+// 📤 Upload Handlers
+function onUploaded(res: any) {
   uploadedFiles.value.push(...res.files)
 }
 
-const onUploadError = (err: any) => {
+function onUploadError(err: any) {
   console.error('Upload error:', err)
 }
 
-const handlePriceUpdated = (price: number) => {
+// 💰 Price
+function handlePriceUpdated(price: number) {
   localPrice.value = price
 }
 
-const submit = () => {
-  form.processing = true
-
-  form.post('/loctr/applications', {
-    onSuccess: () => {
-      // Permanently hide the button
-      buttonVisible.value = false
-    },
-    onError: () => {
-      // Keep the button visible so user can retry
-      buttonVisible.value = true
-    },
-    onFinish: () => {
-      form.processing = false
-    },
+// 📝 Form submission
+function submit() {
+  createForm.post('/loctr/applications', {
+    onStart: () => { createForm.processing = true },
+    onSuccess: () => { buttonVisible.value = false },
+    onError: () => { buttonVisible.value = true },
+    onFinish: () => { createForm.processing = false },
   })
+}
+
+// 🚀 Submit for Approval
+function handleApply(applicationId: string | number) {
+  approvalForm.application_id = applicationId
+  approvalForm.post('/approval', {
+    onSuccess: () => console.log('✅ Application sent for approval'),
+    onError: (errors) => console.error('❌ Approval failed', errors),
+  })
+}
+
+// 📑 Form Type Selection
+function selectForm(f: any) {
+  createForm.type = f.name
 }
 </script>
 
 <template>
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
-    <div
-      class="p-6 w-full mx-6 bg-white shadow-xl rounded-xl border border-gray-100
-             dark:bg-gray-900 dark:border-gray-700"
-    >
-      <h1
-        class="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-2
-               dark:text-gray-100 dark:border-gray-700"
-      >
+    <TopCard/>
+    <div class="p-6 w-full mx-6 bg-white shadow-xl rounded-xl border border-gray-100 dark:bg-gray-900 dark:border-gray-700">
+
+      <!-- 🏷 Title -->
+      <h1 class="text-3xl font-extrabold mb-6 border-b pb-2 text-gray-900 dark:text-gray-100 dark:border-gray-700">
         {{ props.form_title ? `Applying for ${props.form_title}` : 'Create New Application' }}
       </h1>
 
       <!-- Alerts & Info -->
       <div v-if="props.application_form_id" class="text-right space-y-1 mb-4">
-        <Alert
-          message="You can now choose your Declared value and Validity Period"
-          type="success"
-          :duration="10000"
-        />
-        <div v-if="selectedDeclaredValue">
-          <Alert
-            message="You can now Upload/ Attach Supporting Documents"
-            type="info"
-            :duration="10000"
-          />
-        </div>
-        <div v-if="uploadedFiles.length > 0">
-          <Alert
-            message="You have attached Supporting Documents. You can now add Article Details."
-            type="success"
-            :duration="10000"
-          />
-        </div>
+        <Alert message="You can now choose your Declared value and Validity Period" type="success" :duration="10000"/>
+        <Alert v-if="selectedDeclaredValue" message="You can now Upload Supporting Documents" type="info" :duration="10000"/>
+        <Alert v-if="uploadedFiles.length" message="You can now add Article Details." type="success" :duration="10000"/>
 
-        <p v-if="props.form_number" class="text-sm text-gray-500 dark:text-gray-400">
+        <p v-if="props.form_number" class="text-sm text-gray-500">
           <b>Form Number:</b> {{ props.form_number }}
         </p>
-        <p v-if="props.control_number" class="text-sm text-gray-500 dark:text-gray-400">
+        <p v-if="props.control_number" class="text-sm text-gray-500">
           <b>Control Number:</b> {{ props.control_number }}
         </p>
-        <p v-if="selectedDeclaredValue" class="text-sm text-gray-500 dark:text-gray-400 leading-5">
+        <p v-if="selectedDeclaredValue" class="text-sm text-gray-500 leading-5">
           <b>Declared Value:</b> {{ selectedDeclaredValue.name || selectedDeclaredValue.value }}<br>
-          <b>Validity:</b> {{ selectedDeclaredValue?.validity }}
+          <b>Validity:</b> {{ selectedDeclaredValue.validity }}
         </p>
-        <p v-if="localPrice" class="text-sm text-gray-500 dark:text-gray-400">
-          <b>Amount:</b> ₱{{ price }}
+        <p v-if="localPrice" class="text-sm text-gray-500">
+          <b>Amount:</b> ₱{{ localPrice }}
         </p>
-        <p v-if="props.start_date" class="text-sm text-gray-500 dark:text-gray-400">
-          <b>Started Date:</b> {{ new Date(props.start_date).toLocaleDateString() }}
+        <p v-if="props.start_date" class="text-sm text-gray-500">
+          <b>Start Date:</b> {{ new Date(props.start_date).toLocaleDateString() }}
         </p>
-        <p v-if="props.expired_at" class="text-sm text-gray-500 dark:text-gray-400">
-          <b>Expires on:</b> {{ new Date(props.expired_at).toLocaleDateString() }}
+        <p v-if="props.expired_at" class="text-sm text-gray-500">
+          <b>Expires On:</b> {{ new Date(props.expired_at).toLocaleDateString() }}
         </p>
       </div>
-
+<div v-if="props.application_form_id" class="mt-8">
+          <DynamicFormRepeater
+            :formId="props.application_form_id"
+            v-model="articles"
+            :title="`Article Details for Order # ${props.application_form_id}`"
+          />
+        </div>
+      <!-- 📝 Create Form -->
       <form @submit.prevent="submit" class="space-y-6">
-        <!-- Application Creator -->
+
+        <!-- Creator -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Application Creator
-          </label>
-          <span class="text-gray-900 dark:text-gray-100">{{ props.user?.name }}</span>
+          <label class="block text-sm font-medium mb-1">Application Creator</label>
+          <span>{{ props.user?.name }}</span>
         </div>
 
         <!-- Application Type -->
         <div v-if="!props.form_title">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Application Type
-          </label>
+          <label class="block text-sm font-medium mb-1">Application Type</label>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <Button
-                variant="ghost"
-                class="w-full justify-between text-gray-800 bg-transparent hover:bg-gray-100
-                       focus:outline-none focus:ring-0
-                       dark:text-gray-100 dark:hover:bg-gray-800"
-              >
-                <span>{{ form.type || '-- Select an application type --' }}</span>
+              <Button variant="ghost" class="w-full justify-between">
+                <span>{{ createForm.type || '-- Select application type --' }}</span>
                 <svg class="ml-2 h-4 w-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent class="w-full bg-white dark:bg-gray-800 border dark:border-gray-700">
+            <DropdownMenuContent class="w-full">
               <DropdownMenuItem
-                v-for="type in applicationTypes"
-                :key="type"
-                @click="form.type = type"
-                class="cursor-pointer text-sm px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-100"
+                v-for="f in props.form"
+                :key="f.id"
+                @click="selectForm(f)"
               >
-                {{ type }}
+                {{ f.name }}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <div v-if="form.errors.type" class="text-red-500 text-sm mt-1">
-            {{ form.errors.type }}
+          <div v-if="createForm.errors.type" class="text-red-500 text-sm mt-1">
+            {{ createForm.errors.type }}
           </div>
         </div>
 
-        <!-- Declared Value & Validity -->
+        <!-- Declared Value -->
         <div v-if="props.application_form_id">
           <ApplicationOptionSelect
-            v-model="form.application_category_option_id"
+            v-model="createForm.application_category_option_id"
             :options="props.options"
             :application-id="props.application_form_id"
             @price-updated="handlePriceUpdated"
           />
         </div>
-        <div v-if="form.errors.application_category_option_id" class="text-red-500 text-sm mt-1">
-          {{ form.errors.application_category_option_id }}
+        <div v-if="createForm.errors.application_category_option_id" class="text-red-500 text-sm mt-1">
+          {{ createForm.errors.application_category_option_id }}
         </div>
 
         <!-- Upload Attachments -->
-        <div v-if="props.expired_at" class="space-y-4">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Upload Attachments
-          </label>
+        <div v-if="props.application_form_id && props.expired_at" class="space-y-4">
+          <label class="block text-sm font-medium mb-1">Upload Attachments</label>
           <UploadAttachment
             :application-form-id="props.application_form_id"
             upload-url="/loctr/uploads"
@@ -240,38 +238,35 @@ const submit = () => {
             @error="onUploadError"
           />
           <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-            <div
-              v-for="file in uploadedFiles"
-              :key="file.id"
-              class="rounded p-2 bg-gray-50 dark:bg-gray-800"
-            >
-              <a
-                :href="file.url"
-                target="_blank"
-                class="text-blue-600 hover:underline dark:text-blue-400"
-              >
+            <div v-for="file in uploadedFiles" :key="file.id" class="rounded p-2 bg-gray-50 dark:bg-gray-800">
+              <a :href="file.url" target="_blank" class="text-blue-600 hover:underline">
                 {{ file.file_name }}
               </a>
             </div>
           </div>
         </div>
 
-        <!-- Dynamic Repeater -->
-        <div v-if="props.application_form_id" class="mt-8">
-          <DynamicFormRepeater
-            :formId="props.application_form_id"
-            v-model="articles"
-            :title="`Article Details for Order # ${props.application_form_id}`"
-          />
-        </div>
+        <!-- Article Details -->
+        
 
-        <!-- Submit -->
-        <div v-if="form.type && buttonVisible" class="pt-4 flex justify-center">
-          <Button type="submit" class="px-5 py-2" :disabled="form.processing">
-            {{ form.processing ? 'Saving...' : 'Apply' }}
+        <!-- Action Buttons -->
+        <div class="pt-4 flex justify-center space-x-4">
+          <Button v-if="buttonVisible" type="submit" class="px-5 py-2 bg-gray-200 hover:bg-gray-300">
+            Generate Form-ID
+          </Button>
+
+          <Button
+            v-else
+            type="button"
+            class="px-5 py-2 bg-blue-500 text-white hover:bg-blue-600"
+            @click="handleApply(props.application_form_id)"
+            :disabled="createForm.processing"
+          >
+            {{ createForm.processing ? 'Saving...' : 'Submit for Approval' }}
           </Button>
         </div>
       </form>
+      
     </div>
   </LocatorAppSidebarLayout>
 </template>

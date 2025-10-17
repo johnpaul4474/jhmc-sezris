@@ -58,14 +58,14 @@ $application->form_number = $formNumber;
     }
     public function articleDetails()
     {
-        return $this->hasMany(\App\Models\Locator\ArticleDetail::class, 'application_form_id');
+        return $this->hasMany(\App\Models\Locator\ArticleDetail::class, 'application_form_id','id');
     }
     public function uploads()
     {
-    return $this->hasMany(\App\Models\Locator\Upload::class, 'application_form_id');
+    return $this->hasMany(\App\Models\Locator\Upload::class, 'application_form_id','id');
     }
     public function selections()
     {
-    return $this->hasMany(\App\Models\Locator\UserApplicationSelection::class, 'application_id');
+    return $this->hasMany(\App\Models\Locator\UserApplicationSelection::class, 'application_id','id');
     }
 }

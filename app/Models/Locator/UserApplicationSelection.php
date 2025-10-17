@@ -17,6 +17,7 @@ class UserApplicationSelection extends Model
         'application_id',
         'option_id',
         'Expired_at',
+        'amount',
         'status', // e.g., pending, approved, rejected
     ];
 

@@ -73,7 +73,7 @@ class UploadController extends Controller
 
             $savedFiles[] = $upload;
         }
-
+        
         return response()->json([
             'message' => 'File(s) uploaded successfully',
             'files' => $savedFiles,
