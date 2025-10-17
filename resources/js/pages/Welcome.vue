@@ -44,6 +44,8 @@ import { Head, Link } from '@inertiajs/vue3';
           >
             Log in
           </Link>
+          <!-- Uncomment if you want register button too
+          <Link
           <!-- Uncomment if you want register button too -->
           <!-- <Link
             :href="register()"
