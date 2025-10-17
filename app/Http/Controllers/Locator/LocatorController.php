@@ -14,10 +14,13 @@ class LocatorController extends Controller
 {
     public function index(){
         $applications = auth()->user()->applications;
+        if($applications){
         return Inertia::render('Locator/Index', [
             'applications' => $applications,
         ]);
-       
+    }else{
+        return Inertia::render('Locator/Index', []);
+    }
     }
     public function show($id){
        return $id;

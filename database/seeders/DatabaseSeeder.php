@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
     
-        //$this->call(Approver_Group_Seeder::class);
+        $this->call(Approver_Group_Seeder::class);
         $this->call(FormSeeder::class);
         $this->call(ApplicationOptionsSeeder::class);
         $this->call(HolidaySeeder::class);
