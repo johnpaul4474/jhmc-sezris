@@ -52,6 +52,7 @@ const createForm = useForm({
 const approvalForm = useForm({
   application_id: props.application_form_id,
   approver_group_id: approverGroupId.value,
+  form_number: props.form_number,
   status: 'pending',
 })
 
@@ -120,8 +121,9 @@ function submit() {
 }
 
 // 🚀 Submit for Approval
-function handleApply(applicationId: string | number) {
+function handleApply(applicationId: string | number,form_number:string| number) {
   approvalForm.application_id = applicationId
+  approvalForm.form_number = form_number
   approvalForm.post('/approval', {
     onSuccess: () => console.log('✅ Application sent for approval'),
     onError: (errors) => console.error('❌ Approval failed', errors),
@@ -259,7 +261,7 @@ function selectForm(f: any) {
             v-else
             type="button"
             class="px-5 py-2 bg-blue-500 text-white hover:bg-blue-600"
-            @click="handleApply(props.application_form_id)"
+            @click="handleApply(props.application_form_id, props.form_number)"
             :disabled="createForm.processing"
           >
             {{ createForm.processing ? 'Saving...' : 'Submit for Approval' }}

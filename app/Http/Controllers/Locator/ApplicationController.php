@@ -13,6 +13,8 @@ use App\Helpers\PermitHelper;
 use App\Models\User;
 use App\Models\Locator\Form;
 use App\Models\ApproverGroup;
+use App\Models\Locator\ApplicationForApproval;
+ 
 
 
 class ApplicationController extends Controller
@@ -104,14 +106,20 @@ class ApplicationController extends Controller
      * Display the specified resource.
      */
     public function show(int $id)
-    {    
-        $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
-    ->findOrFail($id);
-        
-        return Inertia::render('Locator/Application/Show', [
-            'application' => $application,
-        ]);
-    }
+{
+    $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
+        ->findOrFail($id);
+
+    $approvers = ApplicationForApproval::with('approverGroup.approvers')
+        ->where('form_number', $application->form_number)
+        ->first();
+
+    return Inertia::render('Locator/Application/Show', [
+        'application' => $application,
+        'approverGroup' => $approvers?->approverGroup,               // match Vue prop name
+        'approvers' => $approvers?->approverGroup?->approvers ?? [], // safe chaining
+    ]);
+}
 
     /**
      * Show the form for editing the specified resource.

@@ -24,6 +24,13 @@ Route::group(['prefix' => 'loctr', 'middleware' => 'auth'], function () {
     ->name('applications.option-selection');
 });
 
+//routes for application approve and return
+Route::post('application-for-approval/{id}/approvers/{approverId}/approve', [ApplicationForApprovalController::class, 'approve'])
+    ->name('application-for-approval.approve');
+
+Route::post('application-for-approval/{id}/approvers/{approverId}/return', [ApplicationForApprovalController::class, 'returnApproval'])
+    ->name('application-for-approval.return');
+Route::get('/my', [LocatorController::class, 'myApprovals'])->name('myApprovals');
 
 // routes/web.php
 

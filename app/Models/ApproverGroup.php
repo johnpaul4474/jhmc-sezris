@@ -19,9 +19,9 @@ class ApproverGroup extends Model
      * Relationship: Group has many approvers (many-to-many).
      */
     public function approvers()
-    {
-        return $this->belongsToMany(User::class, 'approver_group_approver', 'approver_group_id', 'approver_id')
-                    ->withPivot('sequence')
-                    ->orderBy('pivot_sequence', 'asc');
-    }
+{
+    return $this->belongsToMany(User::class, 'approver_group_approver', 'approver_group_id', 'approver_id')
+                ->withPivot('role', 'sequence', 'status', 'acted_at')
+                ->orderBy('pivot_sequence', 'asc');
+}
 }
