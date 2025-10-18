@@ -18,10 +18,10 @@ class LocatorController extends Controller
         if($applications){
             return Inertia::render('Locator/Index', [
                 'applications' => $applications,
-        ]);
-    }else{
-        return Inertia::render('Locator/Index',[]);
-    }
+                    ]);
+        }else{
+            return Inertia::render('Locator/Index',[]);
+        }
        
     }
     public function show($id){
