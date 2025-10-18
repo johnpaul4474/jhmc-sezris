@@ -15,8 +15,8 @@ class Approver_Group_seeder extends Seeder
     {
         DB::table('approver_groups')->insert([
             'id' => 1,
-            'name' => 'Default Approval Group',
-            'description' => 'Default group for testing and forms seeding',
+            'name' => 'Sezad',
+            'description' => 'Special Economic Zone Administration Department',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
