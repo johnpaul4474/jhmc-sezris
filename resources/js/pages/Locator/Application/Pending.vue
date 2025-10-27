@@ -5,7 +5,7 @@ import locators from '@/routes/locators'
 import applications from '@/routes/applications'
 import ApplicationTable from '@/components/common/ApplicationTable.vue'
 import TopCard from '@/components/common/TopCard.vue'
-import Approver from '@/components/locator/Approver.vue'
+//import Approver from '@/components/locator/Approver.vue'
 
 const props = defineProps({
   applications: {

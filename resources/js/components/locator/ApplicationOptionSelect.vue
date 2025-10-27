@@ -49,12 +49,12 @@ const handleSelect = (option: any) => {
     <DropdownMenuTrigger as-child>
       <button
         type="button"
-        class="w-[4/12] text-left px-3 py-1 bg-gray-100 border border-gray-400 rounded
+        class="w-[6/12] text-left px-3 py-1 bg-gray-100 border border-gray-400 rounded
                focus:outline-none focus:ring-1 focus:ring-gray-300
                dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:focus:ring-gray-500"
       >
         <span v-if="selectedOption">{{ selectedOption.name }}</span>
-        <span v-else class="text-gray-600 italic dark:text-gray-400">-- Select option --</span>
+        <span v-else class="text-gray-600 italic dark:text-gray-400">-- Select Declared Value and Validity option --</span>
       </button>
     </DropdownMenuTrigger>
 

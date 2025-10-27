@@ -195,8 +195,8 @@ function selectForm(f: any) {
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <Button variant="ghost" class="w-full justify-between">
-                <span>{{ createForm.type || '-- Select application type --' }}</span>
-                <svg class="ml-2 h-4 w-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span>{{ createForm.type || '-- Select Application Type --' }}</span>
+                <svg class="ml-2 h-4 w-6 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </Button>
@@ -262,7 +262,7 @@ function selectForm(f: any) {
             v-else
             type="button"
             class="px-5 py-2 bg-blue-500 text-white hover:bg-blue-600"
-            @click="handleApply(props.application_form_id, props.form_number,)"
+            @click="handleApply(props.application_form_id, props.form_number)"
             :disabled="createForm.processing"
           >
             {{ createForm.processing ? 'Saving...' : 'Submit for Approval' }}

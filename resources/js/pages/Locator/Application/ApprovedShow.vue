@@ -183,12 +183,12 @@ return date
           </td>
           <td class="px-3 py-2">
             <a
-              :href="props.applications.uploads[0].file_path ?? '#'"
-              target="_blank"
-              class="text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              Open
-            </a>
+  :href="`${$page.props.appUrl}/storage/${props.applications.uploads[0]?.file_path ?? '#'}`"
+  target="_blank"
+  class="text-blue-600 dark:text-blue-400 hover:underline"
+>
+  Open
+</a>
           </td>
         </tr>
 
