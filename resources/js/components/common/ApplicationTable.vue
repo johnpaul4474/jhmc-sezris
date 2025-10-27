@@ -22,7 +22,7 @@ const emit = defineEmits(['view', 'edit', 'delete'])
         <tr>
           <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">#</th>
           <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Form Title</th>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Control Number</th>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Form Number</th>
           <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Form Number</th>
           <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Status</th>
           <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 text-center">Actions</th>
@@ -40,7 +40,7 @@ const emit = defineEmits(['view', 'edit', 'delete'])
         >
           <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{{ index + 1 }}</td>
           <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-100">{{ app.form_title }}</td>
-          <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{{ app.control_number ?? 'N/A' }}</td>
+          <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{{ app.form_number ?? 'N/A' }}</td>
           <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{{ app.form_number ?? '—' }}</td>
           <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 capitalize">{{ app.status ?? 'N/A' }}</td>
 

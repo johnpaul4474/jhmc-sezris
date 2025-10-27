@@ -6,6 +6,7 @@ import applications from '@/routes/applications'
 import ApplicationTable from '@/components/common/ApplicationTable.vue'
 import TopCard from '@/components/common/TopCard.vue'
 import { ref } from "vue";
+import { Head, router } from '@inertiajs/vue3';
 
 
 const props = defineProps({
@@ -26,7 +27,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 // Optional table action handlers
 function handleView(app: any) {
-  console.log('View', app)
+  router.visit(`/loctr/applications/${app?.id}/approved`)
 }
 
 function handleEdit(app: any) {
@@ -43,7 +44,6 @@ function handleDelete(app: any) {
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     <TopCard  />
     <h1 class="text-2xl font-bold mb-4">Approved Application Lists</h1>
-
     <ApplicationTable
       :applications="props.applications"
       @view="handleView"

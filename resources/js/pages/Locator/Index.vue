@@ -4,7 +4,7 @@ import locatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.v
 import locators from '@/routes/locators';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { ref } from "vue";
 import { Users, FileText, UserPlus } from "lucide-vue-next"; // Lucide icons
 import applications from '@/routes/applications';
@@ -38,6 +38,10 @@ const stats = ref({
   },
   bddCreatedUsers: 56,
 });
+function handleView(app:number) {
+  //console.log('View clicked:', app.id)
+  router.visit(`/loctr/applications/${app?.id}`)
+}
 </script>
 
 <template>

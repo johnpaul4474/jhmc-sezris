@@ -31,14 +31,14 @@ class ApplicationForApprovalController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
+    {   
         $app = ApplicationModel::findOrFail($request->input('application_id'));
 
         ApplicationForApproval::create([
             'application_id'    => $request->input('application_id'),
             'approver_group_id' => $request->input('approver_group_id'),
             'form_number'       => $app->form_number,
-            'status'            => 'pending',
+            'status'            => 'Pending',
         ]);
 
         return Inertia::render('Locator/Application/Create', []);

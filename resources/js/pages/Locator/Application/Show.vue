@@ -58,10 +58,11 @@ const currentApproverId = ref<number | null>(null)
 
 // helper to check if an approver can act
 const canAct = (approver: any) => {
-  if ( approver.pivot.status === 'pending') return true
+  
+  if ( approver.pivot.status === 'Approved') return false
   if (approver.pivot.sequence === 1) return true
   const prev = approvers.value.find(a => a.pivot.sequence === approver.pivot.sequence - 1)
-  return prev && prev.pivot.status === 'approved'
+  return prev && prev.pivot.status === 'Approved'
 }
 
 // SPA POST handlers
@@ -73,7 +74,7 @@ const handleApprove = (approverId: number) => {
       onSuccess: page => {
         // update local state
         const idx = approvers.value.findIndex(a => a.id === approverId)
-        if (idx !== -1) approvers.value[idx].pivot.status = 'approved'
+        if (idx !== -1) approvers.value[idx].pivot.status = 'Approved'
       }
     }
   )
@@ -173,7 +174,7 @@ const submitReturn = () => {
               <td class="p-2">{{ approver.email }}</td>
               <td class="p-2">{{ approver.pivot.role ?? '—' }}</td>
               <td class="p-2">{{ approver.pivot.sequence }}</td>
-              <td class="p-2">{{ approver.pivot.status ?? 'pending' }}</td>
+              <td class="p-2">{{ approver.pivot.status ?? 'Pending' }}</td>
               <td class="p-2">{{ approver.pivot.remark ?? '-' }}</td>
               <td class="p-2 flex gap-2">
                 <button
@@ -183,6 +184,7 @@ const submitReturn = () => {
                 >
                   Approve
                 </button>
+              
                 <button
                   v-if="canAct(approver)"
                   @click="handleReturnClick(approver.id)"

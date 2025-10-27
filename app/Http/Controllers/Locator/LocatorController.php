@@ -31,17 +31,24 @@ class LocatorController extends Controller
     public function pendingList()
     {
         $applications = ApplicationModel::where('user_id', Auth::id())
-    ->where('status', 'pending')
+    ->where('status', 'Pending')
     ->get();
         
         return Inertia::render('Locator/Application/Pending', [
             'applications' => $applications,
         ]);
     }
+    public function approvedShow(string $id)
+    {
+         $applications = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])->findOrFail($id);
+        return Inertia::render('Locator/Application/ApprovedShow',[
+            'applications' => $applications
+        ]);
+    }
 
     public function approvedList(){
         $applications = ApplicationModel::where('user_id', Auth::id())
-    ->where('status', 'approved')
+    ->where('status', 'Approved')
     ->get();
 
         return Inertia::render('Locator/Application/Approved', [

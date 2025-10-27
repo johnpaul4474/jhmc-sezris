@@ -44,6 +44,7 @@ const applicationId = ref(props.application_form_id)
 // 📌 Forms
 const createForm = useForm({
   user_id: props.user?.id,
+  applicationId,
   type: props.form?.name ?? '',
   description: '',
   application_category_option_id: '',
@@ -261,7 +262,7 @@ function selectForm(f: any) {
             v-else
             type="button"
             class="px-5 py-2 bg-blue-500 text-white hover:bg-blue-600"
-            @click="handleApply(props.application_form_id, props.form_number)"
+            @click="handleApply(props.application_form_id, props.form_number,)"
             :disabled="createForm.processing"
           >
             {{ createForm.processing ? 'Saving...' : 'Submit for Approval' }}

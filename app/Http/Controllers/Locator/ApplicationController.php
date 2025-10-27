@@ -14,6 +14,8 @@ use App\Models\User;
 use App\Models\Locator\Form;
 use App\Models\ApproverGroup;
 use App\Models\Locator\ApplicationForApproval;
+use App\Models\ApproverSets;
+use App\Models\Locator\ApproverGroupApprover;
  
 
 
@@ -63,7 +65,9 @@ class ApplicationController extends Controller
      * Show the form for creating a new resource.
      */
     public function create()
-{    $form = Form::all();
+    {   //$approvers = ApproverSets::all();
+        
+         $form = Form::all();
      $user = auth()->user();
    
     return Inertia::render('Locator/Application/Create', [
@@ -78,13 +82,29 @@ class ApplicationController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        
-       $user = auth()->user();
+    {  
+        //get approver based of pass
+         $user = auth()->user();
        $application = ApplicationModel::create([
             'form_title' => $request->input('type') ,
             'user_id'    => $user->id,
         ]);
+        
+        $approver = Form::where('name',$request->input('type'))->first();
+        $sets = ApproverSets::where('approver_group_id',$approver->approver_group_id)->get();
+        //dd($sets);//the result of this is 3
+        foreach ($sets as $set) {
+    ApproverGroupApprover::create([
+        'approver_group_id' => $set->approver_group_id,
+        'approver_id'       => $set->user_id,
+        'level'             => $set->level,
+        'sequence'           => $set->sequence,
+        'application_form_id'=>$application->id, // optional if your table has it
+        'status'            => 'Pending',         // or whatever your default is
+    ]);
+   
+}
+      
     // Collection of all options
    
     return Inertia::render('Locator/Application/Create', [
@@ -105,15 +125,21 @@ class ApplicationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(int $id)
-{
+    public function show(String $id)
+{    
     $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
         ->findOrFail($id);
 
     $approvers = ApplicationForApproval::with('approverGroup.approvers')
         ->where('form_number', $application->form_number)
         ->first();
-
+     if($approvers->approverGroup->allApproversStatusApproved()){
+    //if All Approvers status is Approved update ApplicationForm and ApplicationForApproval status to Approved
+          $application->status= 'Approved';
+          $application->save();
+          $approvers->status = 'Approved';
+          $approvers->save();
+     }    
     return Inertia::render('Locator/Application/Show', [
         'application' => $application,
         'approverGroup' => $approvers?->approverGroup,               // match Vue prop name
@@ -144,12 +170,16 @@ class ApplicationController extends Controller
     {
         //
     }
-    public function pendingList(){
+    public function pendingList()
+    {
         return Inertia::render('Locator/Application/Pending', []);
     }
-    public function approvedList(){
+    public function approvedList()
+    {
+        
         return Inertia::render('Locator/Application/Approved',[]);
     }
+    
     /**
      * Request $request are application_id and option_id selected by the locator
      * this function saves selected option to user_application_selected Table
@@ -167,7 +197,7 @@ class ApplicationController extends Controller
     $expireddate= PermitHelper::computeValidity((int)$validity);
     
     $form = Form::where('name', $application[0]->form_title)->get();
-
+    //dd($form);
     $price = ApplicationOption::find($validated['option_id'])->price;
     $selection = UserApplicationSelection::updateOrCreate(
         [
@@ -179,12 +209,11 @@ class ApplicationController extends Controller
             'Expired_at'  => PermitHelper::computeValidity((int)$validity),
             'selected_at' => now(),
             'amount'      => $price,
-        ]
-    );
+        ]);
     
     
     return Inertia::render('Locator/Application/Create',[
-       'user' => $user,
+        'user' => $user,
         'application_form_id' => $validated['application_id'],
         'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
         'expired_at'=> $expireddate,
@@ -199,4 +228,5 @@ class ApplicationController extends Controller
     ]);
     
     }
+   
 }
