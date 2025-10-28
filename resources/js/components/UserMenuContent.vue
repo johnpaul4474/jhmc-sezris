@@ -11,7 +11,7 @@ import { edit } from '@/routes/profile';
 import type { User } from '@/types';
 import { Link, router } from '@inertiajs/vue3';
 import { LogOut, Settings, BellRing } from 'lucide-vue-next';
-import notifications from '@/routes/notifications';
+//import notifications from '@/routes/notifications';
 
 
 interface Props {
@@ -38,38 +38,28 @@ defineProps<Props>();
         <!-- Settings -->
         <DropdownMenuItem :as-child="true">
             <Link class="block w-full" :href="edit()" prefetch as="button">
-                <Settings class="mr-2 h-4 w-4" />
-                Settings
+            <Settings class="mr-2 h-4 w-4" />
+            Settings
             </Link>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
 
         <!-- ✅ Notifications -->
-        <Link
-  :href="notifications.index.url()"
-  class="flex items-center px-2 py-1 w-full relative"
-  prefetch
->
-  <BellRing class="mr-2 h-4 w-4" />
-  <span>Notifications</span>
-  </Link>
+        <!-- <Link :href="notifications.index.url()" class="flex items-center px-2 py-1 w-full relative" prefetch> -->
+        <Link class="flex items-center px-2 py-1 w-full relative" prefetch>
+        <BellRing class="mr-2 h-4 w-4" />
+        <span>Notifications</span>
+        </Link>
     </DropdownMenuGroup>
-    
+
     <DropdownMenuSeparator />
 
     <!-- Logout -->
     <DropdownMenuItem :as-child="true">
-        <Link
-            class="block w-full"
-            :href="logout()"
-            @click="handleLogout"
-            as="button"
-            data-test="logout-button"
-        >
-            <LogOut class="mr-2 h-4 w-4" />
-            Log out
+        <Link class="block w-full" :href="logout()" @click="handleLogout" as="button" data-test="logout-button">
+        <LogOut class="mr-2 h-4 w-4" />
+        Log out
         </Link>
     </DropdownMenuItem>
 </template>
-

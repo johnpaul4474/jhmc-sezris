@@ -18,14 +18,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 // Example data (later replace with Inertia or API call)
-const stats = ref({
-    activeUsers: 124,
-    sezadRequests: {
-        new: 12,
-        pending: 8,
-        declined: 3,
-    },
-    bddCreatedUsers: 56,
+
 interface UserDetails {
   permission_id: number
   role_id: number

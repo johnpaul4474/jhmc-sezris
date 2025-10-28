@@ -1,90 +1,104 @@
 <?php
 
-use App\Models\UserDetails;
-use App\Http\Controllers\Users\UserDetailsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\Utilities\LookupController;
-use App\Services\GmailService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+
+use App\Helpers\UserHelper;
+use App\Models\UserDetails;
+use App\Http\Controllers\Users\UserDetailsController;
+use App\Http\Controllers\Utilities\LookupController;
+use App\Http\Controllers\BDD\BddController;
+
+use App\Http\Controllers\SEZAD\SEZADController;
 use App\Http\Controllers\Auth\GoogleOAuthController;
 use App\Mail\ChangePasswordMail;
-use Illuminate\Support\Facades\Auth;
-use App\Helpers\UserHelper;
-use App\Http\Controllers\BDD\BddController;
-use App\Http\Controllers\SEZAD\SEZADController;
+use App\Services\GmailService;
+use App\Http\Controllers\SEZAD\Clearances\BringInController;
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Keep all URL names intact. Organized by section for clarity.
+|
+*/
 
-// Route::get('/oauth/google', [GoogleOAuthController::class, 'redirectToGoogle']);
-// Route::get('/oauth/google/callback', [GoogleOAuthController::class, 'handleGoogleCallback']);
-// Route::get('/send-test-email', [UserDetailsController::class, 'sendTestEmail']);
+// 🔹 Public Route
+Route::get('/', fn() => Inertia::render('Welcome'))->name('home');
 
-Route::get('/', function () {
-    return Inertia::render('Welcome');
-})->name('home');
-/** @var \App\Models\User|null $user */
-// Route::get('dashboard', function () {
-//     $user = UserHelper::loadUserWithDetails();
-//     return Inertia::render('Dashboard', [
-//         'auth' => ['user' => $user],
-//     ]);
-// })
-//     ->middleware(['auth', 'verified'])
-//     ->name('dashboard');
+// 🔹 Authenticated Routes
+Route::middleware(['auth', 'verified'])->group(function () {
 
-//Users routes
-Route::get('/users', [UserDetailsController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('usersDashboard');
-
-Route::get('/users/list', [UserDetailsController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('users.list');
-
-Route::post('/user/addUser', [UserDetailsController::class, 'store'])
-    ->middleware(['auth', 'verified'])
-    ->name('userDetails.store');;
-
-
-
-//SEZAD routes
-Route::middleware(['auth', 'verified', 'role.access'])->group(function () {
-    /** @var \App\Models\User|null $user */
+    // Dashboard
     Route::get('dashboard', function () {
         $user = UserHelper::loadUserWithDetails();
-        return Inertia::render('Dashboard', [
-            'auth' => ['user' => $user],
-        ]);
-    })
-        ->middleware(['auth', 'verified'])
-        ->name('dashboard');
+        return Inertia::render('Dashboard', ['auth' => ['user' => $user]]);
+    })->name('dashboard');
 
-    Route::get('/sezad', [SEZADController::class, 'index'])->name('sezadDashboard');
-    // add users and other routes
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SEZAD
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['auth', 'verified', 'role.access'])->group(function () {
+        /*
+        |--------------------------------------------------------------------------
+        | Users
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('users')->group(function () {
+            Route::get('/', [UserDetailsController::class, 'index'])->name('usersDashboard');
+            Route::get('/list', [UserDetailsController::class, 'index'])->name('users.list');
+            Route::post('/addUser', [UserDetailsController::class, 'store'])->name('userDetails.store');
+        });
+        /*
+        |--------------------------------------------------------------------------
+        | BDD
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/bdd', [BDDController::class, 'index'])->name('bddDashboard');
+        Route::prefix('sezad')->group(function () {
+            Route::get('/', [SEZADController::class, 'index'])->name('sezadDashboard');
+
+            Route::prefix('clearances')->group(function () {
+                Route::get('/bring-in', [BringInController::class, 'index'])->name('bringInclearance');
+            });
+        });
+    });
+
+    
+
+    /*
+    |--------------------------------------------------------------------------
+    | Address
+    |--------------------------------------------------------------------------
+    */
+    Route::get('address', fn() => Inertia::render('users/Address'))->name('usersAddress');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Utilities
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/departments', [LookupController::class, 'departments'])->name('departments');
+    Route::get('/divisions', [LookupController::class, 'divisions'])->name('divisions');
+    Route::get('/roles', [LookupController::class, 'roles'])->name('roles');
+    Route::get('/permissions', [LookupController::class, 'permissions'])->name('permissions');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Email
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/sendChangePassword', [UserDetailsController::class, 'sendChangePassword'])->name('sendChangePassword');
 });
 
-// Route::get('/sezad', [SEZADController::class, 'index'])
-//     ->middleware(['auth', 'verified'])
-//     ->name('sezadDashboard');
-
-//BDD routes
-Route::get('/bdd', [BDDController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('bddDashboard');
-
-//address
-Route::get('address', function () {
-    return Inertia::render('users/Address');
-})->middleware(['auth', 'verified'])->name('usersAddress');
-
-//Utilities routes
-Route::get('/departments', [LookupController::class, 'departments'])->middleware(['auth', 'verified'])->name('departments');
-Route::get('/divisions', [LookupController::class, 'divisions'])->middleware(['auth', 'verified'])->name('divisions');
-Route::get('/roles', [LookupController::class, 'roles'])->middleware(['auth', 'verified'])->name('roles');
-Route::get('/permissions', [LookupController::class, 'permissions'])->middleware(['auth', 'verified'])->name('permissions');
-
-
-//Email
-Route::get('/sendChangePassword', [UserDetailsController::class, 'sendChangePassword'])->middleware(['auth', 'verified'])->name('sendChangePassword');
-
+// 🔹 Include other route files
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
+require __DIR__ . '/locator/locator.php';
+require __DIR__ . '/locator/notification.php';

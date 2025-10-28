@@ -7,11 +7,11 @@ import { defineConfig } from 'vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/js/app.ts'],
+            input: ['resources/css/app.css', 'resources/js/app.ts'], // 💡 ADDED CSS FILE
             ssr: 'resources/js/ssr.ts',
             refresh: true,
         }),
-        tailwindcss(),
+        tailwindcss('./tailwind.config.ts'),
         wayfinder({
             formVariants: true,
         }),
