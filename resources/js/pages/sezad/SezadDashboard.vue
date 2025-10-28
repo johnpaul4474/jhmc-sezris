@@ -65,7 +65,7 @@ const fullNavItems = [
         name: "Clearance",
         children: [
           { name: "Gatepass Clearance", href: "/clearance/gatepass" },
-          { name: "Bring-In Clearance", href: "/clearance/bring-in" },
+          { name: "Bring-In Clearance", href: "/sezad/clearances/bring-in" },
           { name: "Bring-Out Clearance", href: "/clearance/bring-out" },
           { name: "Temporary Bring-Out Clearance", href: "/clearance/temp-bring-out" },
           { name: "Overtime Clearance", href: "/clearance/overtime" },
@@ -106,11 +106,11 @@ const oneStopActionCenterOnly = [
   {
     name: "One Stop Action Center",
     children: [
-      { name: "Declaration of Admission of Articles", href: "/declaration" },
+     
       {
         name: "Clearance",
         children: [
-          { name: "Bring-In Clearance", href: "SEZAD/OneStopActionCenter/Clearances/bring-in" },
+          { name: "Bring-In Clearance", href: "sezad/clearances/bring-in" },
           { name: "Bring-Out Clearance", href: "/clearance/bring-out" },
           { name: "Temporary Bring-Out Clearance", href: "/clearance/temp-bring-out" },
           { name: "Gatepass Clearance", href: "/clearance/gatepass" },  

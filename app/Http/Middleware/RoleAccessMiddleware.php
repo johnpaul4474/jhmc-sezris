@@ -12,6 +12,10 @@ class RoleAccessMiddleware
     {
         $user = Auth::user();
 
+        if ($request->is('login') || $request->is('logout') || $request->is('sanctum/csrf-cookie')) {
+            return $next($request);
+        }
+
         if (!$user) {
             return redirect('/login');
         }
@@ -37,7 +41,7 @@ class RoleAccessMiddleware
             }
             // SEZAD user: allow sezad only
             elseif ($isSezadUser) {
-                if (!$request->is('sezad')) {
+                if (!$request->is('sezad') && !$request->is('sezad/*')) {
                     return redirect('/sezad');
                 }
             }
