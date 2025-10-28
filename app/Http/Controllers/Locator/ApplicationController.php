@@ -83,7 +83,7 @@ class ApplicationController extends Controller
      */
     public function store(Request $request)
     {  
-        //get approver based of pass
+        
          $user = auth()->user();
        $application = ApplicationModel::create([
             'form_title' => $request->input('type') ,
@@ -92,7 +92,9 @@ class ApplicationController extends Controller
         
         $approver = Form::where('name',$request->input('type'))->first();
         $sets = ApproverSets::where('approver_group_id',$approver->approver_group_id)->get();
-        //dd($sets);//the result of this is 3
+        
+        
+        //create new Sets of ApprovergroupApprover 
         foreach ($sets as $set) {
     ApproverGroupApprover::create([
         'approver_group_id' => $set->approver_group_id,

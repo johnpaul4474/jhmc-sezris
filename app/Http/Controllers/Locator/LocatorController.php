@@ -33,8 +33,18 @@ class LocatorController extends Controller
         $applications = ApplicationModel::where('user_id', Auth::id())
     ->where('status', 'Pending')
     ->get();
-        
         return Inertia::render('Locator/Application/Pending', [
+            'applications' => $applications,
+        ]);
+    }
+    public function pendingShow(string $form_number)
+    {   
+        $applications = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
+                                        ->where('form_number', $form_number )
+                                        ->where('status','Pending')
+                                        ->get();
+                        //dd($application);
+        return Inertia::render('Locator/Application/PendingShow', [
             'applications' => $applications,
         ]);
     }

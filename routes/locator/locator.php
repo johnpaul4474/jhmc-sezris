@@ -11,6 +11,8 @@ Route::resource('approval', ApplicationForApprovalController::class);
 Route::group(['prefix' => 'loctr', 'middleware' => 'auth'], function () {
     //route for pending view
     Route::get('applications/pending', [LocatorController::class, 'pendingList'])->name('applications.pending');
+    //Route for single pending view
+    Route::get('applications/{id}/pending',[LocatorController::class, 'pendingShow'])->name('applications.pendingShow');
     //route for approved 
     Route::get('applications/{id}/approved', [LocatorController::class, 'approvedShow'])->name('applications.approvedShow');
     Route::get('applications/approved', [LocatorController::class, 'approvedList'])->name('applications.approved');
