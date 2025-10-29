@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Locator\ApplicationForApproval;
 use App\Models\Locator\ApplicationModel;
 use Inertia\Inertia;
+use App\Models\Locator\ApproverGroupApprover;
 
 class ApplicationForApprovalController extends Controller
 {
@@ -65,7 +66,7 @@ class ApplicationForApprovalController extends Controller
      */
     public function approve(Request $request, $formNumber, $approverId)
 { 
-
+     
      $appForm= ApplicationModel::where('form_number', $formNumber)->first();
     // Find the approval record by form_number
     $applicationForApproval = ApplicationForApproval::where('application_id', $appForm->id)
@@ -95,8 +96,10 @@ class ApplicationForApprovalController extends Controller
 }
 
 public function returnApproval(Request $request, $formNumber, $approverId)
-{
-    $applicationForApproval = ApplicationForApproval::where('form_number', $formNumber)
+{   
+    $appForm= ApplicationModel::where('form_number', $formNumber)->first();
+
+    $applicationForApproval = ApplicationForApproval::where('application_id', $appForm->id)
         ->with('approverGroup')
         ->firstOrFail();
 
@@ -108,8 +111,11 @@ public function returnApproval(Request $request, $formNumber, $approverId)
         'remark'   => $request->input('remark'),
         'acted_at' => now(),
     ]);
-
-    // Optionally mark the whole application as returned
+     $Approver = ApproverGroupApprover::where('approver_id',$approverId)->first();
+     $prevApprover = ApproverGroupApprover::where('sequence',($Approver->sequence - 1))->first();
+      $prevApprover->status = 'Pending';
+      $prevApprover->save();
+     // Optionally mark the whole application as returned
     $applicationForApproval->update([
         'status'   => 'Returned',
         'acted_at' => now(),

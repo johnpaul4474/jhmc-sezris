@@ -69,7 +69,7 @@ const canAct = (approver: any) => {
 const handleApprove = (approverId: number) => {
   console.log('approver Id: '+approverId+ "\nApplication Form: "+props.application.form_number);
   router.post(
-    `/application-for-approval/${props.application.id}/approvers/${approverId}/approve`,
+    `/application-for-approval/${props.application.form_number}/approvers/${approverId}/approve`,
     {},
     {
       onSuccess: page => {
