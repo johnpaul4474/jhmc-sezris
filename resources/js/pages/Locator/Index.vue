@@ -42,13 +42,13 @@ const stats = ref({
 
 <template>
   <Head title="Locator Dashboard" />
-
+    
   <locatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     
       <!-- Apply New -->
        
        <TopCard />
-    
+       
     <!---table-->
      <div v-if="props.applications && props.applications.length" class="mt-6 overflow-x-auto">
  
@@ -61,7 +61,7 @@ const stats = ref({
 </div>
 
 <div v-else class="mt-6 text-gray-500 text-sm italic">
-  null
+  You are not Logged In
 </div>
 <!--end table-->
   </locatorAppSidebarLayout>

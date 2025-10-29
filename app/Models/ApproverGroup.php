@@ -24,4 +24,8 @@ class ApproverGroup extends Model
                     ->withPivot('sequence')
                     ->orderBy('pivot_sequence', 'asc');
     }
+    public function allApproversStatusApproved(): bool
+    {
+        return $this->approvers->every(fn($a) => $a->pivot->status === 'Approved' );
+    }
 }

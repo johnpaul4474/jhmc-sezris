@@ -43,7 +43,7 @@ return new class extends Migration
             $table->timestamps();
 
             //(Optional) add indexes/foreign keys if you already have these tables
-            $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('position_id')->references('id')->on('positions');
             $table->foreign('department_id')->references('id')->on('departments');
             $table->foreign('division_id')->references('id')->on('divisions');

@@ -5,7 +5,7 @@ import locators from '@/routes/locators'
 import applications from '@/routes/applications'
 import ApplicationTable from '@/components/common/ApplicationTable.vue'
 import TopCard from '@/components/common/TopCard.vue'
-import Approver from '@/components/locator/Approver.vue'
+//import Approver from '@/components/locator/Approver.vue'
 
 const props = defineProps({
   applications: {
@@ -38,6 +38,7 @@ function handleDelete(app: any) {
 <template>
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     <TopCard />
+    {{ props.applications }}
     <h1 class="text-2xl font-bold mb-4">Pending Application Lists</h1>
 
     <ApplicationTable
@@ -46,6 +47,6 @@ function handleDelete(app: any) {
       @edit="handleEdit"
       @delete="handleDelete"
     />
-    <Approver />
+   
   </LocatorAppSidebarLayout>
 </template>

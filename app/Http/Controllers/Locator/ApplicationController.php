@@ -13,6 +13,9 @@ use App\Helpers\PermitHelper;
 use App\Models\User;
 use App\Models\Locator\Form;
 use App\Models\ApproverGroup;
+use App\Models\ApproverSets;
+use App\Models\Locator\ApproverGroupApprover;
+use App\Models\Locator\ApplicationForApproval;
 
 
 class ApplicationController extends Controller
@@ -76,13 +79,31 @@ class ApplicationController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        
-       $user = auth()->user();
+    {  
+       
+         $user = auth()->user();
        $application = ApplicationModel::create([
             'form_title' => $request->input('type') ,
             'user_id'    => $user->id,
         ]);
+        
+        $approver = Form::where('name',$request->input('type'))->first();
+        $sets = ApproverSets::where('approver_group_id',$approver->approver_group_id)->get();
+        
+        
+        //create new Sets of ApprovergroupApprover 
+        foreach ($sets as $set) {
+    ApproverGroupApprover::create([
+        'approver_group_id' => $set->approver_group_id,
+        'approver_id'       => $set->user_id,
+        'level'             => $set->level,
+        'sequence'           => $set->sequence,
+        'application_form_id'=>$application->id, // optional if your table has it
+        'status'            => 'Pending',         // or whatever your default is
+    ]);
+   
+}
+      
     // Collection of all options
    
     return Inertia::render('Locator/Application/Create', [
@@ -100,18 +121,30 @@ class ApplicationController extends Controller
     }
     
 
+
     /**
      * Display the specified resource.
      */
-    public function show(int $id)
-    {    
-        $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
-    ->findOrFail($id);
-        
-        return Inertia::render('Locator/Application/Show', [
-            'application' => $application,
-        ]);
-    }
+        public function show(String $id)
+{    
+    $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
+                   ->findOrFail($id);
+    $approvers = ApplicationForApproval::with('approverGroup.approvers')
+                    ->where('application_id', $application->id)
+                    ->first();
+     if($approvers->approverGroup->allApproversStatusApproved()){
+    //if All Approvers status is Approved update ApplicationForm and ApplicationForApproval status to Approved
+          $application->status= 'Approved';
+          $application->save();
+          $approvers->status = 'Approved';
+          $approvers->save();
+     }    
+    return Inertia::render('Locator/Application/Show', [
+        'application' => $application,
+        'approverGroup' => $approvers?->approverGroup,               // match Vue prop name
+        'approvers' => $approvers?->approverGroup?->approvers ?? [], // safe chaining
+    ]);
+}
 
     /**
      * Show the form for editing the specified resource.

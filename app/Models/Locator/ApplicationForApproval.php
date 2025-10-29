@@ -20,6 +20,7 @@ class ApplicationForApproval extends Model
         'application_id',
         'approver_group_id',
         'approver_id',
+        'form_number',
         'status',
         'remark',
         'acted_at',
@@ -46,4 +47,5 @@ class ApplicationForApproval extends Model
     {
         return $this->belongsTo(User::class, 'approver_id');
     }
+   
 }
