@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import LocatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue'
 import { type BreadcrumbItem } from '@/types'
 import locators from '@/routes/locators'
 import applications from '@/routes/applications'
-import { Image } from 'lucide-vue-next'
 import { router } from '@inertiajs/vue3'
 
+// Base URL (safe for SSR)
 const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
 
+// Props definition
 const props = defineProps<{
   application: {
     id: number
@@ -32,80 +33,81 @@ const props = defineProps<{
     id: number
     name: string
     email: string
-    pivot: {
-      role: string | null
-      sequence: number
-      status: string | null
-      acted_at: string | null
-      remark: string | null
-    }
+    role: string | null
+    sequence: number
+    status: string | null
+    acted_at: string | null
+    remark: string | null
   }[]
 }>()
 
+// Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Locator', href: locators.index.url() },
   { title: 'Applications', href: applications.index.url() },
   { title: `Application #${props.application.id}`, href: '#' },
 ]
 
-// reactive list for SPA update
+// Make approvers reactive & editable
 const approvers = ref([...props.approvers])
 
-// modal & remark for return
+// Modal state for "Return"
 const showReturnModal = ref(false)
 const returnRemark = ref('')
 const currentApproverId = ref<number | null>(null)
 
-// helper to check if an approver can act
+// Check if approver can act (approve/return)
 const canAct = (approver: any) => {
-  
-  if ( approver.pivot.status === 'Approved') return false
+  console.log(approver)
+  if (!approver?.pivot) return false
+  // if already approved, skip
+  if (approver.pivot.status === 'Approved') return false
+
+  // if first in sequence
   if (approver.pivot.sequence === 1) return true
+
+  // find previous approver
   const prev = approvers.value.find(a => a.pivot.sequence === approver.pivot.sequence - 1)
-  return prev && prev.pivot.status === 'Approved'
+  return prev ? prev.pivot.status === 'Approved' : false
 }
 
-// SPA POST handlers
+// Approve action
 const handleApprove = (approverId: number) => {
- 
   router.post(
     `/application-for-approval/${props.application.form_number}/approvers/${approverId}/approve`,
     {},
     {
       onSuccess: (page) => {
-      console.log(page.props.flash.success);
-      console.log(page.props.approvers);
-      console.log("Before: "+approvers);
-      //const idx = approvers.value.findIndex(a => a.id === approverId);
-      //if (idx !== -1) approvers.value[idx].pivot.status = 'Approved';
-      approvers.value = page.props.approvers;
-      console.log("After: "+approvers);
-    },
+        console.log(page.props.flash?.success)
+        approvers.value = page.props.approvers ?? []
+      },
     }
   )
 }
 
+// Show return modal
 const handleReturnClick = (approverId: number) => {
   currentApproverId.value = approverId
   returnRemark.value = ''
   showReturnModal.value = true
 }
 
+// Submit return action
 const submitReturn = () => {
   if (!currentApproverId.value) return
   router.post(
     `/application-for-approval/${props.application.form_number}/approvers/${currentApproverId.value}/return`,
     { remark: returnRemark.value },
     {
-      onSuccess: page => {
+      onSuccess: (page) => {
         const idx = approvers.value.findIndex(a => a.id === currentApproverId.value)
         if (idx !== -1) {
-          approvers.value[idx].pivot.status = 'returned'
-          approvers.value[idx].pivot.remark = returnRemark.value
+          approvers.value[idx].status = 'Returned'
+          approvers.value[idx].remark = returnRemark.value
         }
         showReturnModal.value = false
         returnRemark.value = ''
-      }
+      },
     }
   )
 }
@@ -127,40 +129,58 @@ const submitReturn = () => {
             'text-red-600 dark:text-red-400': props.application.status === 'Returned',
           }"
         >
-        {{ props.application.status.charAt(0).toUpperCase() + props.application.status.slice(1) }}
+          {{ props.application.status.charAt(0).toUpperCase() + props.application.status.slice(1) }}
         </span>
       </p>
     </div>
 
     <!-- Basic Info -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-      <div class="p-4 border rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm">
+      <div
+        class="p-4 border rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm"
+      >
         <h2 class="font-semibold mb-2 text-gray-900 dark:text-gray-100">Basic Information</h2>
         <ul class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
           <li><strong>Form Number:</strong> {{ props.application.form_number }}</li>
           <li><strong>Control Number:</strong> {{ props.application.control_number ?? '—' }}</li>
           <li><strong>User ID:</strong> {{ props.application.user_id }}</li>
-          <li><strong>Created At:</strong> {{ new Date(props.application.created_at).toLocaleString() }}</li>
-          <li><strong>Updated At:</strong> {{ new Date(props.application.updated_at).toLocaleString() }}</li>
+          <li>
+            <strong>Created At:</strong>
+            {{ new Date(props.application.created_at).toLocaleString() }}
+          </li>
+          <li>
+            <strong>Updated At:</strong>
+            {{ new Date(props.application.updated_at).toLocaleString() }}
+          </li>
         </ul>
       </div>
     </div>
 
     <!-- Approver Group -->
-    <div class="mb-8" v-if="props.approverGroup">
+    <div v-if="props.approverGroup" class="mb-8">
       <h2 class="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Approver Group</h2>
-      <div class="p-4 border rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm">
-        <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Name:</strong> {{ props.approverGroup.name }}</p>
-        <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Description:</strong> {{ props.approverGroup.description ?? '—' }}</p>
+      <div
+        class="p-4 border rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm"
+      >
+        <p class="text-sm text-gray-700 dark:text-gray-300">
+          <strong>Name:</strong> {{ props.approverGroup.name }}
+        </p>
+        <p class="text-sm text-gray-700 dark:text-gray-300">
+          <strong>Description:</strong> {{ props.approverGroup.description ?? '—' }}
+        </p>
       </div>
     </div>
 
     <!-- Approvers Table -->
     <div v-if="approvers.length">
       <h2 class="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Approvers</h2>
-      <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700">
+      <div
+        class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+      >
         <table class="min-w-full text-sm">
-          <thead class="bg-gray-100 dark:bg-gray-700 text-left text-gray-800 dark:text-gray-200">
+          <thead
+            class="bg-gray-100 dark:bg-gray-700 text-left text-gray-800 dark:text-gray-200"
+          >
             <tr>
               <th class="p-2">#</th>
               <th class="p-2">Name</th>
@@ -173,14 +193,28 @@ const submitReturn = () => {
             </tr>
           </thead>
           <tbody class="text-gray-700 dark:text-gray-300">
-            <tr v-for="(approver, index) in approvers" :key="approver.id" class="border-t border-gray-200 dark:border-gray-700">
+            <tr
+              v-for="(approver, index) in approvers"
+              :key="approver.id"
+              class="border-t border-gray-200 dark:border-gray-700"
+            >
               <td class="p-2">{{ index + 1 }}</td>
               <td class="p-2">{{ approver.name }}</td>
               <td class="p-2">{{ approver.email }}</td>
-              <td class="p-2">{{ approver.pivot.role ?? '—' }}</td>
-              <td class="p-2">{{ approver.pivot.sequence }}</td>
-              <td class="p-2">{{ approver.pivot.status ?? 'waiting for Action'  }}</td>
-              <td class="p-2">{{ approver.pivot.remark ?? '-' }}</td>
+              <td class="p-2">{{ approver.role ?? 'N/A' }}</td>
+              <td class="p-2 text-center">{{ approver.sequence ?? '-' }}</td>
+              <td class="p-2">
+                <span
+                  :class="{
+                    'text-yellow-600 dark:text-yellow-400': approver.pivot.status === 'Pending',
+                    'text-green-600 dark:text-green-400': approver.pivot.status === 'Approved',
+                    'text-red-600 dark:text-red-400': approver.pivot.status === 'Returned',
+                  }"
+                >
+                  {{ approver.pivot.status ?? 'Waiting for Approval' }}
+                </span>
+              </td>
+              <td class="p-2">{{ approver.remark ?? '—' }}</td>
               <td class="p-2 flex gap-2">
                 <button
                   v-if="canAct(approver)"
@@ -189,7 +223,7 @@ const submitReturn = () => {
                 >
                   Approve
                 </button>
-              
+
                 <button
                   v-if="canAct(approver)"
                   @click="handleReturnClick(approver.id)"
@@ -205,9 +239,14 @@ const submitReturn = () => {
     </div>
 
     <!-- Return Modal -->
-    <div v-if="showReturnModal" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+    <div
+      v-if="showReturnModal"
+      class="fixed inset-0 flex items-center justify-center z-50 bg-black/50"
+    >
       <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Return Remark</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          Return Remark
+        </h3>
         <textarea
           v-model="returnRemark"
           placeholder="Enter remark..."
@@ -231,10 +270,3 @@ const submitReturn = () => {
     </div>
   </LocatorAppSidebarLayout>
 </template>
-
-<style scoped>
-table th,
-table td {
-  white-space: nowrap;
-}
-</style>

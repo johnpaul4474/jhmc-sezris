@@ -98,6 +98,7 @@ class ApplicationController extends Controller
         'approver_id'       => $set->user_id,
         'level'             => $set->level,
         'sequence'           => $set->sequence,
+        'role'              => $set->role,
         'application_form_id'=>$application->id, 
         'status'            => AppConstants::STATUS_PENDING,         
     ]);
@@ -130,8 +131,17 @@ class ApplicationController extends Controller
     $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
                    ->findOrFail($id);
     $approvers = ApplicationForApproval::with('approverGroup.approvers')
-                    ->where('application_id', $application->id)
+                    ->where('application_id', $id)
                     ->first();
+    
+    $approver = ApproverGroupApprover::with(['approver', 'approverGroup'])
+    ->where('approver_group_id', $approvers->approverGroup->id)
+    ->where('application_form_id', $id)
+    ->get(['id', 'approver_id', 'sequence', 'role', 'status', 'acted_at', 'approver_group_id']);
+
+
+    //approver group ID
+    //$approvers->approverGroup->id;  
      if($approvers->approverGroup->allApproversStatusApproved()){
     //if All Approvers status is Approved update ApplicationForm and ApplicationForApproval status to Approved
           $application->status= AppConstants::STATUS_APPROVED;
@@ -140,10 +150,23 @@ class ApplicationController extends Controller
           $approvers->save();
      }    
     return Inertia::render('Locator/Application/Show', [
-        'application' => $application,
-        'approverGroup' => $approvers?->approverGroup,               // match Vue prop name
-        'approvers' => $approvers?->approverGroup?->approvers ?? [], // safe chaining
-    ]);
+    'application' => $application,
+    'approverGroup' => $approvers?->approverGroup,
+    'approvers' => $approver->map(function ($item) {
+        return [
+            'id' => $item->approver->id ?? null,
+            'name' => $item->approver->name ?? '(Unknown)',
+            'email' => $item->approver->email ?? null,
+            'pivot' => [
+                'role' => $item->role ?? null,
+                'sequence' => $item->sequence ?? null,
+                'status' => $item->status ?? null,
+                'acted_at' => $item->acted_at ?? null,
+                'remark' => $item->remark ?? null,
+            ],
+        ];
+    }),
+]);
 }
 
     /**

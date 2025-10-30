@@ -51,7 +51,7 @@ class ApplicationForApprovalController extends Controller
     public function show(int $id)
     {
         $approvers = ApplicationForApproval::with('approverGroup.approvers')->find($id);
-
+    dd($approvers);
         // This is how to get the ApproverGroup
         echo "<pre>";
         print_r($approvers->approverGroup);

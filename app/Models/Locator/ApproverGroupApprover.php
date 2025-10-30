@@ -3,7 +3,7 @@
 namespace App\Models\Locator;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
-
+use App\Models\approverGroup;
 class ApproverGroupApprover extends Pivot
 {
     protected $table = 'approver_group_approver';
