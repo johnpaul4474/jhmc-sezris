@@ -64,36 +64,44 @@ class ApplicationForApprovalController extends Controller
     /**
      * Approve the application for the given approver.
      */
-    public function approve(Request $request, $formNumber, $approverId)
+   public function approve(Request $request, $formNumber, $approverId)
 { 
-     
-     $appForm= ApplicationModel::where('form_number', $formNumber)->first();
-    // Find the approval record by form_number
+    $appForm = ApplicationModel::where('form_number', $formNumber)->firstOrFail();
+
     $applicationForApproval = ApplicationForApproval::where('application_id', $appForm->id)
         ->with('approverGroup.approvers')
         ->firstOrFail();
 
     $group = $applicationForApproval->approverGroup;
-
-    // Update the approver's pivot status
+    
+    // ✅ Update the approver's pivot record
     $group->approvers()->updateExistingPivot($approverId, [
         'status'   => 'Approved',
         'acted_at' => now(),
     ]);
      
-    // Check if all approvers approved
+    // ✅ Check if all approvers have approved
     $remaining = $group->approvers()->wherePivot('status', '!=', 'Approved')->count();
     if ($remaining === 0) {
         $applicationForApproval->update([
             'status'   => 'Approved',
             'acted_at' => now(),
         ]);
-        $appForm->status = 'Approved';
-        $appForm->save();
+        $appForm->update(['status' => 'Approved']);
     }
 
-    return back()->with('success', 'Application approved successfully.');
+    // ✅ Reload all fresh data
+    //$applicationForApproval->load('approverGroup.approvers');
+    //$appForm->load('approvals'); // adjust this if ApplicationModel has a relation
+
+    // ✅ Return updated data to frontend
+    return back()->with([
+        'success' => 'Approved successfully.',
+        'application' => $appForm,
+        'approvers' => $group->approvers,
+    ]);
 }
+
 
 public function returnApproval(Request $request, $formNumber, $approverId)
 {   

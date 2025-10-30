@@ -67,16 +67,20 @@ const canAct = (approver: any) => {
 
 // SPA POST handlers
 const handleApprove = (approverId: number) => {
-  console.log('approver Id: '+approverId+ "\nApplication Form: "+props.application.form_number);
+ 
   router.post(
     `/application-for-approval/${props.application.form_number}/approvers/${approverId}/approve`,
     {},
     {
-      onSuccess: page => {
-        // update local state
-        const idx = approvers.value.findIndex(a => a.id === approverId)
-        if (idx !== -1) approvers.value[idx].pivot.status = 'Approved'
-      }
+      onSuccess: (page) => {
+      console.log(page.props.flash.success);
+      console.log(page.props.approvers);
+      console.log("Before: "+approvers);
+      //const idx = approvers.value.findIndex(a => a.id === approverId);
+      //if (idx !== -1) approvers.value[idx].pivot.status = 'Approved';
+      approvers.value = page.props.approvers;
+      console.log("After: "+approvers);
+    },
     }
   )
 }
@@ -118,12 +122,12 @@ const submitReturn = () => {
         Application #{{ props.application.id }} • Status:
         <span
           :class="{
-            'text-yellow-600 dark:text-yellow-400': props.application.status === 'pending',
-            'text-green-600 dark:text-green-400': props.application.status === 'approved',
-            'text-red-600 dark:text-red-400': props.application.status === 'returned',
+            'text-yellow-600 dark:text-yellow-400': props.application.status === 'Pending',
+            'text-green-600 dark:text-green-400': props.application.status === 'Approved',
+            'text-red-600 dark:text-red-400': props.application.status === 'Returned',
           }"
         >
-          {{ props.application.status }}
+        {{ props.application.status.charAt(0).toUpperCase() + props.application.status.slice(1) }}
         </span>
       </p>
     </div>
@@ -175,7 +179,7 @@ const submitReturn = () => {
               <td class="p-2">{{ approver.email }}</td>
               <td class="p-2">{{ approver.pivot.role ?? '—' }}</td>
               <td class="p-2">{{ approver.pivot.sequence }}</td>
-              <td class="p-2">{{ approver.pivot.status ?? 'Pending' }}</td>
+              <td class="p-2">{{ approver.pivot.status ?? 'waiting for Action'  }}</td>
               <td class="p-2">{{ approver.pivot.remark ?? '-' }}</td>
               <td class="p-2 flex gap-2">
                 <button

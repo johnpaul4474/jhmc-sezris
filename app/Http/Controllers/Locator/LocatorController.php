@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use App\Models\Locator\ApplicationModel;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Locator\ApplicationForApproval;
+use App\Helpers\AppConstants;
 
 
 
@@ -28,14 +29,14 @@ class LocatorController extends Controller
     public function pendingList()
     {
          $user = Auth::user();
-        $approvers = ApplicationForApproval::whereHas('approverGroup.approvers', function ($query) use ($user) {
-                                                                        $query->where('id', 2);
+       $currentUserApplication = ApplicationModel::where('user_id',$user->id)->first();
+        $approvers = ApplicationForApproval::whereHas('approverGroup.approvers', function ($query) use ($user,$currentUserApplication) {
+                                                                     $query->where('application_id', $currentUserApplication->id);
                                                                     })
     ->with(['approverGroup.approvers', 'application'])
     ->get();
-        dd($approvers);
         $applications = ApplicationModel::where('user_id', Auth::id())
-    ->where('status', 'Pending')
+    ->where('status', AppConstants::STATUS_PENDING)
     ->get();
         
         return Inertia::render('Locator/Application/Pending', [

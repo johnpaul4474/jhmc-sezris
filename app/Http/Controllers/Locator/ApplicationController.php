@@ -16,11 +16,11 @@ use App\Models\ApproverGroup;
 use App\Models\ApproverSets;
 use App\Models\Locator\ApproverGroupApprover;
 use App\Models\Locator\ApplicationForApproval;
+use App\Helpers\AppConstants;
 
 
 class ApplicationController extends Controller
 {
-  
     /**
      * Display a listing of the resource.
      */
@@ -98,8 +98,8 @@ class ApplicationController extends Controller
         'approver_id'       => $set->user_id,
         'level'             => $set->level,
         'sequence'           => $set->sequence,
-        'application_form_id'=>$application->id, // optional if your table has it
-        'status'            => 'Pending',         // or whatever your default is
+        'application_form_id'=>$application->id, 
+        'status'            => AppConstants::STATUS_PENDING,         
     ]);
    
 }
@@ -134,9 +134,9 @@ class ApplicationController extends Controller
                     ->first();
      if($approvers->approverGroup->allApproversStatusApproved()){
     //if All Approvers status is Approved update ApplicationForm and ApplicationForApproval status to Approved
-          $application->status= 'Approved';
+          $application->status= AppConstants::STATUS_APPROVED;
           $application->save();
-          $approvers->status = 'Approved';
+          $approvers->status = AppConstants::STATUS_APPROVED;
           $approvers->save();
      }    
     return Inertia::render('Locator/Application/Show', [

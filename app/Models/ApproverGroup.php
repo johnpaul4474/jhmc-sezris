@@ -21,7 +21,7 @@ class ApproverGroup extends Model
     public function approvers()
     {
         return $this->belongsToMany(User::class, 'approver_group_approver', 'approver_group_id', 'approver_id')
-                    ->withPivot('sequence')
+                    ->withPivot('sequence','status')
                     ->orderBy('pivot_sequence', 'asc');
     }
     public function allApproversStatusApproved(): bool

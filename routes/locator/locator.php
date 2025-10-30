@@ -4,6 +4,7 @@ use App\Http\Controllers\Locator\ApplicationController;
 use App\Http\Controllers\Locator\ArticleDetailController;
 use App\Http\Controllers\Locator\UploadController;
 use App\Http\Controllers\Locator\ApplicationForApprovalController;
+use App\Helpers\AppConstants;
 
 
 Route::get('/locator', [LocatorController::class, 'index'])->name('locators.index');
@@ -34,7 +35,10 @@ Route::post('application-for-approval/{form_number}/approvers/{approverId}/appro
 Route::post('application-for-approval/{id}/approvers/{approverId}/return', [ApplicationForApprovalController::class, 'returnApproval'])
     ->name('application-for-approval.return');
 
-
+Route::get('/const', function(){
+    $status= AppConstants::STATUS_PENDING;
+    dd($status);
+});
 // routes/web.php
 
 
