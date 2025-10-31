@@ -5,6 +5,7 @@ import { type BreadcrumbItem } from '@/types'
 import locators from '@/routes/locators'
 import applications from '@/routes/applications'
 import { router } from '@inertiajs/vue3'
+import TimeLine from '@/components/locator/TimeLine.vue'
 
 // Base URL (safe for SSR)
 const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
@@ -268,5 +269,6 @@ const submitReturn = () => {
         </div>
       </div>
     </div>
+    <TimeLine :data="props.approvers" />
   </LocatorAppSidebarLayout>
 </template>

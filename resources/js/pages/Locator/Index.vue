@@ -10,6 +10,7 @@ import { Users, FileText, UserPlus } from "lucide-vue-next"; // Lucide icons
 import applications from '@/routes/applications';
 import ApplicationTable from '@/components/common/ApplicationTable.vue';
 import TopCard from '@/components/common/TopCard.vue';
+import TimeLine from '@/components/locator/TimeLine.vue';
 
 // ✅ Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
@@ -38,6 +39,7 @@ const stats = ref({
   },
   bddCreatedUsers: 56,
 });
+const msg= "hello123";
 </script>
 
 <template>
@@ -46,7 +48,7 @@ const stats = ref({
   <locatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     
       <!-- Apply New -->
-       
+    
        <TopCard />
        
     <!---table-->
