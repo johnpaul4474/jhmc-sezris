@@ -137,7 +137,7 @@ class ApplicationController extends Controller
     $approver = ApproverGroupApprover::with(['approver', 'approverGroup'])
     ->where('approver_group_id', $approvers->approverGroup->id)
     ->where('application_form_id', $id)
-    ->get(['id', 'approver_id', 'sequence', 'role', 'status', 'acted_at', 'approver_group_id']);
+    ->get(['id', 'approver_id', 'sequence', 'role','remark', 'status', 'acted_at', 'approver_group_id']);
 
 
     //approver group ID

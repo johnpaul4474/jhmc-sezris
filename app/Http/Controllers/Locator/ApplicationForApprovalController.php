@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Locator\ApplicationForApproval;
 use App\Models\Locator\ApplicationModel;
 use Inertia\Inertia;
+use App\Models\ApproverGroup;
 use App\Models\Locator\ApproverGroupApprover;
 
 class ApplicationForApprovalController extends Controller
@@ -67,33 +68,34 @@ class ApplicationForApprovalController extends Controller
    public function approve(Request $request, $formNumber, $approverId)
 { 
     $appForm = ApplicationModel::where('form_number', $formNumber)->firstOrFail();
-
+    
     $applicationForApproval = ApplicationForApproval::where('application_id', $appForm->id)
         ->with('approverGroup.approvers')
         ->firstOrFail();
-
+    
     $group = $applicationForApproval->approverGroup;
     
-    // ✅ Update the approver's pivot record
-    $group->approvers()->updateExistingPivot($approverId, [
-        'status'   => 'Approved',
-        'acted_at' => now(),
-    ]);
-     
-    // ✅ Check if all approvers have approved
-    $remaining = $group->approvers()->wherePivot('status', '!=', 'Approved')->count();
-    if ($remaining === 0) {
-        $applicationForApproval->update([
-            'status'   => 'Approved',
-            'acted_at' => now(),
-        ]);
-        $appForm->update(['status' => 'Approved']);
-    }
+    $approverMember = ApproverGroupApprover::where('approver_id',$approverId)
+             ->where('application_form_id', $appForm->id)
+             ->where('approver_group_id', $group->id)
+             ->first();
+        $approverMember->status ='Approved';
+        $approverMember->acted_at = now();
+        $approverMember->save();
+       
+      $remaining = ApproverGroupApprover::pending()
+                ->where('approver_group_id',$group->id)
+                ->where('application_form_id', $appForm->id)
+                ->count();
 
-    // ✅ Reload all fresh data
-    //$applicationForApproval->load('approverGroup.approvers');
-    //$appForm->load('approvals'); // adjust this if ApplicationModel has a relation
+           if ($remaining === 0) {
+                $applicationForApproval->status='Approved';
+                $applicationForApproval->acted_at =now();
+                $applicationForApproval->save();
 
+                $appForm->status = 'Approved';
+                $appForm->save();
+            }
     // ✅ Return updated data to frontend
     return back()->with([
         'success' => 'Approved successfully.',
@@ -104,32 +106,47 @@ class ApplicationForApprovalController extends Controller
 
 
 public function returnApproval(Request $request, $formNumber, $approverId)
-{   
-    $appForm= ApplicationModel::where('form_number', $formNumber)->first();
+{  
+    $appForm= ApplicationModel::where('form_number', $request->form_number)->first();
 
     $applicationForApproval = ApplicationForApproval::where('application_id', $appForm->id)
-        ->with('approverGroup')
-        ->firstOrFail();
+                            ->with('approverGroup')
+                            ->firstOrFail();
 
     $group = $applicationForApproval->approverGroup;
+    
+     $approver = ApproverGroupApprover::where('approver_id', $request->currentApproverId)
+               ->where('application_form_id',$applicationForApproval->application_id)
+               ->first();
+     
+                if ($approver) {
+                    $prevApprover = ApproverGroupApprover::where('approver_group_id', $approver->approver_group_id)
+                    ->where('application_form_id', $applicationForApproval->application_id)
+                        ->where('sequence', ($approver->sequence - 1))
+                        ->first();
+                       
+                    if ($prevApprover) {
+                        $prevApprover->status = 'Pending';
+                        $prevApprover->remark = $request->remark;
+                        $prevApprover->save();
+                       
+                    } 
+                }
+             
 
-    // Update pivot table with status and remark
-    $group->approvers()->updateExistingPivot($approverId, [
+     // Optionally mark the whole application as returned
+    $applicationForApproval->update([
         'status'   => 'Returned',
         'remark'   => $request->input('remark'),
         'acted_at' => now(),
     ]);
-     $Approver = ApproverGroupApprover::where('approver_id',$approverId)->first();
-     $prevApprover = ApproverGroupApprover::where('sequence',($Approver->sequence - 1))->first();
-      $prevApprover->status = 'Pending';
-      $prevApprover->save();
-     // Optionally mark the whole application as returned
-    $applicationForApproval->update([
-        'status'   => 'Returned',
-        'acted_at' => now(),
-    ]);
 
-    return back()->with('success', 'Application returned successfully.');
+    return back()->with([
+        'success' => 'Returned',
+        'application' => $appForm,
+        'approvers' => $group->approvers,
+        'remark' =>$request->remark,
+    ]);
 }
 
 

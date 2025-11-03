@@ -1,55 +1,88 @@
 <script setup>
+import { Check, Clock, X } from 'lucide-vue-next'
+
 const props = defineProps({
   data: {
     type: Array,
     default: () => [],
   },
-});
+})
+
+// Map status → color
+const statusColor = (status) => {
+  switch ((status || '').toLowerCase()) {
+    case 'approved':
+      return 'bg-green-500'
+    case 'pending':
+      return 'bg-yellow-400'
+    case 'rejected':
+      return 'bg-red-500'
+    default:
+      return 'bg-gray-400'
+  }
+}
 </script>
 
 <template>
   <div class="p-4 bg-white shadow rounded">
-    <h2 class="text-lg font-bold mb-4 text-gray-800">Approvers Timeline</h2>
+    <h2 class="text-lg font-bold mb-6 text-gray-800">Approvers Timeline</h2>
 
-    <div class="flex items-center justify-between overflow-x-auto py-6 px-2">
-      <div
-        v-for="(approver, index) in props.data"
-        :key="approver.id"
-        class="flex flex-col items-center relative min-w-[140px]"
-      >
-        <!-- Connector line -->
-        <div
-          v-if="index !== props.data.length - 1"
-          class="absolute top-[18px] left-1/2 w-full h-1 bg-gray-300 z-0 translate-x-1/2"
-        ></div>
-
-        <!-- Step circle -->
-        <div
-          class="flex items-center justify-center w-9 h-9 rounded-full z-10 border-4 border-white text-white font-bold text-sm"
-          :class="{
-            'bg-green-500': approver.pivot.status === 'Approved',
-            'bg-yellow-400': approver.pivot.status === 'Pending',
-            'bg-red-500': approver.pivot.status === 'Rejected',
-            'bg-gray-400': !approver.pivot.status,
-          }"
-        >
-          {{ index + 1 }}
-        </div>
-
-        <!-- Approver Info -->
-        <div class="text-center mt-3 w-full px-2">
-          <p class="font-semibold text-gray-700 truncate">{{ approver.name }}</p>
-          <p class="text-sm text-gray-500 capitalize">
-            {{ approver.pivot.status || '—' }}
-          </p>
-          <p
-            v-if="approver.pivot.acted_at"
-            class="text-xs text-gray-400"
+    <div class="flex items-center overflow-x-auto space-x-8 relative px-4 pb-6">
+      <template v-for="(approver, index) in props.data" :key="approver.id">
+        <div class="flex flex-col items-center relative min-w-[140px]">
+          <!-- Connector line -->
+          <div
+            v-if="index < props.data.length - 1"
+            class="absolute top-[18px] left-1/2 h-1 w-[calc(100%+2rem)] z-0 flex items-center"
           >
-            {{ new Date(approver.pivot.acted_at).toLocaleString() }}
-          </p>
+            <div
+              class="flex-1 h-1 rounded-full relative"
+              :class="statusColor(approver.pivot.status)"
+            >
+              <!-- Arrowhead -->
+              <div
+                class="absolute right-0 -top-[4px] w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[10px]"
+                :class="{
+                  'border-l-green-500': approver.pivot.status === 'Approved',
+                  'border-l-gray-400': approver.pivot.status === 'Pending',
+                  'border-l-red-500': approver.pivot.status === 'Rejected',
+                  'border-l-gray-400': !approver.pivot.status,
+                }"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Step icon -->
+          <div
+            class="flex items-center justify-center w-10 h-10 rounded-full z-10 border-4 border-white text-white shadow"
+            :class="statusColor(approver.pivot.status)"
+          >
+            <template v-if="approver.pivot.status === 'Approved'">
+              <Check class="w-5 h-5 text-white" />
+            </template>
+            <template v-else-if="approver.pivot.status === 'Rejected'">
+              <X class="w-5 h-5 text-white" />
+            </template>
+            <template v-else>
+              <Clock class="w-5 h-5 text-white" />
+            </template>
+          </div>
+
+          <!-- Approver Info -->
+          <div class="text-center mt-3 w-full px-2">
+            <p class="font-semibold text-gray-700 truncate">{{ approver.name }}</p>
+            <p class="text-sm text-gray-500 capitalize">
+              {{ approver.pivot.status || '—' }}
+            </p>
+            <p v-if="approver.pivot.remark" class="text-xs text-gray-400">
+              {{ approver.pivot.remark }}
+            </p>
+            <p v-if="approver.pivot.acted_at" class="text-xs text-gray-400">
+              {{ new Date(approver.pivot.acted_at).toLocaleString() }}
+            </p>
+          </div>
         </div>
-      </div>
+      </template>
     </div>
 
     <div
@@ -60,12 +93,3 @@ const props = defineProps({
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Slight tweak for connector positioning */
-div[role='timeline'] {
-  display: flex;
-  justify-content: space-between;
-  position: relative;
-}
-</style>

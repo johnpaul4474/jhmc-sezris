@@ -27,6 +27,7 @@ createInertiaApp({
   setup({ el, App, props, plugin }) {
     const vueApp = createApp({ render: () => h(App, props) })
     vueApp.use(plugin)
+    
 
     // ✅ Register your data table component globally
     vueApp.component('EasyDataTable', Vue3EasyDataTable)

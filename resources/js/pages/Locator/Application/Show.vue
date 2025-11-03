@@ -4,9 +4,9 @@ import LocatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.v
 import { type BreadcrumbItem } from '@/types'
 import locators from '@/routes/locators'
 import applications from '@/routes/applications'
-import { router } from '@inertiajs/vue3'
+import { router, usePage,useForm } from '@inertiajs/vue3'
 import TimeLine from '@/components/locator/TimeLine.vue'
-
+const page = usePage()
 // Base URL (safe for SSR)
 const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
 
@@ -59,7 +59,7 @@ const currentApproverId = ref<number | null>(null)
 
 // Check if approver can act (approve/return)
 const canAct = (approver: any) => {
-  console.log(approver)
+
   if (!approver?.pivot) return false
   // if already approved, skip
   if (approver.pivot.status === 'Approved') return false
@@ -93,21 +93,29 @@ const handleReturnClick = (approverId: number) => {
   showReturnModal.value = true
 }
 
-// Submit return action
+const form = useForm({
+  remark: '',
+  currentApproverId: null, 
+  form_number:null,
+})
+
 const submitReturn = () => {
   if (!currentApproverId.value) return
-  router.post(
+  form.currentApproverId = currentApproverId.value
+  form.form_number = props.application.form_number
+  form.post(
     `/application-for-approval/${props.application.form_number}/approvers/${currentApproverId.value}/return`,
-    { remark: returnRemark.value },
     {
       onSuccess: (page) => {
+        console.log(returnRemark)
         const idx = approvers.value.findIndex(a => a.id === currentApproverId.value)
         if (idx !== -1) {
-          approvers.value[idx].status = 'Returned'
-          approvers.value[idx].remark = returnRemark.value
+          approvers.value[idx].pivot.status = page.props.flash?.success || 'Returned'
+          approvers.value[idx].pivot.remark = page.props.flash?.remark
         }
+
         showReturnModal.value = false
-        returnRemark.value = ''
+        form.reset()
       },
     }
   )
@@ -121,6 +129,7 @@ const submitReturn = () => {
       <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
         {{ props.application.form_title }}
       </h1>
+      <pre>Current LoggedIn User ID: {{ page.props.auth.user.id }}</pre>
       <p class="text-gray-600 dark:text-gray-400">
         Application #{{ props.application.id }} • Status:
         <span
@@ -134,7 +143,9 @@ const submitReturn = () => {
         </span>
       </p>
     </div>
+    <pre>
 
+</pre>
     <!-- Basic Info -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
       <div
@@ -215,15 +226,16 @@ const submitReturn = () => {
                   {{ approver.pivot.status ?? 'Waiting for Approval' }}
                 </span>
               </td>
-              <td class="p-2">{{ approver.remark ?? '—' }}</td>
+              <td class="p-2">{{ approver.pivot.remark }}</td>
               <td class="p-2 flex gap-2">
                 <button
-                  v-if="canAct(approver)"
-                  @click="handleApprove(approver.id)"
-                  class="px-3 py-1 rounded bg-green-600 hover:bg-green-700 text-white text-xs font-medium"
-                >
-                  Approve
-                </button>
+  v-if="canAct(approver)"
+  @click="handleApprove(approver.id)"
+  class="px-3 py-1 rounded bg-green-600 hover:bg-green-700 text-white text-xs font-medium"
+>
+  Approve
+</button>
+
 
                 <button
                   v-if="canAct(approver)"
@@ -248,8 +260,10 @@ const submitReturn = () => {
         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
           Return Remark
         </h3>
+        <input type="hidden" 
+        value="456" />
         <textarea
-          v-model="returnRemark"
+          v-model="form.remark"
           placeholder="Enter remark..."
           class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded mb-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
         ></textarea>
