@@ -17,6 +17,7 @@ class ApproverGroupApprover extends Pivot
         'approver_id',
         'sequence',
         'status',
+        'role',
         'remark',
         'application_form_id',
     ];

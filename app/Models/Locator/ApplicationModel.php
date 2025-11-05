@@ -70,4 +70,27 @@ class ApplicationModel extends Model
     {
         return $this->hasOne(\App\Models\Locator\ApplicationForApproval::class, 'application_id');
     }
+    
+    public function meta()
+{
+    return $this->hasMany(\App\Models\Locator\ApplicationMeta::class, 'application_id');
+}
+    public function setMeta(string $key, mixed $value): void
+    {
+        $this->meta()->updateOrCreate(
+            ['meta_key' => $key],
+            ['meta_value' => $value]
+        );
+    }
+
+    // 🧩 Helper: getMeta
+    public function getMeta(string $key, mixed $default = null): mixed
+    {
+        $meta = $this->meta()->where('meta_key', $key)->first();
+        return $meta ? $meta->meta_value : $default;
+    }
+    public function application()
+    {
+        return $this->belongsTo(ApplicationModel::class, 'application_id');
+    }
 }

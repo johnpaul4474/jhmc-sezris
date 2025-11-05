@@ -75,7 +75,7 @@ const statusColor = (status) => {
               {{ approver.pivot.status || '—' }}
             </p>
             <p v-if="approver.pivot.remark" class="text-xs text-gray-400">
-              {{ approver.pivot.remark }}
+           <b class="text-gray-700"> Remark:</b> {{ approver.pivot.remark ?? '-' }}
             </p>
             <p v-if="approver.pivot.acted_at" class="text-xs text-gray-400">
               {{ new Date(approver.pivot.acted_at).toLocaleString() }}

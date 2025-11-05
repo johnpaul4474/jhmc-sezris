@@ -26,6 +26,7 @@ class ApplicationController extends Controller
      */
     public function index()
      { 
+
         
         $application = ApplicationModel::with(['selections.option', 'selections.user'])
             ->latest()
@@ -97,7 +98,7 @@ class ApplicationController extends Controller
         'approver_group_id' => $set->approver_group_id,
         'approver_id'       => $set->user_id,
         'level'             => $set->level,
-        'sequence'           => $set->sequence,
+        'sequence'          => $set->sequence,
         'role'              => $set->role,
         'application_form_id'=>$application->id, 
         'status'            => AppConstants::STATUS_PENDING,         

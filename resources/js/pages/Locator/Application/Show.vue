@@ -6,6 +6,8 @@ import locators from '@/routes/locators'
 import applications from '@/routes/applications'
 import { router, usePage,useForm } from '@inertiajs/vue3'
 import TimeLine from '@/components/locator/TimeLine.vue'
+import UploadsTable from '@/components/locator/UploadsTable.vue'
+import ArticleDetailTable from '@/components/locator/ArticleDetailTable.vue'
 const page = usePage()
 // Base URL (safe for SSR)
 const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
@@ -125,6 +127,8 @@ const submitReturn = () => {
 <template>
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     <!-- Title -->
+     
+
     <div class="mb-6">
       <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
         {{ props.application.form_title }}
@@ -143,9 +147,7 @@ const submitReturn = () => {
         </span>
       </p>
     </div>
-    <pre>
-
-</pre>
+   
     <!-- Basic Info -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
       <div
@@ -167,9 +169,25 @@ const submitReturn = () => {
         </ul>
       </div>
     </div>
+    <ArticleDetailTable
+    title="Article Details"
+    :details="props.application.article_details"
+    :showActions="false"
+    @view=""
+    @edit=""
+    @delete=""
+  />
 
+    <!---Uploads-->
+   <UploadsTable
+    title="Uploaded Supporting Document/s"
+    :files="props.application.uploads"
+    :showActions="false"
+    @view=""
+    @delete=""
+  />
     <!-- Approver Group -->
-    <div v-if="props.approverGroup" class="mb-8">
+    <div v-if="props.approverGroup" class="mb-8 hidden">
       <h2 class="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Approver Group</h2>
       <div
         class="p-4 border rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm"
@@ -213,7 +231,7 @@ const submitReturn = () => {
               <td class="p-2">{{ index + 1 }}</td>
               <td class="p-2">{{ approver.name }}</td>
               <td class="p-2">{{ approver.email }}</td>
-              <td class="p-2">{{ approver.role ?? 'N/A' }}</td>
+              <td class="p-2">{{ approver.pivot.role ?? 'N/A' }}</td>
               <td class="p-2 text-center">{{ approver.sequence ?? '-' }}</td>
               <td class="p-2">
                 <span

@@ -5,6 +5,7 @@ use App\Http\Controllers\Locator\ArticleDetailController;
 use App\Http\Controllers\Locator\UploadController;
 use App\Http\Controllers\Locator\ApplicationForApprovalController;
 use App\Helpers\AppConstants;
+use App\Models\Locator\ApplicationModel;
 
 
 Route::get('/locator', [LocatorController::class, 'index'])->name('locators.index');
@@ -35,9 +36,13 @@ Route::post('application-for-approval/{form_number}/approvers/{approverId}/appro
 Route::post('application-for-approval/{id}/approvers/{approverId}/return', [ApplicationForApprovalController::class, 'returnApproval'])
     ->name('application-for-approval.return');
 
-Route::get('/const', function(){
-    $status= AppConstants::STATUS_PENDING;
-    dd($status);
+//how form meta works
+Route::get('/test-meta', function(){
+   $applicationTest = App\Models\Locator\ApplicationModel::find(15);
+   $applicationTest->setMeta('processing', 'processing required.');
+    $meta= $applicationTest->getMeta('processing');
+dd($meta);
+
 });
 // routes/web.php
 

@@ -19,7 +19,6 @@ class LocatorController extends Controller
     public function index(){
          abort_unless(auth()->check(), 403, 'Unauthorized');
          $applications = auth()->user()?->applications ?? [];
-         //abort_unless(!auth()->id(), 403);
         return Inertia::render('Locator/Index', [
             'applications' => $applications,
         ]);
@@ -30,24 +29,28 @@ class LocatorController extends Controller
     }
     public function pendingList()
     {
-        
-$applications = ApplicationForApproval::with([
+     $appForm_number = ApplicationModel::where('user_id', Auth::id())->pluck('form_number');
+     $applications = ApplicationForApproval::with([
         'application',
         'approverGroup.approvers'
     ])
-    ->where('status','Pending')
-    //->assignedToUser(Auth::user())
+    ->whereIn('form_number', $appForm_number)
+    ->where('status', 'Pending')
     ->get();
-
          return Inertia::render('Locator/Application/Pending', [
             'applications' => $applications,
         ]);
     }
 
     public function approvedList(){
-        $applications = ApplicationModel::where('user_id', Auth::id())
-    ->where('status', 'approved')
-    ->get();
+        $appIds = ApplicationModel::where('user_id', Auth::id())->pluck('id');
+        $applications = ApplicationForApproval::with([
+                        'application',
+                        'approverGroup.approvers'
+                        ])
+                        ->whereIn('application_id', $appIds)
+                        ->where('status', 'Approved')
+                        ->get();
 
         return Inertia::render('Locator/Application/Approved', [
             'applications' => $applications,
