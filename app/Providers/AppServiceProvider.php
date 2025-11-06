@@ -15,11 +15,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(ApplicationService::class, ApplicationService::class);
-    $this->app->bind(UploadService::class, UploadService::class);
-
-    // You can also bind the default interface if you want
-    $this->app->bind(ISezrisService::class, ApplicationService::class);
+       
     }
 
     /**
@@ -27,8 +23,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (app()->environment('local')) {
-      //  URL::forceScheme('https');
-    }
+        
     }
 }
