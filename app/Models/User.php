@@ -66,6 +66,17 @@ class User extends Authenticatable
                 ->withPivot('sequence')
                 ->orderBy('pivot_sequence', 'asc');
     }
+    public function approverGroup()
+{
+    return $this->belongsToMany(
+        \App\Models\ApproverGroup::class,
+        'approver_group_approver',
+        'approver_id',
+        'approver_group_id'
+    )
+    ->withPivot('sequence')
+    ->orderBy('pivot_sequence', 'asc');
+}
 
 
     public function details()

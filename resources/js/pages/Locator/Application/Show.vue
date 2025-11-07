@@ -216,7 +216,6 @@ const submitReturn = () => {
               <th class="p-2">Name</th>
               <th class="p-2">Email</th>
               <th class="p-2">Role</th>
-              <th class="p-2">Sequence</th>
               <th class="p-2">Status</th>
               <th class="p-2">Remark</th>
               <th class="p-2">Actions</th>
@@ -232,7 +231,7 @@ const submitReturn = () => {
               <td class="p-2">{{ approver.name }}</td>
               <td class="p-2">{{ approver.email }}</td>
               <td class="p-2">{{ approver.pivot.role ?? 'N/A' }}</td>
-              <td class="p-2 text-center">{{ approver.sequence ?? '-' }}</td>
+             
               <td class="p-2">
                 <span
                   :class="{
@@ -247,10 +246,11 @@ const submitReturn = () => {
               <td class="p-2">{{ approver.pivot.remark }}</td>
               <td class="p-2 flex gap-2">
                 <button
-  v-if="canAct(approver)"
+  v-if=" canAct(approver)"
   @click="handleApprove(approver.id)"
   class="px-3 py-1 rounded bg-green-600 hover:bg-green-700 text-white text-xs font-medium"
 >
+
   Approve
 </button>
 
@@ -301,6 +301,7 @@ const submitReturn = () => {
         </div>
       </div>
     </div>
+   
     <TimeLine :data="props.approvers" />
   </LocatorAppSidebarLayout>
 </template>

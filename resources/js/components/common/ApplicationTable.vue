@@ -38,8 +38,9 @@ const emit = defineEmits(['view', 'edit', 'delete'])
           :key="app.id"
           class="hover:bg-gray-50 dark:hover:bg-gray-800 transition"
         >
+        
           <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{{ index + 1 }}</td>
-          <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-100">{{ app.form_title }}</td>
+          <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-100">{{ app.form_title || '-' }}</td>
           <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{{ app.control_number ?? 'N/A' }}</td>
           <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{{ app.form_number ?? '—' }}</td>
           <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 capitalize">{{ app.status ?? 'N/A' }}</td>

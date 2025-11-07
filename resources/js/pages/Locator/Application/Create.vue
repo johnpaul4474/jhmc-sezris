@@ -131,11 +131,14 @@ function handleApply(applicationId: string | number) {
 // 📑 Form Type Selection
 function selectForm(f: any) {
   createForm.type = f.name
+  approvalForm.approver_group_id = f.approver_group_id
+  
 }
 </script>
 
 <template>
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
+    {{ props.approverGroupId }}
     <TopCard/>
     <div class="p-6 w-full mx-6 bg-white shadow-xl rounded-xl border border-gray-100 dark:bg-gray-900 dark:border-gray-700">
 

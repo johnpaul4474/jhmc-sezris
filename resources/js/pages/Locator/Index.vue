@@ -39,7 +39,7 @@ const stats = ref({
   },
   bddCreatedUsers: 56,
 });
-const msg= "hello123";
+
 </script>
 
 <template>
@@ -48,9 +48,9 @@ const msg= "hello123";
   <locatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     
       <!-- Apply New -->
-        {{ page.props.auth.user }}
-       <TopCard />
       
+       <TopCard />
+     
     <!---table-->
      <div class="mt-6 overflow-x-auto">
  

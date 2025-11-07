@@ -17,7 +17,7 @@ use App\Models\ApproverSets;
 use App\Models\Locator\ApproverGroupApprover;
 use App\Models\Locator\ApplicationForApproval;
 use App\Helpers\AppConstants;
-
+use Illuminate\Support\Facades\Log;
 
 class ApplicationController extends Controller
 {
@@ -67,12 +67,11 @@ class ApplicationController extends Controller
     public function create()
 {    $form = Form::all();
      $user = auth()->user();
-   
     return Inertia::render('Locator/Application/Create', [
         'user' => $user,
         'application_form_id' => null,
         'form' => $form,
-        'approverGroupId' => $form[0]->approver_group_id,
+        'approverGroupId' => null,
         
     ]);
 }
@@ -91,23 +90,27 @@ class ApplicationController extends Controller
         $approver = Form::where('name',$request->input('type'))->first();
         $sets = ApproverSets::where('approver_group_id',$approver->approver_group_id)->get();
         
-        
         //create new Sets of ApprovergroupApprover 
         foreach ($sets as $set) {
-    ApproverGroupApprover::create([
-        'approver_group_id' => $set->approver_group_id,
-        'approver_id'       => $set->user_id,
-        'level'             => $set->level,
-        'sequence'          => $set->sequence,
-        'role'              => $set->role,
-        'application_form_id'=>$application->id, 
-        'status'            => AppConstants::STATUS_PENDING,         
-    ]);
+            //set the Role of reciever that needs to recieve emails
+            // if($set->role === 'Manager'){
+            //    $reciever = User::where('id',$set->user_id)->first();
+            //    Log::info('Send Email to:', ['user Email: ' => $reciever->email ,"id" =>$reciever->id]); 
+            // }
+    ApproverGroupApprover::query()->insert([
+    'approver_group_id' => $set->approver_group_id,
+    'approver_id'       => $set->user_id,
+    'sequence'          => $set->sequence,
+    'role'              => $set->role,
+    'application_form_id'=> $application->id,
+    'status'            => AppConstants::STATUS_PENDING,
+    'created_at'        => now(),
+    'updated_at'        => now(),
+]);
    
 }
       
     // Collection of all options
-   
     return Inertia::render('Locator/Application/Create', [
         'user' => $user,
         'application_form_id' => $application->id, // Pass the new ID
@@ -116,7 +119,7 @@ class ApplicationController extends Controller
         'form_title' => $application->form_title,
         'start_date' => $application->created_at,
     'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
-    'approverGroupId' => $application->approver_group_id,
+    'approverGroupId' => $approver->approver_group_id,
 
     ]);
 
@@ -139,17 +142,14 @@ class ApplicationController extends Controller
     ->where('approver_group_id', $approvers->approverGroup->id)
     ->where('application_form_id', $id)
     ->get(['id', 'approver_id', 'sequence', 'role','remark', 'status', 'acted_at', 'approver_group_id']);
-
-
-    //approver group ID
-    //$approvers->approverGroup->id;  
+     
      if($approvers->approverGroup->allApproversStatusApproved()){
-    //if All Approvers status is Approved update ApplicationForm and ApplicationForApproval status to Approved
           $application->status= AppConstants::STATUS_APPROVED;
           $application->save();
           $approvers->status = AppConstants::STATUS_APPROVED;
           $approvers->save();
-     }    
+     }   
+    
     return Inertia::render('Locator/Application/Show', [
     'application' => $application,
     'approverGroup' => $approvers?->approverGroup,

@@ -6,6 +6,7 @@ use App\Http\Controllers\Locator\UploadController;
 use App\Http\Controllers\Locator\ApplicationForApprovalController;
 use App\Helpers\AppConstants;
 use App\Models\Locator\ApplicationModel;
+use App\Models\User;
 
 
 Route::get('/locator', [LocatorController::class, 'index'])->name('locators.index');
@@ -44,6 +45,18 @@ Route::get('/test-meta', function(){
 dd($meta);
 
 });
+// Route::get('/app', function(){
+//     $date= now();
+//  $applications = ApplicationModel::where('user_id', Auth::id())
+//     ->where('form_title', 'ATO')
+//     ->where('status', 'Approved')
+//     ->first();
+//   $applications->setMeta('verified','ATOS123');   
+//   $expiration= $applications->getMeta('Expiration');
+//  $meta = $applications->meta;
+//     dump($expiration === 'ATOS123' );
+    
+// });
 // routes/web.php
 
 

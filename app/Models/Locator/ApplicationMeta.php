@@ -10,6 +10,9 @@ class ApplicationMeta extends Model
     use HasFactory;
 
     protected $table = 'application_meta';
+    public $incrementing = false; // no auto-increment
+    protected $primaryKey = null; // no primary key
+    public $timestamps = false;
 
     protected $fillable = [
         'application_form_id',
@@ -17,7 +20,7 @@ class ApplicationMeta extends Model
         'meta_value',
         
     ];
-    public $timestamps = false;
+   
     public function application()
     {
         return $this->belongsTo(ApplicationModel::class, 'application_form_id');

@@ -27,8 +27,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 // Optional table action handlers
 function handleView(app: any) {
-  console.log('View', app)
-  router.visit(`/loctr/applications/${app.id}`)
+  router.visit(`/loctr/applications/${app.application_id}`)
 }
 
 function handleEdit(app: any) {

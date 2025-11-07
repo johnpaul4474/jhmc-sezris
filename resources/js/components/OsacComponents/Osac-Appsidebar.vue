@@ -2,6 +2,7 @@
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
+import NavMainOSAC from '@/layouts/Osac/NavMainOSAC.vue';
 import {
     Sidebar,
     SidebarContent,
@@ -23,20 +24,21 @@ const mainNavItems: NavItem[] = [
         title: 'Osac',
         href: '/osac',
         icon: LayoutGrid,
+        children: [
+      {
+        title: "Pending Applications",
+        href: "/applications/all",
+      },
+      {
+        title: "Apply for Locator",
+        href:"#",
+      },{
+        title:"Assigned to Me",
+        href:"#",
+      }
+    ],
     },
-    {
-        title: 'Applications For Approval',
-        href: '#',
-        icon: SquareUserRound,
-    },{
-        title: 'Assigned To Me',
-        href: '#',
-        icon: Clock,
-    },{
-        title: 'My Pending',
-        href: '#',
-        icon: Eye,
-    },
+    
 ];
 
 const footerNavItems: NavItem[] = [
@@ -59,12 +61,13 @@ const footerNavItems: NavItem[] = [
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :items="mainNavItems" />
+            <NavMainOSAC :items="mainNavItems" />
+           
         </SidebarContent>
 
         <SidebarFooter>
             <NavFooter :items="footerNavItems" />
-            <NavUser />
+             <NavUser />
         </SidebarFooter>
     </Sidebar>
    

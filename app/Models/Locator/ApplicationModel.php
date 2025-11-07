@@ -76,12 +76,17 @@ class ApplicationModel extends Model
     return $this->hasMany(\App\Models\Locator\ApplicationMeta::class, 'application_id');
 }
     public function setMeta(string $key, mixed $value): void
-    {
-        $this->meta()->updateOrCreate(
-            ['meta_key' => $key],
-            ['meta_value' => $value]
-        );
-    }
+{
+    $this->meta()->updateOrCreate(
+        [
+            'application_id' => $this->id,
+            'meta_key' => $key,
+        ],
+        [
+            'meta_value' => $value,
+        ]
+    );
+}
 
     // 🧩 Helper: getMeta
     public function getMeta(string $key, mixed $default = null): mixed
