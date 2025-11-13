@@ -48,13 +48,15 @@ dd($meta);
 
 });
 Route::get('/app', function(){
-    $date= now();
-    $user = Auth::user();
+    $app = ApplicationModel::all();
+    dump($app);
+//     $date= now();
+//     $user = Auth::user();
 
-$applications = $user->applications()
-    ->where('form_title', 'ATO')
-    ->where('status', 'Approved')
-    ->get();
+// $applications = $user->applications()
+//     ->where('form_title', 'ATO')
+//     ->where('status', 'Approved')
+//     ->get();
 
 //dd(count($applications) > 0);
 //     $ato = User

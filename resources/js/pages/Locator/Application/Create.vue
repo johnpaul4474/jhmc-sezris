@@ -10,12 +10,13 @@ import Alert from '@/components/locator/Alert.vue'
 import { Button } from '@/components/ui/button'
 import TopCard from '@/components/common/TopCard.vue'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
-
+import { usePage } from '@inertiajs/vue3'
 import locators from '@/routes/locators'
 import applications from '@/routes/applications'
 import { type BreadcrumbItem } from '@/types'
 
 // 🧭 Props
+const page = usePage()
 const props = defineProps({
   user: Object,
   application_form_id: [String, Number],
@@ -37,7 +38,8 @@ const props = defineProps({
 const articles = ref<any[]>([])
 const uploadedFiles = ref<any[]>([])
 const localPrice = ref(props.price ?? null)
-const buttonVisible = ref(true)
+const buttonVisible = ref(false)
+const forApproval = ref(false)
 const approverGroupId = ref(props.approverGroupId)
 const applicationId = ref(props.application_form_id)
 
@@ -115,7 +117,8 @@ function submit() {
     onStart: () => { createForm.processing = true },
     onSuccess: () => { buttonVisible.value = false },
     onError: () => { buttonVisible.value = true },
-    onFinish: () => { createForm.processing = false },
+    onFinish: () => { createForm.processing = false 
+                    forApproval.value = true},
   })
 }
 
@@ -130,16 +133,18 @@ function handleApply(applicationId: string | number) {
 
 // 📑 Form Type Selection
 function selectForm(f: any) {
+  console.log('selected'+f)
   createForm.type = f.name
   approvalForm.approver_group_id = f.approver_group_id
-  
+  buttonVisible.value = true
 }
 </script>
 
 <template>
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     
-    <TopCard/>
+    <TopCard :stats="page.props.applications[0].status"/>
+    {{ page }}
     <div class="p-6 w-full mx-6 bg-white shadow-xl rounded-xl border border-gray-100 dark:bg-gray-900 dark:border-gray-700">
 
       <!-- 🏷 Title -->
@@ -148,12 +153,14 @@ function selectForm(f: any) {
       </h1>
 
       <!-- Alerts & Info -->
-      <div v-if="props.application_form_id" class="text-right space-y-1 mb-4">
+      <div v-if="props.application_form_id" class="text-left space-y-1 mb-4">
         <Alert message="You can now list Declared Article Detail" type="success" :duration="10000"/>
         <!--Alert message="You can now choose your Declared value and Validity Period" type="success" :duration="10000"/-->
         <Alert v-if="selectedDeclaredValue" message="You can now Upload Supporting Documents" type="info" :duration="10000"/>
         <Alert v-if="uploadedFiles.length" message="You can now Submit Application for Approval." type="success" :duration="10000"/>
-
+        <p v-if="props.form_number" class="text-sm text-gray-500">
+          <b>Applicant:</b> {{ props.user?.name }}
+        </p>
         <p v-if="props.form_number" class="text-sm text-gray-500">
           <b>Form Number:</b> {{ props.form_number }}
         </p>
@@ -174,7 +181,7 @@ function selectForm(f: any) {
           <b>Expires On:</b> {{ new Date(props.expired_at).toLocaleDateString() }}
         </p>
       </div>
-<div v-if="props.application_form_id" class="mt-8">
+<div v-if="props.application_form_id" class="mt-8 mb-5">
           <DynamicFormRepeater
             :formId="props.application_form_id"
             v-model="articles"
@@ -185,19 +192,16 @@ function selectForm(f: any) {
       <form @submit.prevent="submit" class="space-y-6">
 
         <!-- Creator -->
-        <div>
-          <label class="block text-sm font-medium mb-1">Application Creator</label>
-          <span>{{ props.user?.name }}</span>
-        </div>
+        
 
         <!-- Application Type -->
         <div v-if="!props.form_title">
-          <label class="block text-sm font-medium mb-1">Application Type</label>
+          <label class="block text-sm font-medium mb">Application Type</label>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <Button variant="ghost" class="w-full justify-between">
                 <span>{{ createForm.type || '-- Select application type --' }}</span>
-                <svg class="ml-2 h-4 w-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="ml-2 h-4 w-4 opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </Button>
@@ -255,12 +259,16 @@ function selectForm(f: any) {
 
         <!-- Action Buttons -->
         <div class="pt-4 flex justify-center space-x-4">
-          <Button v-if="buttonVisible" type="submit" class="px-5 py-2 bg-gray-200 hover:bg-gray-300">
+          <Button 
+          v-if="buttonVisible" 
+          type="submit" 
+          class="px-5 py-2 bg-blue-500 hover:bg-gray-300"
+          >
             Generate Form-ID
           </Button>
 
           <Button
-            v-else
+            v-if="forApproval"
             type="button"
             class="px-5 py-2 bg-blue-500 text-white hover:bg-blue-600"
             @click="handleApply(props.application_form_id)"

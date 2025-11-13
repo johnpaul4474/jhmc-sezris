@@ -17,7 +17,18 @@ const props = defineProps({
     required: true,
     default: () => [],
   },
+  ATO: {
+    type: String,
+    required: true,
+    default: '', // optional default
+  }
 })
+const stats = {
+  atoCertified: '',
+  activeUsers: '',
+  sezadRequests: '',
+  bddUsers: '',
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Locator', href: locators.index.url() },
@@ -42,7 +53,8 @@ function handleDelete(app: any) {
 
 <template>
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
-    <TopCard />
+    <TopCard :stats="props.ATO[0].status"/>
+   
     <h1 class="text-2xl font-bold mb-4">Pending Application Lists</h1>
   
   

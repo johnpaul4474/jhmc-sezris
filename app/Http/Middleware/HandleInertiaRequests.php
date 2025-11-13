@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Inspiring;
 use Inertia\Middleware;
+use App\Models\Locator\ApplicationModel;
+use Illuminate\Support\Facades\Auth;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -28,11 +30,15 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        // Split inspiring quote into message and author
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
-        return [
-            ...parent::share($request),
+        // Only fetch applications if the user is authenticated
+        $applications = $request->user()
+    ? ApplicationModel::where('user_id', Auth::id())->where('form_title', 'ATO')->get()->toArray()
+    : [];
 
+        return array_merge(parent::share($request), [
             // 🌐 Global app data
             'app' => [
                 'name' => config('app.name'),
@@ -51,12 +57,15 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') 
                 || $request->cookie('sidebar_state') === 'true',
 
-            // 💬 Flash messages (available in all Vue pages)
+            // 💬 Flash messages
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error'   => $request->session()->get('error'),
                 'info'    => $request->session()->get('info'),
             ],
-        ];
+
+            // 📝 Applications
+            'applications' => $applications,
+        ]);
     }
 }

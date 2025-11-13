@@ -30,15 +30,22 @@ const props = defineProps({
 });
 
 // ✅ Temporary stats object (mock data)
-const stats = ref({
-  activeUsers: 124,
-  sezadRequests: {
-    new: 12,
-    pending: 8,
-    declined: 3,
-  },
-  bddCreatedUsers: 56,
-});
+const status = {
+  atoCertified: 'ATO Certified',
+  activeUsers: 'Users',
+  sezadRequests: 'Requests',
+  bddUsers: 'Valid',
+}
+
+
+
+const app = page.props.applications[0].status
+if (app?.status === 'Pending') {
+  status.atoCertified = 'ATO Expired'
+} else if (app?.status === 'Approved') {
+  status.atoCertified = 'ATO Certified'
+}
+
 
 </script>
 
@@ -49,7 +56,7 @@ const stats = ref({
     
       <!-- Apply New -->
       
-       <TopCard />
+       <TopCard :stats="page.props.applications[0].status"/>
      
     <!---table-->
      <div class="mt-6 overflow-x-auto">
