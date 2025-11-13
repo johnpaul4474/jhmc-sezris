@@ -128,10 +128,10 @@ watch(() => props.modelValue, (newVal) => {
     <!-- Add Button -->
     <button
       @click="openModal"
-      class="flex items-center space-x-2 px-3 py-1 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition"
+      class="flex items-center space-x-2 px-3 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition"
     >
       <Plus class="w-5 h-5" />
-      <span>List Article</span>
+      <span>Add Article</span>
     </button>
 
     <!-- Table -->

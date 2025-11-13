@@ -71,9 +71,11 @@ class ArticleDetailController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-{
+{   
     $article = ArticleDetail::findOrFail($id);
+    if($article){
 
+    }
     $validated = $request->validate([
         'marks_and_number' => 'sometimes|required|string',
         'qty' => 'sometimes|required|integer|min:1',
@@ -96,5 +98,26 @@ class ArticleDetailController extends Controller
 
     // Return 204 for AJAX
     return response()->noContent(); 
+}
+public function verifyArticle(Request $request, $id)
+{
+    // $id comes from the URL /loctr/articles/{id}
+    $article = ArticleDetail::find($id);
+
+    if (!$article) {
+        return response()->json(['message' => 'Article not found'], 404);
+    }
+
+    // Example: mark the article as verified
+    // Add a `status` column in your table if it doesn't exist
+    $article->status = 'Verified';
+    $article->verified_at = now(); // optional timestamp
+    $article->save();
+
+    // return response()->json([
+    //     'message' => 'Article verified successfully',
+    //     'article' => $article
+    // ]);
+    return redirect()->back()->with('success', 'Article verified successfully');
 }
 }

@@ -8,7 +8,9 @@ import { router, usePage,useForm } from '@inertiajs/vue3'
 import TimeLine from '@/components/locator/TimeLine.vue'
 import UploadsTable from '@/components/locator/UploadsTable.vue'
 import ArticleDetailTable from '@/components/locator/ArticleDetailTable.vue'
+import articles from '@/routes/articles'
 const page = usePage()
+const verified = ref(false)
 // Base URL (safe for SSR)
 const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
 
@@ -100,6 +102,9 @@ const form = useForm({
   currentApproverId: null, 
   form_number:null,
 })
+const formarticle = useForm({
+  articles: [] as ArticleDetail[],
+})
 
 const submitReturn = () => {
   if (!currentApproverId.value) return
@@ -122,13 +127,55 @@ const submitReturn = () => {
     }
   )
 }
+interface ArticleDetail {
+  id: number
+  application_form_id: number
+  user_id: number
+  marks_and_number: string
+  qty: number
+  detailed_description_of_article: string
+  gross_weight: string
+  created_at: string
+  updated_at: string
+}
+function validate(file){
+  console.log(file[0].id)
+  
+}
+function verify(article: ArticleDetail) {
+  // wrap single article in array for backend
+  formarticle.articles = [article]
+
+  formarticle.put(`/loctr/articles/${article.id}/verify`, {
+  onSuccess: () => {
+    
+    verified.value = true
+    console.log('Article verified!')
+  },
+})
+}
+
+// Example handlers for other actions
+function handleView(article: ArticleDetail) {
+  console.log('View article', article)
+}
+
+function handleEdit(article: ArticleDetail) {
+  console.log('Edit article', article)
+}
+
+function handleDelete(article: ArticleDetail) {
+  console.log('Delete article', article)
+}
+
+
 </script>
 
 <template>
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     <!-- Title -->
      
-
+   
     <div class="mb-6">
       <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
         {{ props.application.form_title }}
@@ -177,21 +224,24 @@ const submitReturn = () => {
       </div>
     </div>
     <ArticleDetailTable
-    title="Article Details"
-    :details="props.application.article_details"
-    :showActions="false"
-    @view=""
-    @edit=""
-    @delete=""
-  />
+  title="Article Details"
+  :details="props.application.article_details"
+  :showActions="true"
+  :verified="verified.value"
+  @verify="verify"
+  @view="handleView"
+  @edit="handleEdit"
+  @delete="handleDelete"
+/>
 
     <!---Uploads-->
    <UploadsTable
     title="Uploaded Supporting Document/s"
     :files="props.application.uploads"
-    :showActions="false"
+    :showActions="true"
     @view=""
     @delete=""
+    @validate="validate(props.application.uploads)"
   />
     <!-- Approver Group -->
     <div v-if="props.approverGroup" class="mb-8 hidden">

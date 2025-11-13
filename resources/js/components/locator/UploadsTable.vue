@@ -75,6 +75,12 @@ const formatSize = (bytes: number) => {
             >
               Delete
             </button>
+            <button
+              class="ml-3 text-red-600 hover:underline text-sm"
+              @click="$emit('validate', file)"
+            >
+              Validate
+            </button>
           </td>
         </tr>
         <tr v-if="files.length === 0">

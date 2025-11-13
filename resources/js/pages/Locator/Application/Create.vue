@@ -138,7 +138,7 @@ function selectForm(f: any) {
 
 <template>
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
-    {{ props.approverGroupId }}
+    
     <TopCard/>
     <div class="p-6 w-full mx-6 bg-white shadow-xl rounded-xl border border-gray-100 dark:bg-gray-900 dark:border-gray-700">
 
@@ -149,9 +149,10 @@ function selectForm(f: any) {
 
       <!-- Alerts & Info -->
       <div v-if="props.application_form_id" class="text-right space-y-1 mb-4">
-        <Alert message="You can now choose your Declared value and Validity Period" type="success" :duration="10000"/>
+        <Alert message="You can now list Declared Article Detail" type="success" :duration="10000"/>
+        <!--Alert message="You can now choose your Declared value and Validity Period" type="success" :duration="10000"/-->
         <Alert v-if="selectedDeclaredValue" message="You can now Upload Supporting Documents" type="info" :duration="10000"/>
-        <Alert v-if="uploadedFiles.length" message="You can now add Article Details." type="success" :duration="10000"/>
+        <Alert v-if="uploadedFiles.length" message="You can now Submit Application for Approval." type="success" :duration="10000"/>
 
         <p v-if="props.form_number" class="text-sm text-gray-500">
           <b>Form Number:</b> {{ props.form_number }}
@@ -164,7 +165,7 @@ function selectForm(f: any) {
           <b>Validity:</b> {{ selectedDeclaredValue.validity }}
         </p>
         <p v-if="localPrice" class="text-sm text-gray-500">
-          <b>Amount:</b> ₱{{ localPrice }}
+          <b>Amount:</b> ₱{{ props.price }}
         </p>
         <p v-if="props.start_date" class="text-sm text-gray-500">
           <b>Start Date:</b> {{ new Date(props.start_date).toLocaleDateString() }}
@@ -177,7 +178,7 @@ function selectForm(f: any) {
           <DynamicFormRepeater
             :formId="props.application_form_id"
             v-model="articles"
-            :title="`Article Details for Order # ${props.application_form_id}`"
+            :title="`Adding Article Details`"
           />
         </div>
       <!-- 📝 Create Form -->

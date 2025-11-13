@@ -27,33 +27,5 @@ class LocatorController extends Controller
     public function show($id){
        return $id;
     }
-    public function pendingList()
-    {
-     $appForm_number = ApplicationModel::where('user_id', Auth::id())->pluck('form_number');
-     $applications = ApplicationForApproval::with([
-        'application',
-        'approverGroup.approvers'
-    ])
-    ->whereIn('form_number', $appForm_number)
-    ->where('status', 'Pending')
-    ->get();
-         return Inertia::render('Locator/Application/Pending', [
-            'applications' => $applications,
-        ]);
-    }
-
-    public function approvedList(){
-        $appIds = ApplicationModel::where('user_id', Auth::id())->pluck('id');
-        $applications = ApplicationForApproval::with([
-                        'application',
-                        'approverGroup.approvers'
-                        ])
-                        ->whereIn('application_id', $appIds)
-                        ->where('status', 'Approved')
-                        ->get();
-
-        return Inertia::render('Locator/Application/Approved', [
-            'applications' => $applications,
-        ]);
-    }
+    
 }

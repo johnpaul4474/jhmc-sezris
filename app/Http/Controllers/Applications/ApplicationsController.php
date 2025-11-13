@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Locator;
+namespace App\Http\Controllers\Applications;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -18,8 +18,9 @@ use App\Models\Locator\ApproverGroupApprover;
 use App\Models\Locator\ApplicationForApproval;
 use App\Helpers\AppConstants;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
-class ApplicationController extends Controller
+class ApplicationsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -65,8 +66,20 @@ class ApplicationController extends Controller
      * Show the form for creating a new resource.
      */
     public function create()
-{    $form = Form::all();
-     $user = auth()->user();
+
+    {   //check if user has approved ATO if it does remove ATO to the Option
+        $user = auth()->user();
+        $applications = $user->applications()
+                    ->where('form_title', 'ATO')
+                    ->where('status', 'Approved')
+                    ->get();
+        if(count($applications) == 1){
+            //8 is the ATO form ID
+            $form = Form::all()->except([8]);
+        }else{
+            $form = Form::all();
+        }
+    
     return Inertia::render('Locator/Application/Create', [
         'user' => $user,
         'application_form_id' => null,
@@ -119,8 +132,8 @@ class ApplicationController extends Controller
         'form_number' => $application->form_number,
         'form_title' => $application->form_title,
         'start_date' => $application->created_at,
-    'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
-    'approverGroupId' => $approver->approver_group_id,
+        'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
+        'approverGroupId' => $approver->approver_group_id,
 
     ]);
 
@@ -132,7 +145,7 @@ class ApplicationController extends Controller
      * Display the specified resource.
      */
         public function show(String $id)
-{    
+{      
     $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
                    ->findOrFail($id);
     $approvers = ApplicationForApproval::with('approverGroup.approvers')
@@ -195,10 +208,32 @@ class ApplicationController extends Controller
         //
     }
     public function pendingList(){
-        return Inertia::render('Locator/Application/Pending', []);
+        $appForm_number = ApplicationModel::where('user_id', Auth::id())->pluck('form_number');
+        $applications = ApplicationForApproval::with([
+                                'application',
+                                'approverGroup.approvers'
+                            ])
+                            ->whereIn('form_number', $appForm_number)
+                            ->where('status', 'Pending')
+                            ->get();
+         return Inertia::render('Locator/Application/Pending', [
+            'applications' => $applications,
+        ]);
     }
+
     public function approvedList(){
-        return Inertia::render('Locator/Application/Approved',[]);
+            $appIds = ApplicationModel::where('user_id', Auth::id())->pluck('id');
+            $applications = ApplicationForApproval::with([
+                            'application',
+                            'approverGroup.approvers'
+                            ])
+                            ->whereIn('application_id', $appIds)
+                            ->where('status', 'Approved')
+                            ->get();
+
+            return Inertia::render('Locator/Application/Approved', [
+                'applications' => $applications,
+            ]);
     }
     /**
      * Request $request are application_id and option_id selected by the locator

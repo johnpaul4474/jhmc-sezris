@@ -1,6 +1,6 @@
 <?php
 use App\Http\Controllers\Locator\LocatorController;
-use App\Http\Controllers\Locator\ApplicationController;
+use App\Http\Controllers\Applications\ApplicationsController;
 use App\Http\Controllers\Locator\ArticleDetailController;
 use App\Http\Controllers\Locator\UploadController;
 use App\Http\Controllers\Locator\ApplicationForApprovalController;
@@ -13,16 +13,18 @@ Route::get('/locator', [LocatorController::class, 'index'])->name('locators.inde
 Route::resource('approval', ApplicationForApprovalController::class);
 Route::group(['prefix' => 'loctr', 'middleware' => 'auth'], function () {
     //route for pending view
-    Route::get('applications/pending', [LocatorController::class, 'pendingList'])->name('applications.pending');
+    Route::get('applications/pending', [ApplicationsController::class, 'pendingList'])->name('applications.pending');
     //Route for single pending view
     Route::get('applications/{id}/pending',[LocatorController::class, 'pendingShow'])->name('applications.pendingShow');
     //route for approved 
     Route::get('applications/{id}/approved', [LocatorController::class, 'approvedShow'])->name('applications.approvedShow');
-    Route::get('applications/approved', [LocatorController::class, 'approvedList'])->name('applications.approved');
+    Route::get('applications/approved', [ApplicationsController::class, 'approvedList'])->name('applications.approved');
     //route for creating application (crud) 
-    Route::resource('applications', ApplicationController::class);
+    Route::resource('applications', ApplicationsController::class);
     //route articles(crud) 
     Route::resource('articles', \App\Http\Controllers\Locator\ArticleDetailController::class);
+    Route::put('/articles/{id}/verify', [ArticleDetailController::class, 'verifyArticle'])
+    ->name('articles.verify');
     //route for uploads/attachment (crud) 
     Route::resource('uploads', UploadController::class);
     //route for declared vue and validity 
@@ -45,18 +47,27 @@ Route::get('/test-meta', function(){
 dd($meta);
 
 });
-// Route::get('/app', function(){
-//     $date= now();
-//  $applications = ApplicationModel::where('user_id', Auth::id())
+Route::get('/app', function(){
+    $date= now();
+    $user = Auth::user();
+
+$applications = $user->applications()
+    ->where('form_title', 'ATO')
+    ->where('status', 'Approved')
+    ->get();
+
+//dd(count($applications) > 0);
+//     $ato = User
+//  $applications = ApplicationModel::where('user_id',Auth::id())
 //     ->where('form_title', 'ATO')
-//     ->where('status', 'Approved')
+//     ->where('status','Approved')
 //     ->first();
 //   $applications->setMeta('verified','ATOS123');   
 //   $expiration= $applications->getMeta('Expiration');
 //  $meta = $applications->meta;
 //     dump($expiration === 'ATOS123' );
-    
-// });
+
+ });
 // routes/web.php
 
 

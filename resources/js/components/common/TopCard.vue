@@ -21,7 +21,7 @@ const props = defineProps({
           <FilePlus class="w-6 h-6 text-[#0F75BC]" />
         </div>
         <h3 class="text-lg font-semibold text-white dark:text-gray-200">
-          Apply New
+          ATO Certified
         </h3>
       </div>
     </div>
