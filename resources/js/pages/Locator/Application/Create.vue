@@ -130,7 +130,8 @@ function handleApply(applicationId: string | number) {
     onError: (errors) => console.error('❌ Approval failed', errors),
   })
 }
-
+const [ato] = page.props.applications;
+const stat = ato == null ? '' : ato.status
 // 📑 Form Type Selection
 function selectForm(f: any) {
   console.log('selected'+f)
@@ -143,8 +144,8 @@ function selectForm(f: any) {
 <template>
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     
-  <TopCard :stats="page.props.applications[0] && !page.props.applications[0].status ? page.props.applications[0] : null" />
-
+  <TopCard :stats="stat" />
+     
     
     <div class="p-6 w-full mx-6 bg-white shadow-xl rounded-xl border border-gray-100 dark:bg-gray-900 dark:border-gray-700">
 
