@@ -208,6 +208,7 @@ class ApplicationsController extends Controller
         //
     }
     public function pendingList(){
+       
         $ato = ApplicationModel::where('user_id', Auth::id())->where('form_title', 'ATO')->get();
         $appForm_number = ApplicationModel::where('user_id', Auth::id())->pluck('form_number');
         $applications = ApplicationForApproval::with([

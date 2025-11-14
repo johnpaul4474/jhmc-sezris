@@ -12,18 +12,19 @@ class RoleAccessMiddleware
     {
         $user = Auth::user();
 
-        if ($request->is('login') || $request->is('logout') || $request->is('sanctum/csrf-cookie')) {
+        if ($request->is('login') || $request->is('logout')) {
             return $next($request);
         }
 
+        // Redirect guest users to login
         if (!$user) {
             return redirect('/login');
         }
 
         $details = $user->details;
 
-        // Super Admin — access dashboard only
         if ($details) {
+            // Determine roles
             $isSuperAdmin = (
                 $details->department_id == 9 &&
                 $details->division_id == 3 &&
@@ -32,18 +33,29 @@ class RoleAccessMiddleware
             );
 
             $isSezadUser = ($details->department_id == 12);
-
-            // Super admin: allow both dashboard & sezad
+            $isLocator = ($details->role_id == 3);
+           
+            // Super Admin: allow only /dashboard and /sezad
             if ($isSuperAdmin) {
-                if (!$request->is('dashboard') && !$request->is('sezad')) {
+                if (! $request->is('dashboard') && ! $request->is('sezad') && ! $request->is('sezad/*')) {
                     return redirect('/dashboard');
                 }
             }
-            // SEZAD user: allow sezad only
+            // SEZAD user: allow only /sezad
             elseif ($isSezadUser) {
-                if (!$request->is('sezad') && !$request->is('sezad/*')) {
+                if (! $request->is('sezad') && ! $request->is('sezad/*')) {
                     return redirect('/sezad');
                 }
+            }
+            // // Locator user: allow only /locator
+            // elseif ($isLocator) {
+                
+            //         return redirect('/locator');
+             
+            // }
+            // Optionally: handle users with unknown roles
+            else {
+                return redirect('/login');
             }
         }
 

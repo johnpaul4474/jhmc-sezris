@@ -144,7 +144,7 @@ function selectForm(f: any) {
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     
     <TopCard :stats="page.props.applications[0].status"/>
-    {{ page }}
+    
     <div class="p-6 w-full mx-6 bg-white shadow-xl rounded-xl border border-gray-100 dark:bg-gray-900 dark:border-gray-700">
 
       <!-- 🏷 Title -->

@@ -55,8 +55,7 @@ function handleDelete(app: any) {
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     <TopCard :stats="props.ATO[0].status"/>
    
-    <h1 class="text-2xl font-bold mb-4">Pending Application Lists</h1>
-  
+    <h1 class="text-2xl font-bold mb-4">Pending Application123 Lists</h1>
   
     <ApplicationTable
       :applications="props.applications"

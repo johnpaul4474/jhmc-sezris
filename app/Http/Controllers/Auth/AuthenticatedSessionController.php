@@ -62,6 +62,8 @@ class AuthenticatedSessionController extends Controller
                 && $user_details->permission_id == 2)
         {
             return redirect()->intended('/sezad');
+        }else if($user_details && $user_details->role_id == 3){
+            return redirect()->intended(route('locator', absolute: false));
         }else {
             return redirect()->intended(route('bddDashboard', absolute: false));
         }
