@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import LocatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue'
 import { type BreadcrumbItem } from '@/types'
-import locators from '@/routes/locators'
+import { locator } from '@/routes';
 import applications from '@/routes/applications'
 import { router, usePage,useForm } from '@inertiajs/vue3'
 import TimeLine from '@/components/locator/TimeLine.vue'
@@ -46,7 +46,7 @@ const props = defineProps<{
 
 // Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Locator', href: locators.index.url() },
+  { title: 'Locator', href: locator.url() },
   { title: 'Applications', href: applications.index.url() },
   { title: `Application #${props.application.id}`, href: '#' },
 ]
@@ -166,13 +166,13 @@ const submitReturn = () => {
             <strong>Updated At:</strong>
             {{ new Date(props.application.updated_at).toLocaleString() }}
           </li> -->
-          <li v-if="props.application.selections[0].Expired_at">
+          <!-- <li v-if="props.application.selections[0].Expired_at">
             <strong>Expired At:</strong>
             {{ new Date(props.application.selections[0].Expired_at).toLocaleString() }}
           </li>
           <li v-else>
             expiration not recorded
-            </li>
+            </li> -->
         </ul>
       </div>
     </div>

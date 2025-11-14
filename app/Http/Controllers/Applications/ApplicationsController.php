@@ -73,9 +73,15 @@ class ApplicationsController extends Controller
                     ->where('form_title', 'ATO')
                     ->where('status', 'Approved')
                     ->get();
-        if(count($applications) == 1){
+        $UserhasATOApplication = $user->applications()
+    ->where('form_title', 'ATO')
+    ->exists();
+           
+        if($UserhasATOApplication){
             //8 is the ATO form ID
             $form = Form::all()->except([8]);
+        }else if(!$UserhasATOApplication){
+            $form = Form::where('name', 'ATO')->get();
         }else{
             $form = Form::all();
         }

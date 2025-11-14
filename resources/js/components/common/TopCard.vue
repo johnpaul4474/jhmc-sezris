@@ -20,7 +20,7 @@ const status = {
 
 
 if (props.stats === 'Pending') {
-  status.atoCertified = 'ATO Expired'
+  status.atoCertified = '[Apply]/[Renew]'
 } else if (props.stats === 'Approved') {
   status.atoCertified = 'ATO Certified'
 }
@@ -31,16 +31,18 @@ if (props.stats === 'Pending') {
   <!-- Added right margin for spacing -->
   <div class="grid gap-6 md:grid-cols-4 px-4 py-4 mr-4">
     <!-- ATO Certified -->
-  
     <div
       class="flex flex-col justify-center items-center rounded-2xl bg-blue-500 p-6 shadow-lg transition hover:shadow-xl dark:bg-[#1b1b18] cursor-pointer"
     >
       <div class="flex flex-col items-center gap-2">
+         <p class="text-lg font-semibold text-white dark:text-gray-200">
+        ATO
+          </p>
         <div class="rounded-full bg-blue-100 p-3 dark:bg-blue-900/40">
           <Crown class="w-6 h-6 text-[#0F75BC]" />
         </div>
-        <h3 class="text-lg font-semibold text-white dark:text-gray-200">
-        {{ status?.atoCertified ? status.atoCertified : '' }}
+        <h3 class="text-md font-regular text-white dark:text-gray-200">
+        {{ status?.atoCertified ? status.atoCertified : 'curent Locator has no ATO' }}
         </h3>
       </div>
     </div>

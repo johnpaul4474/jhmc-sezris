@@ -9,7 +9,7 @@ use App\Models\Locator\ApplicationModel;
 use App\Models\User;
 
 
-Route::get('/locator', [LocatorController::class, 'index'])->name('locator');
+Route::get('/locator', [LocatorController::class, 'index'])->name('locators');
 Route::resource('approval', ApplicationForApprovalController::class);
 Route::group(['prefix' => 'loctr', 'middleware' => 'auth'], function () {
     //route for pending view

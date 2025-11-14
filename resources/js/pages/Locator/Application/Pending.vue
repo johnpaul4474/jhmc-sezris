@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import LocatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue'
 import { type BreadcrumbItem } from '@/types'
-import locators from '@/routes/locators'
+import { locator } from '@/routes';
 import applications from '@/routes/applications'
 import ApplicationTable from '@/components/common/ApplicationTable.vue'
 import TopCard from '@/components/common/TopCard.vue'
@@ -31,9 +31,9 @@ const stats = {
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Locator', href: locators.index.url() },
+  { title: 'Locator', href: locator.url() },
   { title: 'Create Permit', href: applications.create.url() },
-  { title: 'Pending Applications', href: applications.pending.url() },
+  { title: 'Pending Application', href: applications.pending.url() },
 ]
 
 // Optional table action handlers
@@ -55,8 +55,8 @@ function handleDelete(app: any) {
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     <TopCard :stats="props.ATO[0].status"/>
    
-    <h1 class="text-2xl font-bold mb-4">Pending Application123 Lists</h1>
-  
+    <h1 class="text-2xl font-bold mb-4">Pending Application Lists</h1>
+     
     <ApplicationTable
       :applications="props.applications"
       @view="handleView"

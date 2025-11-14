@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import LocatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue'
 import { type BreadcrumbItem } from '@/types'
-import locators from '@/routes/locators'
+import { locator } from '@/routes';
 import applications from '@/routes/applications'
 import ApplicationTable from '@/components/common/ApplicationTable.vue'
 import TopCard from '@/components/common/TopCard.vue'
@@ -23,7 +23,7 @@ const status = {
   sezadRequests: '',
   bddUsers: '',
 }
-const app = page.props.applications[0].status
+const app = page.props.applications[0] && !page.props.applications[0].status ? page.props.applications[0] : null
 if (app?.status === 'Pending') {
   status.atoCertified = 'ATO Expired'
 } else if (app?.status === 'Approved') {
@@ -31,7 +31,7 @@ if (app?.status === 'Pending') {
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Locator', href: locators.index.url() },
+  { title: 'Locator', href: locator.url() },
   { title: 'Create Permit', href: applications.create.url() },
   { title: 'Pending Applications', href: applications.pending.url() },
   { title: 'Approved Applications', href: applications.approved.url() },
@@ -55,7 +55,7 @@ function handleDelete(app: any) {
 <template>
   
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
-    <TopCard :stats="page.props.applications[0].status"/>
+    <TopCard :stats="page.props.applications[0] && !page.props.applications[0].status ? page.props.applications[0] : null"/>
    
     <h1 class="text-2xl font-bold mb-4">Approved Application Lists</h1>
 

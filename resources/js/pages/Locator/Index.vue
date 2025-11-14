@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import locatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue';
-import locators from '@/routes/locators';
+import { locator } from '@/routes';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head , usePage } from '@inertiajs/vue3';
@@ -16,7 +16,7 @@ const page = usePage();
 const breadcrumbs: BreadcrumbItem[] = [
   {
     title: 'Locator',
-    href: locators.index.url(),
+    href: locator.url(),
   },
 ];
 
@@ -39,25 +39,25 @@ const status = {
 
 
 
-const app = page.props.applications[0].status
-if (app?.status === 'Pending') {
-  status.atoCertified = 'ATO Expired'
-} else if (app?.status === 'Approved') {
-  status.atoCertified = 'ATO Certified'
-}
+const app = page.props.applications[0] ? page.props.applications[0].status : null
+// if (app?.status === 'Pending') {
+//   status.atoCertified = 'ATO Expired'
+// } else if (app?.status === 'Approved') {
+//   status.atoCertified = 'ATO Certified'
+// }
 
 
 </script>
 
 <template>
   <Head title="Locator Dashboard" />
-    
+   
   <locatorAppSidebarLayout :breadcrumbs="breadcrumbs">
-    
+   
       <!-- Apply New -->
       
-       <TopCard :stats="page.props.applications[0].status"/>
-     
+       <TopCard :stats="app"/>
+        
     <!---table-->
      <div class="mt-6 overflow-x-auto">
  

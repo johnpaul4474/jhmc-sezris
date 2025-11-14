@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import TopCard from '@/components/common/TopCard.vue'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { usePage } from '@inertiajs/vue3'
-import locators from '@/routes/locators'
+import { locator } from '@/routes';
 import applications from '@/routes/applications'
 import { type BreadcrumbItem } from '@/types'
 
@@ -66,7 +66,7 @@ const selectedDeclaredValue = computed(() => {
 })
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Locator', href: locators.index.url() },
+  { title: 'Locator', href: locator.url() },
   { title: 'Create Permit', href: applications.create.url() },
 ]
 
@@ -143,7 +143,8 @@ function selectForm(f: any) {
 <template>
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
     
-    <TopCard :stats="page.props.applications[0].status"/>
+  <TopCard :stats="page.props.applications[0] && !page.props.applications[0].status ? page.props.applications[0] : null" />
+
     
     <div class="p-6 w-full mx-6 bg-white shadow-xl rounded-xl border border-gray-100 dark:bg-gray-900 dark:border-gray-700">
 
