@@ -77,6 +77,11 @@ class ApplicationModel extends Model
 }
     public function setMeta(string $key, mixed $value): void
 {
+    // Convert objects or arrays to JSON before saving
+    if (is_object($value) || is_array($value)) {
+        $value = json_encode($value);
+    }
+
     $this->meta()->updateOrCreate(
         [
             'application_id' => $this->id,
@@ -88,14 +93,17 @@ class ApplicationModel extends Model
     );
 }
 
-    // 🧩 Helper: getMeta
-    public function getMeta(string $key, mixed $default = null): mixed
-    {
-        $meta = $this->meta()->where('meta_key', $key)->first();
-        return $meta ? $meta->meta_value : $default;
+public function getMeta(string $key, mixed $default = null, bool $asArray = true): mixed
+{
+    $meta = $this->meta()->where('meta_key', $key)->first();
+    if (!$meta) {
+        return $default;
     }
-    public function application()
-    {
-        return $this->belongsTo(ApplicationModel::class, 'application_id');
-    }
+
+    $value = $meta->meta_value;
+
+    // Attempt to decode JSON
+    $decoded = json_decode($value, $asArray);
+    return $decoded !== null ? $decoded : $value;
+}
 }
