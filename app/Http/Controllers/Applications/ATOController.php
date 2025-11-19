@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Applications;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\Locator\ApplicationModel;
+use Illuminate\Support\Facades\Auth;
+use App\Models\ATO\AtoApplication;
+use App\Models\Upload;
+use App\Services\UploadService;
 
 class ATOController extends Controller
 {
@@ -13,7 +18,13 @@ class ATOController extends Controller
      */
     public function index()
     {
-        return Inertia::render('ATO/Index',[]);
+       $userId = Auth::id();
+      $ato = ApplicationModel::where('user_id', $userId)
+              ->where('form_title','ATO')
+              ->first();
+        return Inertia::render('ATO/Index',[
+            'ato' => $ato,
+        ]);
     }
 
     /**
@@ -21,23 +32,64 @@ class ATOController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('ATO/Create2',[]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        //
+    public function store(Request $request, UploadService $uploadService)
+{ 
+    $userId = auth()->id();
+
+    // Create ATO application
+    $ato = AtoApplication::create([
+        'application_id'        => $request->application_id,
+        'application_date'      => now(),
+        'application_type'      => $request->applicationType,
+        'business_structure'    => $request->businessStructure,
+        'trades_name'           => $request->businessProfile['businessName'],
+        'parent_company'        => $request->businessProfile['parentCompany'],
+        'taxpayer_name'         => $request->businessProfile['taxpayerName'],
+        'TIN'                   => $request->businessProfile['TIN'],
+        'PrimaryLine'           => $request->pcic['primaryLine'],
+        'SecondaryLine'         => $request->pcic['secondaryLine'],
+        'nature_of_contract'    => $request->natureOfContract,
+        'pcic_primary_line'     => $request->pcic['PCICPrimary'],
+        'pcic_secondary_line'   => $request->pcic['PCICSecondary'],
+        'pcic_Primary_email'    => $request->pcic['emailPrimary'],
+        'pcic_Secondary_email'  => $request->pcic['emailSecondary'],
+        'pcic_location'         => $request->pcic['location'],
+        'pcic_office_address'   => $request->pcic['officeAddress'],
+        'pcic_contact_person'   => $request->pcic['contactPerson'],
+        'pcic_contact_number'   => $request->pcic['contactNumber'],
+        'user_id'               => $userId,
+    ]);
+
+    // Use $request->all()['files'] to handle both title & file
+    $files = $request->all()['files'] ?? [];
+
+    foreach ($files as $item) {
+        $file = $item['file'] ?? null;
+        $title = $item['title'] ?? null;
+
+        if ($file) {
+            $uploadService->uploadFile($file, $title, $request->application_id, $userId);
+        }
     }
+
+     return redirect()->route('ATO.show', $request->application_id);
+}
+
+    
+    
 
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        //
+        return dd("showing ATO Application id : ". $id);
     }
 
     /**

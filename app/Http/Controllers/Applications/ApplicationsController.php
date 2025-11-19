@@ -27,8 +27,6 @@ class ApplicationsController extends Controller
      */
     public function index()
      { 
-
-        
         $application = ApplicationModel::with(['selections.option', 'selections.user'])
             ->latest()
             ->first();
@@ -111,26 +109,24 @@ class ApplicationsController extends Controller
         
         //create new Sets of ApprovergroupApprover 
         foreach ($sets as $set) {
-            //set the Role of reciever that needs to recieve emails
-            //it depends if admin wants to send email or notifications to all approver sets members
-            // if($set->role === 'Manager'){
-            //    $reciever = User::where('id',$set->user_id)->first();
-            //    Log::info('Send Email to:', ['user Email: ' => $reciever->email ,"id" =>$reciever->id]); 
-            // }
-    ApproverGroupApprover::query()->insert([
-    'approver_group_id' => $set->approver_group_id,
-    'approver_id'       => $set->user_id,
-    'sequence'          => $set->sequence,
-    'role'              => $set->role,
-    'application_form_id'=> $application->id,
-    'status'            => AppConstants::STATUS_PENDING,
-    'created_at'        => now(),
-    'updated_at'        => now(),
-]);
+                    ApproverGroupApprover::query()->insert([
+                    'approver_group_id' => $set->approver_group_id,
+                    'approver_id'       => $set->user_id,
+                    'sequence'          => $set->sequence,
+                    'role'              => $set->role,
+                    'application_form_id'=> $application->id,
+                    'status'            => AppConstants::STATUS_PENDING,
+                    'created_at'        => now(),
+                    'updated_at'        => now(),
+                ]);
    
 }
-      
-    // Collection of all options
+    if($request->type == 'ATO'){
+      return Inertia::render('ATO/Create2',[
+        'application_id'=> $application->id,
+      ]);
+    }
+    else{
     return Inertia::render('Locator/Application/Create', [
         'user' => $user,
         'application_form_id' => $application->id, // Pass the new ID
@@ -145,7 +141,7 @@ class ApplicationsController extends Controller
 
     }
     
-
+    }
 
     /**
      * Display the specified resource.

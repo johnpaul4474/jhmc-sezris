@@ -69,17 +69,18 @@ $details = new ATOmeta(
 );
 
 // SAVE as array
-$app->setMeta('AppMeta', $details->toArray());
+$app->setMeta('AppMeta2', $details->toArray());
 
 // RETRIEVE
-$meta = $app->getMeta('AppMeta');  // array
+$meta = $app->getMeta('AppMeta2');  // array
 //after retrieve create object from Array
 $metaObject = ATOmeta::fromArray($meta);
+dd($metaObject);
 $date = Carbon::createFromFormat('m/d/Y', $metaObject->application_date);
 
 $expirationDate = $date->copy()->endOfYear();
 
-dd('ATO is Valid until: '.$expirationDate->format('F j, Y'));
+//dd('ATO is Valid until: '.$expirationDate->format('F j, Y'));
  });
  
 // routes/web.php

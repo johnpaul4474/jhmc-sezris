@@ -21,7 +21,7 @@ const status = {
 
 
 if (props.stats === 'Pending') {
-  status.atoCertified = '[Apply]/[Renew]'
+  status.atoCertified = 'ATO Waiting for Approval'
 } else if (props.stats === 'Approved') {
   status.atoCertified = 'ATO Approved'
 }
