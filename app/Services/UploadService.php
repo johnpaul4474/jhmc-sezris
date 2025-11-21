@@ -49,7 +49,7 @@ class UploadService implements ISezrisService
         return null;
     }
     public function uploadFiles(array $files, $description, $applicationFormId, $userId)
-{  dd($files);
+{ 
     foreach ($files as $fileItem) {
 
         // Extract title + file object

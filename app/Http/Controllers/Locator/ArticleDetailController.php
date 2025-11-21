@@ -100,7 +100,7 @@ class ArticleDetailController extends Controller
     return response()->noContent(); 
 }
 public function verifyArticle(Request $request, $id)
-{
+{      dd($id);
     // $id comes from the URL /loctr/articles/{id}
     $article = ArticleDetail::find($id);
 

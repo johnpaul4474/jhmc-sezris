@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Eye, Pencil, Trash2 } from 'lucide-vue-next' // 👈 Lucide icons
+import { Eye, Pencil, Trash2 } from 'lucide-vue-next'
 
 const props = defineProps({
   applications: {
@@ -19,13 +19,13 @@ const emit = defineEmits(['view', 'edit', 'delete'])
   >
     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
       <thead class="bg-gray-100 dark:bg-gray-800">
-        <tr>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">#</th>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Form Title</th>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Control Number</th>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Form Number</th>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Status</th>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 text-center">Actions</th>
+        <tr class="text-center">
+          <th class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">#</th>
+          <th class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">Form Title</th>
+          <th class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">Control Number</th>
+          <th class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">Form Number</th>
+          <th class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">Status</th>
+          <th class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">Actions</th>
         </tr>
       </thead>
 
@@ -36,15 +36,21 @@ const emit = defineEmits(['view', 'edit', 'delete'])
         <tr
           v-for="(app, index) in applications"
           :key="app.id"
-          class="hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+          class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-center"
         >
-        
-          <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{{ index + 1 }}</td>
-          <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-100">{{ app.form_title ?? app.application.form_title ?? '-' }}</td>
-          <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{{ app.control_number ?? 'N/A' }}</td>
-          <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{{ app.form_number ?? '—' }}</td>
-          <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 capitalize">{{ app.status ?? 'N/A' }}</td>
-
+          <td class="px-4 py-2 text-sm align-middle">{{ index + 1 }}</td>
+          <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-100 align-middle">
+            {{ app.application?.form_title ?? '-' }}
+          </td>
+          <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 align-middle">
+            {{ app.control_number ?? 'N/A' }}
+          </td>
+          <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 align-middle">
+            {{ app.application?.form_number ?? '—' }}
+          </td>
+          <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 capitalize align-middle">
+            {{ app.application?.status ?? 'N/A' }}
+          </td>
           <td class="px-4 py-2 text-sm flex items-center justify-center gap-2">
             <button
               @click="emit('view', app)"
@@ -60,6 +66,7 @@ const emit = defineEmits(['view', 'edit', 'delete'])
             >
               <Pencil class="w-5 h-5" />
             </button>
+            <!-- Uncomment if delete is needed
             <button
               @click="emit('delete', app)"
               class="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/30 transition"
@@ -67,6 +74,7 @@ const emit = defineEmits(['view', 'edit', 'delete'])
             >
               <Trash2 class="w-5 h-5" />
             </button>
+            -->
           </td>
         </tr>
       </tbody>

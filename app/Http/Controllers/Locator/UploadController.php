@@ -99,4 +99,17 @@ class UploadController extends Controller
 
         return response()->json(['message' => 'Upload deleted successfully']);
     }
+   
+    public function verify($id)
+    { dd($id);
+    $upload = Upload::findOrFail($id);
+
+    $upload->status = 'verified';
+    $upload->save();
+
+    return response()->json([
+        'message' => 'Document has been verified successfully.',
+        'upload' => $upload
+    ]);
+}
 }

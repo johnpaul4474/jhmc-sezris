@@ -31,10 +31,10 @@ const mainNavItems: NavItem[] = [
       },
       {
         title: "Apply for Locator",
-        href:"#",
+        href:"/osac/apply",
       },{
         title:"Assigned to Me",
-        href:"#",
+        href:"/osac",
       }
     ],
     },

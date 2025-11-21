@@ -73,7 +73,28 @@ const canAct = (approver: any) => {
   const prev = approvers.value.find(a => a.pivot.sequence === approver.pivot.sequence - 1)
   return prev ? prev.pivot.status === 'Approved' : false
 }
-
+//Verify Single Article Detail
+const VerifyArticle = (details) =>{
+  router.post(`/loctr/articles/${details.id}/verify`,{},{
+    onSuccess: () =>{
+      console.log(`Article ${details.id} verified successfully`)
+    },
+    onError: (errors) =>{
+      console.error(errors)
+    }
+  })
+}
+//Verify Single Supporting Document
+const ValidateDocument = (file) => {
+  router.post(`/loctr/uploads/${file.id}/verify`, {}, {
+    onSuccess: () => {
+      console.log(`Document ${file.id} verified successfully`)
+    },
+    onError: (errors) => {
+      console.error(errors)
+    }
+  })
+}
 // Approve action
 const handleApprove = (approverId: number) => {
   router.post(
@@ -162,36 +183,30 @@ const submitReturn = () => {
             <strong>Created At:</strong>
             {{ new Date(props.application.created_at).toLocaleString() }}
           </li>
-          <!-- <li>
-            <strong>Updated At:</strong>
-            {{ new Date(props.application.updated_at).toLocaleString() }}
-          </li> -->
-          <!-- <li v-if="props.application.selections[0].Expired_at">
-            <strong>Expired At:</strong>
-            {{ new Date(props.application.selections[0].Expired_at).toLocaleString() }}
-          </li>
-          <li v-else>
-            expiration not recorded
-            </li> -->
+          
         </ul>
       </div>
     </div>
+   
     <ArticleDetailTable
     title="Article Details"
     :details="props.application.article_details"
-    :showActions="false"
+    :showActions="true"
     @view=""
     @edit=""
     @delete=""
+    @verify="VerifyArticle"
   />
 
     <!---Uploads-->
+   
    <UploadsTable
     title="Uploaded Supporting Document/s"
     :files="props.application.uploads"
-    :showActions="false"
+    :showActions="true"
     @view=""
     @delete=""
+    @validate="ValidateDocument"
   />
     <!-- Approver Group -->
     <div v-if="props.approverGroup" class="mb-8 hidden">

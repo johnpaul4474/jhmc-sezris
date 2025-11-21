@@ -62,24 +62,24 @@ const formatSize = (bytes: number) => {
           <td class="px-4 py-2 text-sm text-gray-500">
             {{ new Date(file.created_at).toLocaleString() }}
           </td>
-          <td v-if="showActions" class="px-4 py-2 text-right">
-            <button
+           <td v-if="showActions" class="px-4 py-2 text-right">
+            <!--<button
               class="text-blue-600 hover:underline text-sm"
               @click="$emit('view', file)"
             >
               View
-            </button>
-            <button
+            </button> -->
+            <!-- <button
               class="ml-3 text-red-600 hover:underline text-sm"
               @click="$emit('delete', file)"
             >
               Delete
-            </button>
+            </button> -->
             <button
               class="ml-3 text-red-600 hover:underline text-sm"
               @click="$emit('validate', file)"
             >
-              Validate
+              Verify
             </button>
           </td>
         </tr>

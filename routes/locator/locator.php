@@ -26,11 +26,12 @@ Route::group(['prefix' => 'loctr', 'middleware' => 'auth'], function () {
     Route::resource('applications', ApplicationsController::class);
     //route articles(crud) 
     Route::resource('articles', \App\Http\Controllers\Locator\ArticleDetailController::class);
-    Route::put('/articles/{id}/verify', [ArticleDetailController::class, 'verifyArticle'])
+    Route::post('/articles/{id}/verify', [ArticleDetailController::class, 'verifyArticle'])
     ->name('articles.verify');
     //route for uploads/attachment (crud) 
     Route::resource('uploads', UploadController::class);
     //route for declared vue and validity 
+    Route::post('/uploads/{id}/verify', [UploadController::class, 'verify']);
     Route::post('/applications/option-selection', [\App\Http\Controllers\Locator\ApplicationController::class, 'saveOptionSelection'])
     ->name('applications.option-selection');
 });

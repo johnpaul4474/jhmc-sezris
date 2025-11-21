@@ -124,6 +124,8 @@ class ApplicationsController extends Controller
     if($request->type == 'ATO'){
       return Inertia::render('ATO/Create2',[
         'application_id'=> $application->id,
+        'approver_group_id' =>  $approver->approver_group_id,
+        'application_form_number'=>$application->form_number,
       ]);
     }
     else{

@@ -48,8 +48,8 @@ const statusColor = (status) => {
 
         <div class="text-center mt-3 w-full px-2">
           <p class="font-semibold text-gray-700 truncate">{{ page.props.auth.user.name }}</p>
-           <p class="text-sm text-gray-500">{{ page.props.application.status }}</p>
-          <p class="text-sm text-gray-500">--(Applicant)--</p>
+           <p class="text-sm text-gray-500"><span>(applicant)</span>{{ page.props.application.status }}</p>
+          
              <p class="text-sm text-gray-500">{{ new Date(page.props.application.updated_at).toLocaleString() }}</p>
         </div>
       </div>

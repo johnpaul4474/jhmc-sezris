@@ -5,6 +5,7 @@ namespace App\Models\Locator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Models\ATO\AtoApplication;
 
 class ApplicationModel extends Model
 {
@@ -106,4 +107,8 @@ public function getMeta(string $key, mixed $default = null, bool $asArray = true
     $decoded = json_decode($value, $asArray);
     return $decoded !== null ? $decoded : $value;
 }
+  public function atoApplication()
+    {
+        return $this->hasOne(AtoApplication::class);
+    }
 }

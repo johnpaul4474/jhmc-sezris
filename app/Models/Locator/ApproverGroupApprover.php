@@ -5,6 +5,7 @@ namespace App\Models\Locator;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use App\Models\ApproverGroup;
 use App\Models\User;
+use App\Models\Locator\ApplicationModel;
 
 class ApproverGroupApprover extends Pivot
 {
@@ -40,5 +41,9 @@ class ApproverGroupApprover extends Pivot
     public function scopePending($query)
 {
     return $query->where('status','!=' ,'Approved');
+}
+    public function application()
+{
+    return $this->belongsTo(ApplicationModel::class, 'application_form_id');
 }
 }

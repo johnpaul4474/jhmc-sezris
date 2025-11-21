@@ -1,6 +1,6 @@
 <script setup>
-import OsacAppSidebarLayout from '@/layouts/Osac/OsacAppSidebarLayout.vue';
-import osacApplicationTable from './OsacComponents/osacApplicationTable.vue';
+import CcoAppSidebarLayout from '@/layouts/Cco/CcoAppSidebarLayout.vue';
+import CcoApplicationTable from './CcoComponents/CcoApplicationTable.vue';
 const p = defineProps({
   applications:{
       type:Object,
@@ -19,11 +19,11 @@ const handleDelete =(application) =>{
 </script>
 
 <template>
-    <OsacAppSidebarLayout>
+    <CcoAppSidebarLayout>
   <div>
-    <h1 class="text-2xl font-bold text-center mb-4">OSAC Dashboard</h1>
-    
-    <osacApplicationTable 
+    <h1 class="text-2xl font-bold text-center mb-4">CCO/CCA Dashboard </h1>
+   
+    <CcoApplicationTable 
      :applications="p.applications"
       @view="handleView"
       @edit="handleEdit"
@@ -31,5 +31,5 @@ const handleDelete =(application) =>{
     />
     
   </div>
-  </OsacAppSidebarLayout>
+  </CcoAppSidebarLayout>
 </template>

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\ATO\AtoApplication;
 use App\Models\Upload;
 use App\Services\UploadService;
+use App\Models\Locator\ApplicationForApproval;
 
 class ATOController extends Controller
 {
@@ -41,7 +42,7 @@ class ATOController extends Controller
     public function store(Request $request, UploadService $uploadService)
 { 
     $userId = auth()->id();
-
+    //for Approval I need(application_id, approver_group_id,form_number, )
     // Create ATO application
     $ato = AtoApplication::create([
         'application_id'        => $request->application_id,
@@ -65,7 +66,12 @@ class ATOController extends Controller
         'pcic_contact_number'   => $request->pcic['contactNumber'],
         'user_id'               => $userId,
     ]);
-
+    ApplicationForApproval::create([
+            'application_id'    => $request->application_id,
+            'approver_group_id' => $request->approver_group_id,
+            'form_number'       => $request->application_form_number,
+            'status'            => 'Pending',
+        ]);
     // Use $request->all()['files'] to handle both title & file
     $files = $request->all()['files'] ?? [];
 
@@ -89,7 +95,10 @@ class ATOController extends Controller
      */
     public function show(string $id)
     {
-        return dd("showing ATO Application id : ". $id);
+       // return dd("showing ATO Application id : ". $id);
+       return Inertia::render('ATO/Show',[
+        'ato' => $id,
+       ]);
     }
 
     /**

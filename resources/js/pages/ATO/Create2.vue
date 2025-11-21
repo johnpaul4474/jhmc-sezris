@@ -15,10 +15,18 @@ const props = defineProps({
     application_id: {
     type: String,
     required: true
+  },approver_group_id:{
+    type:String,
+    required: true,
+  },application_form_number:{
+     type: String,
+     required:true,
   }
 })
 const form = useForm({
-    application_id: props.application_id,
+  application_id: props.application_id,
+  approver_group_id: props.approver_group_id,
+  application_form_number:props.application_form_number,
   applicationType: '',            // "New" | "Renewal"
   businessStructure: '',
   natureOfContract: '',
@@ -87,7 +95,9 @@ function submitForm() {
     <h3 class="text-xl font-bold mb-6 text-center">
   ATO (Authority to Operate) Application Form
 </h3>
-<p>{{ props.application_id }}</p>
+<p>application id:{{ props.application_id }}</p>
+<p>application form number:{{ props.application_form_number  }}</p>
+<p>approver Gruop Id:{{ props.approver_group_id }}</p>
     <!-- TYPE OF APPLICATION -->
     <div>
       <Label class="font-semibold">Type of Application</Label>
