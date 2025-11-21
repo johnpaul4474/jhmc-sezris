@@ -10,9 +10,7 @@ class OsacController extends Controller
 {
    public function index()
    {
-   //    $approvers = ApproverGroupApprover::with('approver')
-   //  ->where('approver_id', auth()->id())
-   //  ->get();
+   
    $applications = ApproverGroupApprover::with('application')
     ->where('approver_id', auth()->id())
     ->get();
