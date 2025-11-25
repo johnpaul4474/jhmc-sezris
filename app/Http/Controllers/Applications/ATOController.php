@@ -11,6 +11,8 @@ use App\Models\ATO\AtoApplication;
 use App\Models\Upload;
 use App\Services\UploadService;
 use App\Models\Locator\ApplicationForApproval;
+use Illuminate\Support\Facades\Storage;
+use App\Models\User;
 
 class ATOController extends Controller
 {
@@ -41,8 +43,8 @@ class ATOController extends Controller
      */
     public function store(Request $request, UploadService $uploadService)
 { 
-    $userId = auth()->id();
-    //for Approval I need(application_id, approver_group_id,form_number, )
+   $userId = auth()->id();
+    //for Approval I need(a pplication_id, approver_group_id,form_number, )
     // Create ATO application
     $ato = AtoApplication::create([
         'application_id'        => $request->application_id,
@@ -94,12 +96,21 @@ class ATOController extends Controller
      * Display the specified resource.
      */
     public function show(string $id)
-    {
-       // return dd("showing ATO Application id : ". $id);
-       return Inertia::render('ATO/Show',[
-        'ato' => $id,
-       ]);
+{
+    $ato = AtoApplication::with('uploads')->where('application_id', $id)->first();
+
+    // Fix file paths
+    if ($ato && $ato->uploads) {
+        foreach ($ato->uploads as $upload) {
+            // Convert stored path to a real URL
+            $upload->file_url = Storage::url($upload->file_path);
+        }
     }
+
+    return Inertia::render('ATO/Show', [
+        'ATOapplication' => $ato,
+    ]);
+}
 
     /**
      * Show the form for editing the specified resource.
@@ -123,5 +134,19 @@ class ATOController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+    public function CreateApp(){
+        return Inertia::render('Locator/Application/Create2',[]);
+    }
+    
+    public function MyAto()
+    {   
+        $user = auth()->user(); // safer
+
+    $atoApplications = $user->applications()
+        ->where('form_title', 'ATO')
+        ->first();
+      
+       return redirect()->route('ATO.show', $atoApplications->id);
     }
 }

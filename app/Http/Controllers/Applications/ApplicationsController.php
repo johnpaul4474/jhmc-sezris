@@ -19,6 +19,7 @@ use App\Models\Locator\ApplicationForApproval;
 use App\Helpers\AppConstants;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Models\ATO\AtoApplication;
 
 class ApplicationsController extends Controller
 {
@@ -30,7 +31,7 @@ class ApplicationsController extends Controller
         $application = ApplicationModel::with(['selections.option', 'selections.user'])
             ->latest()
             ->first();
-
+        
         if (!$application) {
             return response()->json(['message' => 'No application found'], 404);
         }
@@ -67,18 +68,25 @@ class ApplicationsController extends Controller
 
     {   //check if user has approved ATO if it does remove ATO to the Option
         $user = auth()->user();
+        
         $applications = $user->applications()
                     ->where('form_title', 'ATO')
-                    ->where('status', 'Approved')
-                    ->get();
-        $UserhasATOApplication = $user->applications()
-    ->where('form_title', 'ATO')
-    ->exists();
-           
+                    //->where('status', 'Approved')
+                    ->first();
+        $ato = $user->applications()
+                                    ->where('form_title', 'ATO')
+                                    ->first();
+         $applicationId = $applications->id ?? null;
+
+$UserhasATOApplication = $applicationId
+    ? AtoApplication::where('application_id', $applicationId)
+    ->where('user_id', $user->id)
+    ->first()
+    : null;
         if($UserhasATOApplication){
             //8 is the ATO form ID
             $form = Form::all()->except([8]);
-        }else if(!$UserhasATOApplication){
+        }else if(!$UserhasATOApplication || !$applications->id){
             $form = Form::where('name', 'ATO')->get();
         }else{
             $form = Form::all();
@@ -104,6 +112,9 @@ class ApplicationsController extends Controller
             'user_id'    => $user->id,
         ]);
         
+        $ato = AtoApplication::where('application_id', $application->id)->first();
+
+       
         $approver = Form::where('name',$request->input('type'))->first();
         $sets = ApproverSets::where('approver_group_id',$approver->approver_group_id)->get();
         

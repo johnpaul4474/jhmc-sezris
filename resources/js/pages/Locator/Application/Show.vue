@@ -142,14 +142,12 @@ const submitReturn = () => {
       },
     }
   )
-}
+  }
 </script>
 
 <template>
-  <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
+  <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs" >
     <!-- Title -->
-     
-
     <div class="mb-6">
       <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
         {{ props.application.form_title }}

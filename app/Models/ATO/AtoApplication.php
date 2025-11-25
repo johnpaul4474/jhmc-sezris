@@ -43,4 +43,9 @@ class AtoApplication extends Model
     {
         return $this->belongsTo(ApplicationModel::class, 'application_id');
     }
+     public function uploads()
+    {
+        return $this->hasMany(\App\Models\Locator\Upload::class, 'application_form_id', 'application_id');
+    }
+
 }

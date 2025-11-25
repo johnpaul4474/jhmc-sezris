@@ -66,6 +66,7 @@ class HandleInertiaRequests extends Middleware
 
             // 📝 Applications
             'applications' => $applications,
+           'user_details' => optional($request->user())->details ?? [],
         ]);
     }
 }

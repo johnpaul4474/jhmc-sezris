@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue'
 import { useForm } from '@inertiajs/vue3'
+import { File } from 'lucide-vue-next';
 
 import LocatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue'
 import DynamicFormRepeater from '@/components/locator/DynamicFormRepeater.vue'
@@ -113,6 +114,7 @@ function handlePriceUpdated(price: number) {
 
 // 📝 Form submission
 function submit() {
+  
   createForm.post('/loctr/applications', {
     onStart: () => { createForm.processing = true },
     onSuccess: () => { buttonVisible.value = false },
@@ -143,7 +145,7 @@ function selectForm(f: any) {
 
 <template>
   <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
-    
+   
   <TopCard :stats="stat" />
      
     
@@ -195,9 +197,23 @@ function selectForm(f: any) {
 
         <!-- Creator -->
         
+<div class="flex flex-wrap gap-2">
+    <button
+      v-for="f in props.form"
+      :key="f.id"
+      @click="selectForm(f)"
+      :class="selectedForm?.id === f.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 py-5 px-5'"
+      class="px-4 py-2 rounded-md hover:bg-blue-500 hover:text-white transition"
+    ><File />
+      {{ f.name }}
+    </button>
+  </div>
 
+  <!-- <div class="mt-4">
+    <p v-if="selectedForm">Selected Form: <strong>{{ selectedForm.name }}</strong></p>
+  </div> -->
         <!-- Application Type -->
-        <div v-if="!props.form_title">
+        <!-- <div v-if="!props.form_title">
           <label class="block text-sm font-medium mb">Application Type</label>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
@@ -221,7 +237,7 @@ function selectForm(f: any) {
           <div v-if="createForm.errors.type" class="text-red-500 text-sm mt-1">
             {{ createForm.errors.type }}
           </div>
-        </div>
+        </div> -->
 
         <!-- Declared Value -->
         <div v-if="props.application_form_id">
@@ -261,13 +277,13 @@ function selectForm(f: any) {
 
         <!-- Action Buttons -->
         <div class="pt-4 flex justify-center space-x-4">
-          <Button 
+          <!-- <Button 
           v-if="buttonVisible" 
           type="submit" 
           class="px-5 py-2 bg-blue-500 hover:bg-gray-300"
           >
             Generate Form-ID
-          </Button>
+          </Button> -->
 
           <Button
             v-if="forApproval"

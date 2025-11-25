@@ -40,8 +40,8 @@ const formatSize = (bytes: number) => {
       <thead class="bg-gray-50">
         <tr>
           <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Filename</th>
-          <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Type</th>
-          <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Size</th>
+          <!-- <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Type</th>
+          <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Size</th> -->
           <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Uploaded</th>
           <th v-if="showActions" class="px-4 py-2 text-right text-sm font-medium text-gray-600">Actions</th>
         </tr>
@@ -57,8 +57,8 @@ const formatSize = (bytes: number) => {
               {{ file.file_name }}
             </a>
           </td>
-          <td class="px-4 py-2 text-sm text-gray-500">{{ file.file_type }}</td>
-          <td class="px-4 py-2 text-sm text-gray-500">{{ formatSize(file.file_size) }}</td>
+          <!-- <td class="px-4 py-2 text-sm text-gray-500">{{ file.file_type }}</td>
+          <td class="px-4 py-2 text-sm text-gray-500">{{ formatSize(file.file_size) }}</td> -->
           <td class="px-4 py-2 text-sm text-gray-500">
             {{ new Date(file.created_at).toLocaleString() }}
           </td>

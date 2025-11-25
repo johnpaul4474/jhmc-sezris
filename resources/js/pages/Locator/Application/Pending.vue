@@ -29,7 +29,7 @@ const stats = {
   sezadRequests: '',
   bddUsers: '',
 }
-
+const ato = props.ATO?.[0]?.status ?? "";
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Locator', href: locator.url() },
   { title: 'Create Permit', href: applications.create.url() },
@@ -52,9 +52,9 @@ function handleDelete(app: any) {
 </script>
 
 <template>
-  <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
-    <TopCard :stats="props.ATO[0].status"/>
-   
+  <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs" :app-id="10">
+    <TopCard :stats="ato"/>
+  
     <h1 class="text-2xl font-bold mb-4">Pending Application Lists</h1>
      
     <ApplicationTable

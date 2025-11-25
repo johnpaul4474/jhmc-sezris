@@ -95,9 +95,6 @@ function submitForm() {
     <h3 class="text-xl font-bold mb-6 text-center">
   ATO (Authority to Operate) Application Form
 </h3>
-<p>application id:{{ props.application_id }}</p>
-<p>application form number:{{ props.application_form_number  }}</p>
-<p>approver Gruop Id:{{ props.approver_group_id }}</p>
     <!-- TYPE OF APPLICATION -->
     <div>
       <Label class="font-semibold">Type of Application</Label>

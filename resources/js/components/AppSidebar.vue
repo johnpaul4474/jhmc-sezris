@@ -47,7 +47,7 @@ interface CustomPageProps extends PageProps {
 
 const page = usePage<CustomPageProps>()
 const user = page.props.auth.user
-
+const cco = user?.details && user.details.role_id ===2 && user.details.department_id === 12 && user.details.user_function_id === 2
 const locator = user?.details && user.details.role_id ===3
     
 const admin =

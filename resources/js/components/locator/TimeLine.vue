@@ -26,7 +26,7 @@ const statusColor = (status) => {
 
 <template>
   <div class="p-4 bg-white shadow rounded">
-    <h2 class="text-lg font-bold mb-6 text-gray-800">Approvers Timeline</h2>
+    <h2 class="text-lg font-bold mb-6 text-gray-800">Application Timeline</h2>
 
     <div class="flex items-center overflow-x-auto space-x-8 relative px-4 pb-6">
       <!-- ✅ Start Node -->

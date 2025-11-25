@@ -17,4 +17,9 @@ class CcoController extends Controller
              'applications'=> $applications,
         ]);
     }
+    public function show($id){
+       return Inertia::render('CCO/Show',[
+        'application' => $id,
+       ]);
+    }
 }

@@ -21,4 +21,10 @@ class OsacController extends Controller
    public function create(){
       return Inertia::render('OSAC/Create',[]);
    }
+   public function show($id){
+
+       return Inertia::render('OSAC/Show',[
+         'application' => $id,
+       ]);
+    }
 }

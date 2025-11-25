@@ -2,6 +2,7 @@
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
+import NavMainOSAC from '@/layouts/Osac/NavMainOSAC.vue';
 import {
     Sidebar,
     SidebarContent,
@@ -11,22 +12,37 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { dashboard,usersDashboard,sezadDashboard,bddDashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { File, LayoutGrid, SquareUserRound, Clock, Eye } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid,SquareUserRound, Clock, Eye } from 'lucide-vue-next';
 import AppLogo from '../AppLogo.vue';
-import { usePage} from '@inertiajs/vue3';
-import app from '@/routes/app';
-const page = usePage()
-const mainNavItems: NavItem[] = [
-    { title: 'Locator', href: '/locator', icon: LayoutGrid },
-    { title: 'Create Application', href: '/loctr/applications/create', icon: SquareUserRound },
-    { title: 'Pending Application', href: '/loctr/applications/pending', icon: Clock },
-    { title: 'Approved Applications', href: '/loctr/applications/approved', icon: Eye },
-    { title: 'My ATO', href: `/ato/viewer`, icon: File } ];
 
-const footerNavItems: NavItem[] = [];
+
+const mainNavItems: NavItem[] = [
+    {
+        title: 'CCO/CCA',
+        href: '/cco',
+        icon: LayoutGrid,
+        children: [
+      {
+        title: "My Applications",
+        href: "/cco",
+      },
+      {
+        title: "Pending Status",
+        href:"#",
+      },{
+        title:"Assigned to Me",
+        href:"/cco",
+      }
+    ],
+    },
+    
+];
+
+const footerNavItems: NavItem[] = [
+];
 </script>
 
 <template>
@@ -37,6 +53,7 @@ const footerNavItems: NavItem[] = [];
                     <SidebarMenuButton size="lg" as-child>
                         <Link :href="dashboard()">
                             <AppLogo />
+                        
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -44,13 +61,15 @@ const footerNavItems: NavItem[] = [];
         </SidebarHeader>
 
         <SidebarContent>
-          
-            <NavMain :items="mainNavItems" />
+            <NavMainOSAC :items="mainNavItems" />
+           
         </SidebarContent>
 
         <SidebarFooter>
             <NavFooter :items="footerNavItems" />
-            <NavUser />
+             <NavUser />
         </SidebarFooter>
     </Sidebar>
+   
+
 </template>

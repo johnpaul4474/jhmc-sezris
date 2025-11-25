@@ -52,38 +52,43 @@ dd($meta);
 
 });
 Route::resource('ATO',ATOController::class);
-Route::get('/app-test', function(){
-    $app = ApplicationModel::where('id',61)->first();
+Route::get('/ato/viewer', [ATOController::class, 'MyAto'])->name('My.Ato');
+// Route::get('/app-test', function(){
+//     $app = ApplicationModel::where('id',61)->first();
     
-$details = new ATOmeta(
-    application_date: "11/17/2025",
-    application_type: "Renewal",
-    corporate_name: "",
-    file_uploaded: "image/1.png",
-    office_address: "johnhay AYALA",
-    owner_email: "sample@gmail.com",
-    owner_mobile: "09950850882",
-    owner_name: "Merlita Tamo",
-    representative_email: "Example@gmail.com",
-    representative_mobile: "123456789",
-    trade_name: "YumYam",
-);
+// $details = new ATOmeta(
+//     application_date: "11/17/2025",
+//     application_type: "Renewal",
+//     corporate_name: "",
+//     file_uploaded: "image/1.png",
+//     office_address: "johnhay AYALA",
+//     owner_email: "sample@gmail.com",
+//     owner_mobile: "09950850882",
+//     owner_name: "Merlita Tamo",
+//     representative_email: "Example@gmail.com",
+//     representative_mobile: "123456789",
+//     trade_name: "YumYam",
+// );
 
-// SAVE as array
-$app->setMeta('AppMeta2', $details->toArray());
+// // SAVE as array
+// $app->setMeta('AppMeta2', $details->toArray());
 
-// RETRIEVE
-$meta = $app->getMeta('AppMeta2');  // array
-//after retrieve create object from Array
-$metaObject = ATOmeta::fromArray($meta);
-dd($metaObject);
-$date = Carbon::createFromFormat('m/d/Y', $metaObject->application_date);
+// // RETRIEVE
+// $meta = $app->getMeta('AppMeta2');  // array
+// //after retrieve create object from Array
+// $metaObject = ATOmeta::fromArray($meta);
+// dd($metaObject);
+// $date = Carbon::createFromFormat('m/d/Y', $metaObject->application_date);
 
-$expirationDate = $date->copy()->endOfYear();
+// $expirationDate = $date->copy()->endOfYear();
 
-//dd('ATO is Valid until: '.$expirationDate->format('F j, Y'));
- });
+// //dd('ATO is Valid until: '.$expirationDate->format('F j, Y'));
+//  });
  
 // routes/web.php
-
+// Route::middleware(['block'])->group(function () {
+//     Route::get('/test-block', function () {
+//         return 'This will never load';
+//     });
+// });
 
