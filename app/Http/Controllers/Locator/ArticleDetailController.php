@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Locator;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\UpdateArticleDetail;
+use App\Http\Requests\StoreArticleDetail;
 use App\Models\Locator\ArticleDetail;
 use Inertia\Inertia;
 
@@ -29,15 +31,9 @@ class ArticleDetailController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreArticleDtail $request)
 {
-    $validated = $request->validate([
-        'application_form_id' => 'required|integer|exists:application_forms,id',
-        'marks_and_number' => 'required|string|max:255',
-        'qty' => 'required|integer|min:1',
-        'detailed_description_of_article' => 'required|string|max:500',
-        'gross_weight' => 'nullable|string|max:255',
-    ]);
+    $validated = $request->validated();
 
     $article = ArticleDetail::create([
         'application_form_id' => $validated['application_form_id'],
@@ -70,18 +66,13 @@ class ArticleDetailController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateArticleDetail $request, $id)
 {   
     $article = ArticleDetail::findOrFail($id);
     if($article){
 
     }
-    $validated = $request->validate([
-        'marks_and_number' => 'sometimes|required|string',
-        'qty' => 'sometimes|required|integer|min:1',
-        'detailed_description_of_article' => 'sometimes|required|string',
-        'gross_weight' => 'sometimes|nullable|string',
-    ]);
+    $validated = $request->$request->validated();
 
     $article->update($validated);
 
