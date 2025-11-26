@@ -1,7 +1,7 @@
 <?php
 use App\Http\Controllers\OSAC\OsacController;
 use App\Http\Controllers\Applications\ATOController;
-Route::prefix('osac')->middleware('block')->group(function () {
+Route::prefix('osac')->group(function () {
 
     Route::get('/', [OsacController::class, 'index'])->name('osac.index');
 

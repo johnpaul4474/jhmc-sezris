@@ -36,6 +36,8 @@ const props = defineProps({
 })
 
 // 📌 State
+const selectedForm = ref<any>(null)
+const isSubmitting = ref(false)
 const articles = ref<any[]>([])
 const uploadedFiles = ref<any[]>([])
 const localPrice = ref(props.price ?? null)
@@ -116,7 +118,9 @@ function handlePriceUpdated(price: number) {
 function submit() {
   
   createForm.post('/loctr/applications', {
-    onStart: () => { createForm.processing = true },
+    onStart: () => { createForm.processing = true 
+                     isSubmitting.value =true
+    },
     onSuccess: () => { buttonVisible.value = false },
     onError: () => { buttonVisible.value = true },
     onFinish: () => { createForm.processing = false 
@@ -136,7 +140,7 @@ const [ato] = page.props.applications;
 const stat = ato == null ? '' : ato.status
 // 📑 Form Type Selection
 function selectForm(f: any) {
-  console.log('selected'+f)
+  console.log(isSubmitting.value)
   createForm.type = f.name
   approvalForm.approver_group_id = f.approver_group_id
   buttonVisible.value = true
@@ -202,7 +206,8 @@ function selectForm(f: any) {
       v-for="f in props.form"
       :key="f.id"
       @click="selectForm(f)"
-      :class="selectedForm?.id === f.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 py-5 px-5'"
+      :disabled="isSubmitting"
+      :class="selectedForm?.id === f.id ? 'bg-blue-600 text-white hidden' : 'bg-gray-200 text-gray-800 py-5 px-5'"
       class="px-4 py-2 rounded-md hover:bg-blue-500 hover:text-white transition"
     ><File />
       {{ f.name }}
@@ -300,3 +305,4 @@ function selectForm(f: any) {
     </div>
   </LocatorAppSidebarLayout>
 </template>
+

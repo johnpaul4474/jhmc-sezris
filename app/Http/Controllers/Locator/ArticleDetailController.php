@@ -31,10 +31,10 @@ class ArticleDetailController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreArticleDtail $request)
-{
+    public function store(StoreArticleDetail $request)
+{  
     $validated = $request->validated();
-
+      
     $article = ArticleDetail::create([
         'application_form_id' => $validated['application_form_id'],
         'marks_and_number' => $validated['marks_and_number'],

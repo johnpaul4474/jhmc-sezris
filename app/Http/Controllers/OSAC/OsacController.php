@@ -8,15 +8,25 @@ use App\Models\Locator\ApproverGroupApprover;
 
 class OsacController extends Controller
 {
+   
    public function index()
    {
-   
-   $applications = ApproverGroupApprover::with('application')
+   $user = auth()->user();
+   $isOSAC =
+            optional($user->details)->position_id === 36 &&
+            optional($user->details)->department_id === 12 &&
+            optional($user->details)->role_id === 2 &&
+            optional($user->details)->permission_id === 2;
+    if($isOSAC){
+      $applications = ApproverGroupApprover::with('application')
     ->where('approver_id', auth()->id())
     ->get();
       return Inertia::render('OSAC/Index',[
          'applications'=> $applications,
       ]);
+    }else{
+     return redirect()->route('dashboard');
+    }
    }
    public function create(){
       return Inertia::render('OSAC/Create',[]);

@@ -55,7 +55,7 @@ const app = page.props.applications[0] ? page.props.applications[0].status : nul
   <locatorAppSidebarLayout :breadcrumbs="breadcrumbs">
    
       <!-- Apply New -->
-      
+     
        <TopCard :stats="app"/>
         
     <!---table-->
@@ -66,7 +66,7 @@ const app = page.props.applications[0] ? page.props.applications[0].status : nul
       @view="handleView"
       @edit="handleEdit"
       @delete="handleDelete"
-    />
+    /> 
 </div>
 
 <!--end table-->

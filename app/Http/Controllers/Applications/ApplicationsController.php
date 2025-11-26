@@ -20,14 +20,20 @@ use App\Helpers\AppConstants;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ATO\AtoApplication;
+use App\Services\AppService;
 
 class ApplicationsController extends Controller
 {
+    protected $service;
+    public function __construct(AppService $service)
+{
+    $this->service = $service;
+}
     /**
      * Display a listing of the resource.
      */
     public function index()
-     { 
+     { abort(403);
         $application = ApplicationModel::with(['selections.option', 'selections.user'])
             ->latest()
             ->first();
@@ -67,35 +73,15 @@ class ApplicationsController extends Controller
     public function create()
 
     {   //check if user has approved ATO if it does remove ATO to the Option
-        $user = auth()->user();
-        
-        $applications = $user->applications()
-                    ->where('form_title', 'ATO')
-                    //->where('status', 'Approved')
-                    ->first();
-        $ato = $user->applications()
-                                    ->where('form_title', 'ATO')
-                                    ->first();
-         $applicationId = $applications->id ?? null;
+         $user = auth()->user();
 
-$UserhasATOApplication = $applicationId
-    ? AtoApplication::where('application_id', $applicationId)
-    ->where('user_id', $user->id)
-    ->first()
-    : null;
-        if($UserhasATOApplication){
-            //8 is the ATO form ID
-            $form = Form::all()->except([8]);
-        }else if(!$UserhasATOApplication || !$applications->id){
-            $form = Form::where('name', 'ATO')->get();
-        }else{
-            $form = Form::all();
-        }
+        $formOptions = $this->service->getFormOptionsForUser();
+
     
     return Inertia::render('Locator/Application/Create', [
         'user' => $user,
         'application_form_id' => null,
-        'form' => $form,
+        'form' => $formOptions,
         'approverGroupId' => null,
         
     ]);
@@ -104,57 +90,30 @@ $UserhasATOApplication = $applicationId
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {  
-       
-         $user = auth()->user();
-       $application = ApplicationModel::create([
-            'form_title' => $request->input('type') ,
-            'user_id'    => $user->id,
-        ]);
-        
-        $ato = AtoApplication::where('application_id', $application->id)->first();
-
-       
-        $approver = Form::where('name',$request->input('type'))->first();
-        $sets = ApproverSets::where('approver_group_id',$approver->approver_group_id)->get();
-        
-        //create new Sets of ApprovergroupApprover 
-        foreach ($sets as $set) {
-                    ApproverGroupApprover::query()->insert([
-                    'approver_group_id' => $set->approver_group_id,
-                    'approver_id'       => $set->user_id,
-                    'sequence'          => $set->sequence,
-                    'role'              => $set->role,
-                    'application_form_id'=> $application->id,
-                    'status'            => AppConstants::STATUS_PENDING,
-                    'created_at'        => now(),
-                    'updated_at'        => now(),
-                ]);
-   
-}
-    if($request->type == 'ATO'){
-      return Inertia::render('ATO/Create2',[
-        'application_id'=> $application->id,
-        'approver_group_id' =>  $approver->approver_group_id,
-        'application_form_number'=>$application->form_number,
-      ]);
-    }
-    else{
-    return Inertia::render('Locator/Application/Create', [
-        'user' => $user,
-        'application_form_id' => $application->id, // Pass the new ID
-        'control_number' => $application->control_number,
-        'form_number' => $application->form_number,
-        'form_title' => $application->form_title,
-        'start_date' => $application->created_at,
-        'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
-        'approverGroupId' => $approver->approver_group_id,
-
-    ]);
-
-    }
+{    $user = auth()->user();
+    $result = $this->service->createApplication($request->type);
     
+    $application = $result['application'];
+    $approverForm = $result['approverForm'];
+
+    if ($request->type === 'ATO') {
+        return Inertia::render('ATO/Create2', [
+            'application_id' => $application->id,
+            'approver_group_id' => $approverForm->approver_group_id,
+            'application_form_number' => $application->form_number
+        ]);
+    }else{ return Inertia::render('Locator/Application/Create', [ 
+        'user' => $user, 
+        'application_form_id' => $application->id, // Pass the new ID 
+        'control_number' => $application->control_number, 
+        'form_number' => $application->form_number, 
+        'form_title' => $application->form_title,
+         'start_date' => $application->created_at,
+          'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
+          'approverGroupId' => $approverForm->approver_group_id, 
+        ]); 
     }
+}
 
     /**
      * Display the specified resource.

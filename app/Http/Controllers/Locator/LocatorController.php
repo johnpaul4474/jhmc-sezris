@@ -10,17 +10,21 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Locator\ApplicationForApproval;
 use App\Helpers\AppConstants;
 use App\Models\Locator\ApproverGroupApprover;
-use App\Model\User;
+use App\Models\User;
 
 
 
 class LocatorController extends Controller
 {
     public function index(){
-         abort_unless(auth()->check(), 403, 'Unauthorized');
+        
+        $user = auth()->user();
+        abort_unless(auth()->check(), 403, 'Unauthorized');
+       $AppForapprovals = $user->approvals;
+       
          $applications = auth()->user()?->applications ?? [];
         return Inertia::render('Locator/Index', [
-            'applications' => $applications,
+            'applications' => $AppForapprovals,
         ]);
        
     }
