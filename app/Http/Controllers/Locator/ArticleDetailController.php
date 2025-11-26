@@ -87,28 +87,24 @@ class ArticleDetailController extends Controller
     $article = ArticleDetail::findOrFail($id);
     $article->delete();
 
-    // Return 204 for AJAX
+    
     return response()->noContent(); 
 }
 public function verifyArticle(Request $request, $id)
 {      dd($id);
-    // $id comes from the URL /loctr/articles/{id}
+    
     $article = ArticleDetail::find($id);
 
     if (!$article) {
         return response()->json(['message' => 'Article not found'], 404);
     }
 
-    // Example: mark the article as verified
-    // Add a `status` column in your table if it doesn't exist
+    
     $article->status = 'Verified';
     $article->verified_at = now(); // optional timestamp
     $article->save();
 
-    // return response()->json([
-    //     'message' => 'Article verified successfully',
-    //     'article' => $article
-    // ]);
+    
     return redirect()->back()->with('success', 'Article verified successfully');
 }
 }
