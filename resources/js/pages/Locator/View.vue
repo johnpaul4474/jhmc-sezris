@@ -69,29 +69,35 @@ const props = defineProps({
 
     <!-- Uploads -->
     <div class="p-4 border rounded-lg">
-      <h2 class="font-semibold mb-4">Uploaded Supporting Document'/s</h2>
+  <h2 class="font-semibold mb-4">Uploaded Supporting Document/s</h2>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div
-          v-for="file in app.uploads"
-          :key="file.id"
-          class="border rounded-lg p-2"
-        >
-          <img
-            :src="`/storage/${file.file_path}`"
-            class="w-full h-32 object-cover rounded"
-            alt="Uploaded file"
-          />
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div
+      v-for="file in app.uploads"
+      :key="file.id"
+      class="border rounded-lg p-2"
+    >
+    <a :href="`/storage/${file.file_path}`" target="_blank" >
+      <img
+        :src="`/storage/${file.file_path}`"
+        class="w-full h-32 object-cover rounded"
+        alt="Uploaded file"
+      />
 
-          <div class="mt-2">
-            <p class="text-sm font-medium">{{ file.file_name }}</p>
-            <p class="text-xs text-gray-500">Type: {{ file.file_type }}</p>
-            <p class="text-xs text-gray-500">
-              Size: {{ (file.file_size / 1024).toFixed(1) }} KB
-            </p>
-          </div>
-        </div>
+      <div class="mt-2">
+        <p class="text-sm font-medium">{{ file.file_name }}</p>
+        <p class="text-xs text-gray-500">Type: {{ file.file_type }}</p>
+        <p class="text-xs text-gray-500">
+          Size: {{ (file.file_size / 1024).toFixed(1) }} KB
+        </p>
+        <!-- Bind href properly -->
+        
       </div>
+       </a>
     </div>
+   
   </div>
+    </div>
+</div>
+
 </template>

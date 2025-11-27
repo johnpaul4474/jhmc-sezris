@@ -11,20 +11,17 @@ use App\Models\Locator\ApplicationForApproval;
 use App\Helpers\AppConstants;
 use App\Models\Locator\ApproverGroupApprover;
 use App\Models\User;
-
+use Illuminate\Support\Facades\Gate;
 
 
 class LocatorController extends Controller
 {
     public function index(){
         
-        $user = auth()->user();
- $isLocator =
-            optional($user->details)->role_id == 3 &&
-            optional($user->details)->permission_id == 2;
-            if(!$isLocator){
-        abort(401, 'Unauthorized.');
-            }else{
+       
+  if (Gate::denies('access-locator')) {
+            abort(403, 'Unauthorized');
+        }
        $AppForapprovals = $user->approvals;
        
          $applications = auth()->user()?->applications ?? [];
@@ -32,7 +29,7 @@ class LocatorController extends Controller
             'applications' => $AppForapprovals,
         ]);
     }
-    }
+    
     public function show(String $id){
        $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
     ->where('id', $id)

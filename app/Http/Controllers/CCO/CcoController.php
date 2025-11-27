@@ -7,27 +7,23 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Locator\ApproverGroupApprover;
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 class CcoController extends Controller
-{
+{   
+    
     public function index(){
-        $user = auth()->user();
-   $isCCO =
-            optional($user->details)->position_id === 37 &&
-            optional($user->details)->department_id === 12 &&
-            optional($user->details)->role_id === 2 &&
-            optional($user->details)->permission_id === 2;
         
-            if($isCCO){
+            if (Gate::denies('access-cco')) {
+            abort(403, 'Unauthorized');
+        }
                 $applications = ApproverGroupApprover::with('application')
                             ->where('approver_id', auth()->id())
                             ->get();
                                 return Inertia::render('CCO/Index',[
                                     'applications'=> $applications,
                                 ]);
-            }else{
-               abort(401, 'Unauthorized.');
-            }
+            
        
     }
     public function show($id){

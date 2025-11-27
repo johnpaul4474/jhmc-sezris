@@ -5,7 +5,7 @@ use App\Contracts\ISezrisService;
 use App\Services\ApplicationService;
 use App\Services\UploadService;
 use Illuminate\Support\Facades\URL;
-
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +23,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        
+        //access cco only
+        Gate::define('access-cco', function ($user) {
+        return optional($user->details)->position_id === 37 &&
+               optional($user->details)->department_id === 12 &&
+               optional($user->details)->role_id === 2 &&
+               optional($user->details)->permission_id === 2;
+          });
+          //osac access only
+          Gate::define('access-osac', function ($user) {
+        return optional($user->details)->position_id === 36 &&
+            optional($user->details)->department_id === 12 &&
+            optional($user->details)->role_id === 2 &&
+            optional($user->details)->permission_id === 2;
+          });
+          //locator access
+          Gate::define('access-locator', function ($user) {
+        return  optional($user->details)->role_id == 3 &&
+            optional($user->details)->permission_id == 2;
+          });
     }
 }
