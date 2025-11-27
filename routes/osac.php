@@ -9,5 +9,5 @@ Route::prefix('osac')->group(function () {
 
     Route::get('/{id}/show', [OsacController::class, 'show'])->name('osac.show');
 
-});
+})->name('osac');
 Route::get('/create2', [ATOController::class, 'CreateApp'])->name('app.create2');

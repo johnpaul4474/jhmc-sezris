@@ -56,15 +56,22 @@ class AuthenticatedSessionController extends Controller
         {
             return redirect()->intended(route('dashboard', absolute: false));
             
+        }else if($user_details && $user_details->role_id == 3){
+            return redirect()->intended('/locator');
+        }else if($user_details && $user_details->position_id == 36 && $user_details->department_id == 12) {
+            return redirect()->intended('osac');
+        }elseif ($user_details && $user_details->department_id == 12
+                 && $user_details->position_id == 37  &&
+                 $user_details->role_id == 2 
+                 && $user_details->permission_id == 2 ){
+            return redirect()->intended('/cco');
         }else if($user_details && $user_details->department_id == 12
                 && $user_details->division_id == null
                 && $user_details->role_id == 2
                 && $user_details->permission_id == 2)
         {
             return redirect()->intended('/sezad');
-        }else if($user_details && $user_details->role_id == 3){
-            return redirect()->intended(route('locator', absolute: false));
-        }else {
+        }else{
             return redirect()->intended(route('bddDashboard', absolute: false));
         }
         
@@ -74,7 +81,7 @@ class AuthenticatedSessionController extends Controller
      * Destroy an authenticated session.
      */
     public function destroy(Request $request): RedirectResponse
-    {
+    { 
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

@@ -13,6 +13,7 @@ use Carbon\Carbon;
 
 
 Route::get('/locator', [LocatorController::class, 'index'])->name('locator');
+Route:: get('/locator/{id}', [LocatorController::class, 'show'])->name('locator.app.show');
 Route::resource('approval', ApplicationForApprovalController::class);
 Route::group(['prefix' => 'loctr', 'middleware' => 'auth'], function () {
     //route for pending view

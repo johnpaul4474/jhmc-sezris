@@ -24,7 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
          $middleware->alias([
         'role.access' => \App\Http\Middleware\RoleAccessMiddleware::class,
-        'block'=>\App\Http\Middleware\BlockAccess::class,
+       
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

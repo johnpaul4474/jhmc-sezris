@@ -19,17 +19,28 @@ class LocatorController extends Controller
     public function index(){
         
         $user = auth()->user();
-        abort_unless(auth()->check(), 403, 'Unauthorized');
+ $isLocator =
+            optional($user->details)->role_id == 3 &&
+            optional($user->details)->permission_id == 2;
+            if(!$isLocator){
+        abort(401, 'Unauthorized.');
+            }else{
        $AppForapprovals = $user->approvals;
        
          $applications = auth()->user()?->applications ?? [];
         return Inertia::render('Locator/Index', [
             'applications' => $AppForapprovals,
         ]);
-       
     }
-    public function show($id){
-       return $id;
+    }
+    public function show(String $id){
+       $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
+    ->where('id', $id)
+    ->first();
+    
+       return Inertia::render('Locator/View',[
+        'app' => $application,
+       ]);
     }
     
 }

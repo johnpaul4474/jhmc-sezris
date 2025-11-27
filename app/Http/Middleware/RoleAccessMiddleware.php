@@ -32,8 +32,16 @@ class RoleAccessMiddleware
                 $details->permission_id == 1
             );
 
-            $isSezadUser = ($details->department_id == 12);
+            $isSezadUser = null;
             $isLocator = ($details->role_id == 3);
+            $isOsac = ($details->position_id == 36 &&
+                        $details->department_id == 12 &&
+                        $details->role_id == 2 &&
+                        $details->permission_id == 2);
+            $isCco= ($details->position_id == 37 &&
+                     $details->department_id == 12 &&
+                     $details->role_id == 2 &&
+                     $details->permission_id == 2); 
            
             // Super Admin: allow only /dashboard and /sezad
             if ($isSuperAdmin) {
@@ -48,11 +56,15 @@ class RoleAccessMiddleware
                 }
             }
             // // Locator user: allow only /locator
-            // elseif ($isLocator) {
+            elseif ($isLocator) {
                 
-            //         return redirect('/locator');
+                     return redirect('/locator');
              
-            // }
+             } elseif($isCco){
+                 return redirect('/cco');
+             }elseif($isOsac){
+                return redirect('/osac');
+             }
             // Optionally: handle users with unknown roles
             else {
                 return redirect('/login');

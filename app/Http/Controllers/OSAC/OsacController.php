@@ -25,7 +25,7 @@ class OsacController extends Controller
          'applications'=> $applications,
       ]);
     }else{
-     return redirect()->route('dashboard');
+     abort(401, 'Unauthorized.');
     }
    }
    public function create(){

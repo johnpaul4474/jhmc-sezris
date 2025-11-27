@@ -17,6 +17,7 @@ class CcoController extends Controller
             optional($user->details)->department_id === 12 &&
             optional($user->details)->role_id === 2 &&
             optional($user->details)->permission_id === 2;
+        
             if($isCCO){
                 $applications = ApproverGroupApprover::with('application')
                             ->where('approver_id', auth()->id())
@@ -25,7 +26,7 @@ class CcoController extends Controller
                                     'applications'=> $applications,
                                 ]);
             }else{
-                return redirect()->route('dashboard');
+               abort(401, 'Unauthorized.');
             }
        
     }
