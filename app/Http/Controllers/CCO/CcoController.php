@@ -8,12 +8,13 @@ use Inertia\Inertia;
 use App\Models\Locator\ApproverGroupApprover;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
+use App\Models\Locator\ApplicationModel;
 
 class CcoController extends Controller
 {   
     
     public function index(){
-        
+        $user = auth()->user();
             if (Gate::denies('access-cco')) {
             abort(403, 'Unauthorized');
         }
@@ -27,8 +28,20 @@ class CcoController extends Controller
        
     }
     public function show($id){
+        $user = auth()->user();
+         if (Gate::denies('access-cco')) {
+            abort(403, 'Unauthorized');
+        }
+         $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections','options'])
+                     ->where('id', $id)
+                     ->first();
+        $approver = ApproverGroupApprover::where('approver_group_id', $application->approval->approver_group_id)
+                  ->where('approver_id', $user->id)
+                  ->where('application_form_id', $application->id)
+                  ->first();
        return Inertia::render('CCO/Show',[
-        'application' => $id,
+        'application' => $application,
+        'approver_status' => $approver->status,
        ]);
     }
 }

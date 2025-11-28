@@ -1,22 +1,52 @@
 <script setup>
-import CcoAppSidebarLayout from '@/layouts/Cco/CcoAppSidebarLayout.vue';
-import CcoApplicationTable from './CcoComponents/CcoApplicationTable.vue';
+import CcoViewer from './CcoComponents/CcoViewer.vue'
+import Button from '@/components/ui/button/Button.vue'
+import CcoAppSidebarLayout from '@/layouts/Cco/CcoAppSidebarLayout.vue'
+
 const props = defineProps({
   application: {
-    type: String,
+    type: Array,
     required: true,
   },
+  approver_status: {
+    type: String,
+    required: true,
+  }
 })
-</script>
-<template>
-<CcoAppSidebarLayout>
-CCO/CCA Show Application id: {{ props.application }}
-<CcoApplicationTable
-      :applications="[props.application]"
-      @view="handleView"
-      @edit="handleEdit"
-      @delete="handleDelete"
-    />
 
-</CcoAppSidebarLayout>
+const handleApprove = () => {
+  console.log("Approved:", props.application)
+}
+
+const handleReject = () => {
+  console.log("Rejected:", props.application)
+}
+</script>
+
+<template>
+  <CcoAppSidebarLayout>
+    <CcoViewer :application="props.application" />
+
+    <!-- Professional Action Bar -->
+    <div 
+      v-if="props.approver_status === 'Pending'"
+      class="flex justify-end gap-4 mt-8"
+    >
+      <Button
+        variant="default"
+        class="px-6 py-2 text-sm font-semibold"
+        @click="handleApprove"
+      >
+        Approve
+      </Button>
+
+      <Button
+        variant="destructive"
+        class="px-6 py-2 text-sm font-semibold"
+        @click="handleReject"
+      >
+        Reject
+      </Button>
+    </div>
+  </CcoAppSidebarLayout>
 </template>
