@@ -12,7 +12,7 @@ const props = defineProps<{
 
 <template>
   <AppShell variant="sidebar">
-    <OsacAppsidebar :breadcrumbs="props.breadcrumbs ?? []" />
+  <OsacAppsidebar :breadcrumbs="props.breadcrumbs ?? []" />
     <AppContent variant="sidebar" class="overflow-x-hidden">
       <AppSidebarHeader :breadcrumbs="props.breadcrumbs ?? []" />
       <slot />

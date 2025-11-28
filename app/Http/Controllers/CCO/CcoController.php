@@ -32,9 +32,10 @@ class CcoController extends Controller
          if (Gate::denies('access-cco')) {
             abort(403, 'Unauthorized');
         }
-         $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections','options'])
+         $application = ApplicationModel::with(['articleDetails','approval', 'uploads', 'selections','options'])
                      ->where('id', $id)
                      ->first();
+                     
         $approver = ApproverGroupApprover::where('approver_group_id', $application->approval->approver_group_id)
                   ->where('approver_id', $user->id)
                   ->where('application_form_id', $application->id)

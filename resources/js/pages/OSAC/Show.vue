@@ -1,7 +1,8 @@
 <script setup>
-import OsacAppSidebarLayout from '@/layouts/Osac/OsacAppSidebarLayout.vue'
-import OsacViewer from './OsacComponents/OsacViewer.vue'
+import { ref } from 'vue'
+import CcoViewer from '../CCO/CcoComponents/CcoViewer.vue'
 import Button from '@/components/ui/button/Button.vue'
+import CcoAppSidebarLayout from '@/layouts/Cco/CcoAppSidebarLayout.vue'
 
 const props = defineProps({
   application: {
@@ -14,24 +15,61 @@ const props = defineProps({
   }
 })
 
+// Modal State
+const showModal = ref(false)
+const comment = ref('')
+const actionType = ref(null) // "reject" or "return"
+
+// APPROVE
 const handleApprove = () => {
   console.log("Approved:", props.application)
 }
 
-const handleReject = () => {
-  console.log("Rejected:", props.application)
+// OPEN MODAL
+const openModal = (type) => {
+  actionType.value = type
+  showModal.value = true
+}
+
+// CONFIRM RETURN / REJECT
+const confirmAction = () => {
+  console.log("Action:", actionType.value)
+  console.log("Comment:", comment.value)
+
+  // Example:
+  // Inertia.post('/cco/action', {
+  //   id: props.application.id,
+  //   action: actionType.value,
+  //   comment: comment.value
+  //  returnToPreviousApprover form.post(
+    // `/application-for-approval/${props.application.form_number}/approvers/${currentApproverId.value}/return`,
+    // {
+ //ApproveApplication router.post(
+  //  `/application-for-approval/${props.application.form_number}/approvers/${approverId}/approve`,
+
+  // })
+
+  showModal.value = false
+  comment.value = ''
+}
+
+// CANCEL
+const cancelAction = () => {
+  showModal.value = false
+  comment.value = ''
 }
 </script>
 
 <template>
-  <OsacAppSidebarLayout>
-    <OsacViewer :application="props.application" />
+  <CcoAppSidebarLayout>
+    <CcoViewer :application="props.application" />
 
-    <!-- Professional Action Bar -->
-    <div 
+    <!-- 🔥 Action bar -->
+    <div
       v-if="props.approver_status === 'Pending'"
       class="flex justify-center gap-4 mt-8"
     >
+      <!-- APPROVE -->
       <Button
         variant="default"
         class="px-6 py-2 text-sm font-semibold"
@@ -40,13 +78,63 @@ const handleReject = () => {
         Approve
       </Button>
 
+      <!-- REJECT -->
       <Button
         variant="destructive"
         class="px-6 py-2 text-sm font-semibold"
-        @click="handleReject"
+        @click="openModal('reject')"
       >
         Reject
       </Button>
+
+      <!-- RETURN -->
+      <Button
+        class="px-6 py-2 text-sm font-semibold bg-green-600 text-white hover:bg-green-700"
+        @click="openModal('return')"
+      >
+        Return
+      </Button>
     </div>
-  </OsacAppSidebarLayout>
+
+    <!-- 🔥 Modal -->
+    <div
+      v-if="showModal"
+      class="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+    >
+      <div class="bg-white w-full max-w-md p-6 rounded-xl shadow-xl">
+        <!-- Modal Title -->
+        <h2 class="text-lg font-semibold mb-3">
+          {{ actionType === 'reject' ? 'Reject Application' : 'Return Application' }}
+        </h2>
+
+        <!-- Comment -->
+        <label class="text-sm font-medium">Comment</label>
+        <textarea
+          v-model="comment"
+          class="w-full mt-2 border border-gray-300 rounded-lg p-3 text-sm focus:ring focus:ring-primary"
+          rows="4"
+          placeholder="Enter your comment..."
+        ></textarea>
+
+        <!-- Modal Footer -->
+        <div class="mt-4 flex justify-end gap-3">
+          <Button
+            variant="secondary"
+            @click="cancelAction"
+          >
+            Cancel
+          </Button>
+
+          <Button
+            :class="actionType === 'reject'
+              ? 'bg-red-600 text-white hover:bg-red-700'
+              : 'bg-green-600 text-white hover:bg-green-700'"
+            @click="confirmAction"
+          >
+            {{ actionType === 'reject' ? 'Confirm Reject' : 'Confirm Return' }}
+          </Button>
+        </div>
+      </div>
+    </div>
+  </CcoAppSidebarLayout>
 </template>
