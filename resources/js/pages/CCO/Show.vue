@@ -97,13 +97,13 @@ const cancelAction = () => {
       </Button>
 
       <!-- REJECT -->
-      <Button
+      <!-- <Button
         variant="destructive"
         class="px-6 py-2 text-sm font-semibold"
         @click="openModal('reject')"
       >
         Reject
-      </Button>
+      </Button> -->
 
       <!-- RETURN -->
       <Button

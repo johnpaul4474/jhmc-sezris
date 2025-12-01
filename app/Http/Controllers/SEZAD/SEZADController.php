@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 class SEZADController extends Controller
 {
     public function index()
-    {
+    {     dd(sezadController);
         $user = Auth::user();
         if ($user instanceof \App\Models\User) { 
             if ($user && method_exists($user, 'load')) {

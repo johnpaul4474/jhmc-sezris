@@ -93,13 +93,13 @@ const cancelAction = () => {
         Approve
       </Button>
 
-      <Button
+      <!-- <Button
         variant="destructive"
         class="px-6 py-2 text-sm font-semibold"
         @click="openModal('reject')"
       >
         Reject
-      </Button>
+      </Button> -->
 
       <Button
         class="px-6 py-2 text-sm font-semibold bg-green-600 text-white hover:bg-green-700"

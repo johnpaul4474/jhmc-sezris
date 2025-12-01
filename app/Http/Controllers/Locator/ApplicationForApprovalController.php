@@ -9,6 +9,7 @@ use App\Models\Locator\ApplicationModel;
 use Inertia\Inertia;
 use App\Models\ApproverGroup;
 use App\Models\Locator\ApproverGroupApprover;
+use Illuminate\Support\Facades\DB;
 
 class ApplicationForApprovalController extends Controller
 {
@@ -185,37 +186,6 @@ public function returnApproval(Request $request, $formNumber, $approverId)
     {
         //
     }
-    public function reject(Request $request, $formNumber, $approverId)
-    {
-      
-      $applicationForApproval = ApplicationForApproval::where('form_number', $formNumber)->first();
-      $applicationForm = ApplicationModel::where('form_number', $applicationForApproval->form_number)->first();
-      if ($applicationForApproval) {
-            $applicationForApproval->status = 'Rejected';
-            $applicationForApproval->remark = $request->comment;
-            $applicationForApproval->acted_at = now();
-        
-            $applicationForApproval->save();
-            $applicationForm->status= 'Rejected';
-            $applicationForm->save();
-}
 
-$totalApprovers = ApproverGroupApprover::where('application_form_id', $applicationForApproval->application_id)
-    ->where('approver_group_id', $applicationForApproval->approver_group_id)
-    ->count();
-   
-    $rejectedApprovers = ApproverGroupApprover::where('application_form_id', $applicationForApproval->application_id)
-    ->where('approver_group_id', $applicationForApproval->approver_group_id)
-    ->where('status', 'Rejected')
-    ->count();
-    $AppForm =ApplicationModel::where('form_number',$formNumber)->first();
-    if($totalApprovers === $rejectedApprovers){
-        
-        $AppForm->status = 'Rejected';
-        $AppForm->save();
-     }else{
-        $AppForm->status = 'Pending';
-        $AppForm->save();
-     }
-    } 
+
 }
