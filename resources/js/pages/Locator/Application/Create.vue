@@ -157,7 +157,7 @@ function selectForm(f: any) {
 
       <!-- 🏷 Title -->
       <h1 class="text-3xl font-extrabold mb-6 border-b pb-2 text-gray-900 dark:text-gray-100 dark:border-gray-700">
-        {{ props.form_title ? `Applying for ${props.form_title}` : 'Create New Application' }}
+        {{ props.form_title ? `Applying for ${props.form_title}` : ' Application Forms' }}
       </h1>
 
       <!-- Alerts & Info -->

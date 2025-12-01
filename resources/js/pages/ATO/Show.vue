@@ -1,130 +1,117 @@
 <script setup>
-import { computed } from 'vue'
-import { usePage } from '@inertiajs/vue3'
-import { Image } from 'lucide-vue-next';
+import { Image } from "lucide-vue-next";
+import LocatorAppSidebarLayout from "@/layouts/locator/LocatorAppSidebarLayout.vue";
 
-// Data passed from controller via Inertia
 const props = defineProps({
   ATOapplication: {
     type: Object,
     required: true,
   },
-})
+});
 
-//const app = computed(() => props.application)
+// Format date helper
+const formatDate = (date) =>
+  new Date(date).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
+// Computed values
+const status = props.ATOapplication.application_form.status;
+const displayStatus = status === "Approved" ? "Valid" : status;
+
+const createdAt = new Date(props.ATOapplication.application_form.created_at);
+const createdDate = formatDate(createdAt);
+const validUntil =
+  status === "Approved" ? `Valid until December 31, ${createdAt.getFullYear()}` : createdDate;
 </script>
 
 <template>
-  <div class="p-6 space-y-6">
-    
-    <h2 class="text-2xl font-bold text-center">ATO Application Details</h2>
+  <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">Application Type</p>
-        <p class="font-semibold">{{ props.ATOapplication.application_type }}</p>
-      </div>
+    <!-- Header / Overview Card -->
+    <div class="bg-white border rounded-xl shadow-sm p-6 mb-10">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
 
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">Business Structure</p>
-        <p class="font-semibold">{{ props.ATOapplication.business_structure }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">Trade Name</p>
-        <p class="font-semibold">{{ props.ATOapplication.Trades_name }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">Parent Company</p>
-        <p class="font-semibold">{{ props.ATOapplication.parent_company }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">Taxpayer Name</p>
-        <p class="font-semibold">{{ props.ATOapplication.taxpayer_name }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">TIN</p>
-        <p class="font-semibold">{{ props.ATOapplication.TIN }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">Primary Line</p>
-        <p class="font-semibold">{{ props.ATOapplication.PrimaryLine }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">Secondary Line</p>
-        <p class="font-semibold">{{ props.ATOapplication.SecondaryLine }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow md:col-span-2">
-        <p class="text-gray-600 text-sm">Nature of Contract</p>
-        <p class="font-semibold">{{ props.ATOapplication.nature_of_contract }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">PCIC Primary Line</p>
-        <p class="font-semibold">{{ props.ATOapplication.pcic_primary_line }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">PCIC Secondary Line</p>
-        <p class="font-semibold">{{ props.ATOapplication.pcic_secondary_line }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">PCIC Primary Email</p>
-        <p class="font-semibold">{{ props.ATOapplication.pcic_Primary_email }}</p>
-
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">PCIC Secondary Email</p>
-        <p class="font-semibold">{{ props.ATOapplication.pcic_Secondary_email }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">PCIC Location</p>
-        <p class="font-semibold">{{ props.ATOapplication.pcic_location }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow md:col-span-2">
-        <p class="text-gray-600 text-sm">PCIC Office Address</p>
-        <p class="font-semibold">{{ props.ATOapplication.pcic_office_address }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">Contact Person</p>
-        <p class="font-semibold">{{ props.ATOapplication.pcic_contact_person }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow">
-        <p class="text-gray-600 text-sm">Contact Number</p>
-        <p class="font-semibold">{{ props.ATOapplication.pcic_contact_number }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow md:col-span-2">
-        <p class="text-gray-600 text-sm">Application Date</p>
-        <p class="font-semibold">{{ props.ATOapplication.application_date }}</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-white shadow md:col-span-2">
-        <p class="text-gray-600 text-sm">Uploaded Supporting Documents Files</p>
-        <div>
-           
-          <template v-if="props.ATOapplication.uploads && props.ATOapplication.uploads.length">
-            <ul class="list-disc pl-5">
-              <li v-for="(file, index) in props.ATOapplication.uploads" :key="index">
-            
-                <a :href="file.file_url" class="text-blue-500 underline" target="_blank"><Image />{{ file.file_name }}</a>
-              </li>
-            </ul>
-          </template> 
-          <p v-else class="text-gray-400 italic">No files uploaded</p>
+        <!-- Status -->
+        <div class="bg-white border rounded-lg p-4 shadow-sm">
+          <p class="text-sm text-muted-foreground"> ATO Status:</p>
+          <p class="text-green-600 text-xl font-semibold">{{ displayStatus }}</p>
         </div>
+
+        <!-- Created At / Valid Until -->
+        <div class="bg-white border rounded-lg p-4 shadow-sm">
+          <p class="text-sm text-muted-foreground">Valid Until: </p>
+          <p class="text-green-600 text-xl font-semibold">{{ validUntil }}</p>
+        </div>
+
       </div>
     </div>
-  </div>
-  </div>
+
+    <!-- Main Details Section -->
+    <div class="space-y-10 px-2 sm:px-6">
+      <h2 class="text-2xl font-bold text-center tracking-tight">ATO Permit Details</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Field Cards -->
+        <div
+          v-for="(value, label) in {
+            'Application Type': props.ATOapplication.application_type,
+            'Business Structure': props.ATOapplication.business_structure,
+            'Trade Name': props.ATOapplication.Trades_name,
+            'Parent Company': props.ATOapplication.parent_company,
+            'Taxpayer Name': props.ATOapplication.taxpayer_name,
+            'TIN': props.ATOapplication.TIN,
+            'Primary Line': props.ATOapplication.PrimaryLine,
+            'Secondary Line': props.ATOapplication.SecondaryLine,
+            'Nature of Contract': props.ATOapplication.nature_of_contract,
+            'PCIC Primary Line': props.ATOapplication.pcic_primary_line,
+            'PCIC Secondary Line': props.ATOapplication.pcic_secondary_line,
+            'PCIC Primary Email': props.ATOapplication.pcic_Primary_email,
+            'PCIC Secondary Email': props.ATOapplication.pcic_Secondary_email,
+            'PCIC Location': props.ATOapplication.pcic_location,
+            'PCIC Office Address': props.ATOapplication.pcic_office_address,
+            'Contact Person': props.ATOapplication.pcic_contact_person,
+            'Contact Number': props.ATOapplication.pcic_contact_number,
+            'Application Date': formatDate(props.ATOapplication.application_date),
+          }"
+          :key="label"
+          class="bg-white border rounded-xl shadow-sm p-6 hover:shadow-md transition"
+        >
+          <p class="text-sm text-muted-foreground">{{ label }}</p>
+          <p class="font-medium text-lg mt-1">{{ value }}</p>
+        </div>
+
+        <!-- Uploaded Files -->
+        <div class="bg-white border rounded-xl shadow-sm p-6 md:col-span-2">
+          <p class="text-sm text-muted-foreground mb-3">Uploaded Documents</p>
+
+          <div v-if="props.ATOapplication.uploads?.length">
+            <ul class="space-y-3">
+              <li
+                v-for="(file, index) in props.ATOapplication.uploads"
+                :key="index"
+                class="flex items-center gap-2"
+              >
+                <Image class="w-4 h-4 text-blue-600" />
+                <a
+                  :href="file.file_url"
+                  target="_blank"
+                  class="text-blue-600 underline font-medium"
+                >
+                  {{ file.file_name }}
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <p v-else class="text-muted-foreground italic">No files uploaded</p>
+        </div>
+
+      </div>
+    </div>
+
+  </LocatorAppSidebarLayout>
 </template>

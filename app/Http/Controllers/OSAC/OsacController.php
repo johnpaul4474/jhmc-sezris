@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Models\Locator\ApproverGroupApprover;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Locator\ApplicationModel;
+use App\Models\ApproverGroup;
 class OsacController extends Controller
 {
    
@@ -17,8 +18,8 @@ class OsacController extends Controller
             abort(403, 'Unauthorized');
         }
       $applications = ApproverGroupApprover::with('application')
-    ->where('approver_id', auth()->id())
-    ->get();
+               ->where('approver_id', auth()->id())
+               ->get();
       return Inertia::render('OSAC/Index',[
          'applications'=> $applications,
       ]);
@@ -35,13 +36,15 @@ class OsacController extends Controller
          $application = ApplicationModel::with(['articleDetails', 'uploads', 'options','selections','approval'])
                      ->where('id', $id)
                      ->first();
-          $approver = ApproverGroupApprover::where('approver_group_id', $application->approval->approver_group_id)
+          $approver = ApproverGroupApprover::with(['approver'])->where('approver_group_id', $application->approval->approver_group_id)
                   ->where('approver_id', $user->id)
                   ->where('application_form_id', $application->id)
                   ->first();
+         $group = ApproverGroup:: where('id', $application->approval->approver_group_id)->first();
        return Inertia::render('OSAC/Show',[
          'application' => $application,
          'approver_status' => $approver->status,
+         'group' => $group,
        ]);
     }
 }

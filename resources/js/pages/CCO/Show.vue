@@ -1,9 +1,10 @@
 <script setup>
 import { ref } from 'vue'
+import { router, usePage } from '@inertiajs/vue3';
 import CcoViewer from './CcoComponents/CcoViewer.vue'
 import Button from '@/components/ui/button/Button.vue'
 import CcoAppSidebarLayout from '@/layouts/Cco/CcoAppSidebarLayout.vue'
-
+const page = usePage()
 const props = defineProps({
   application: {
     type: Array,
@@ -12,6 +13,10 @@ const props = defineProps({
   approver_status: {
     type: String,
     required: true,
+  },
+   group:{
+    type:Object,
+    required:true,
   }
 })
 
@@ -22,8 +27,21 @@ const actionType = ref(null) // "reject" or "return"
 
 // APPROVE
 const handleApprove = () => {
-  console.log("Approved:", props.application)
-}
+  // console.log("Approver ID:"+page.props.auth.user.id);
+  // console.log('Permit ID: '+props.application.form_number);
+  router.post(
+    `/application-for-approval/${props.application.form_number}/approvers/${page.props.auth.user.id}/approve`,
+    {},
+    {
+      onSuccess: () => {
+        console.log('Application approved!');
+      },
+      onError: (errors) => {
+        console.error('Approval failed', errors);
+      },
+    }
+  );
+};
 
 // OPEN MODAL
 const openModal = (type) => {
@@ -33,19 +51,24 @@ const openModal = (type) => {
 
 // CONFIRM RETURN / REJECT
 const confirmAction = () => {
-  console.log("Action:", actionType.value)
-  console.log("Comment:", comment.value)
+  
+  router.post(
+    `/application-for-approval/${props.application.form_number}/approvers/${page.props.auth.user.id}/${actionType.value}`,
+    { comment: comment.value },
+    {
+      onSuccess: () => {
+        console.log(`${actionType.value} successful`);
+      },
+      onError: (errors) => {
+        console.error(`${actionType.value} failed`, errors);
+      },
+    }
+  );
 
-  // Example:
-  // Inertia.post('/cco/action', {
-  //   id: props.application.id,
-  //   action: actionType.value,
-  //   comment: comment.value
-  // })
-
-  showModal.value = false
-  comment.value = ''
-}
+  // Reset modal
+  showModal.value = false;
+  comment.value = '';
+};
 
 // CANCEL
 const cancelAction = () => {
@@ -56,7 +79,8 @@ const cancelAction = () => {
 
 <template>
   <CcoAppSidebarLayout>
-    <CcoViewer :application="props.application" />
+   
+    <CcoViewer :application="props.application" :group="props.group"/>
 
     <!-- 🔥 Action bar -->
     <div

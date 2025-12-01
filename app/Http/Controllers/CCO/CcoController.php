@@ -9,6 +9,7 @@ use App\Models\Locator\ApproverGroupApprover;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Locator\ApplicationModel;
+use App\Models\ApproverGroup;
 
 class CcoController extends Controller
 {   
@@ -40,9 +41,12 @@ class CcoController extends Controller
                   ->where('approver_id', $user->id)
                   ->where('application_form_id', $application->id)
                   ->first();
+         $group = ApproverGroup::where('id', $application->approval->approver_group_id)->first();
+         
        return Inertia::render('CCO/Show',[
         'application' => $application,
         'approver_status' => $approver->status,
+        'group' => $group,
        ]);
     }
 }

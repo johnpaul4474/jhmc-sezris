@@ -38,12 +38,15 @@ Route::group(['prefix' => 'loctr', 'middleware' => 'auth'], function () {
 });
 
 //routes for application approve and return
+//approve
 Route::post('application-for-approval/{form_number}/approvers/{approverId}/approve', [ApplicationForApprovalController::class, 'approve'])
     ->name('application-for-approval.approve');
-
+//Return
 Route::post('application-for-approval/{id}/approvers/{approverId}/return', [ApplicationForApprovalController::class, 'returnApproval'])
     ->name('application-for-approval.return');
-
+//Reject
+Route::post('application-for-approval/{id}/approvers/{approverId}/reject', [ApplicationForApprovalController::class, 'reject'])
+    ->name('application-for-approval.reject');
 //how form meta works
 Route::get('/test-meta', function(){
    $applicationTest = App\Models\Locator\ApplicationModel::find(15);

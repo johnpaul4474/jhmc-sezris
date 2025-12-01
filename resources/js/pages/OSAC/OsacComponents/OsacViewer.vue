@@ -3,15 +3,25 @@ const props = defineProps({
   application: {
     type: Object,
     required: true
+  },
+  approver:{
+    type:Object,
+    required: true,
+  },
+  group:{
+    type:Object,
+    required:true,
   }
 })
 </script>
 
 <template>
+ 
   <div class="bg-white rounded-xl shadow p-6 space-y-8">
 
     <!-- Header -->
     <div class="border-b pb-4">
+     
         <h3 class="text-lg bg-gray-500 text-white text-center font-semibold mb-2">Application Basic Information</h3>
       <h2 class="text-xl font-bold text-gray-900">
         {{ props.application.form_title }}
@@ -90,7 +100,7 @@ const props = defineProps({
       <h3 class="text-lg  bg-gray-500 text-white text-center font-semibold mb-2">Approval Info</h3>
       <div class="border rounded-lg p-4 bg-gray-50">
         <p><strong>Status:</strong> {{ props.application.approval.status }}</p>
-        <p><strong>Group ID:</strong> {{ props.application.approval.approver_group_id }}</p>
+        <p class="py-1"><strong>Approver Group:</strong> {{ props.group.name }}</p>
         <p v-if="props.application.approval.remark"><strong>Remark:</strong> {{ props.application.approval.remark }}</p>
       </div>
     </div>

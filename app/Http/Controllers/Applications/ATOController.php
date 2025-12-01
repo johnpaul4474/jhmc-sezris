@@ -97,8 +97,8 @@ class ATOController extends Controller
      */
     public function show(string $id)
 {
-    $ato = AtoApplication::with('uploads')->where('application_id', $id)->first();
-
+    $ato = AtoApplication::with('uploads', 'applicationForm')->where('application_id', $id)->first();
+    
     // Fix file paths
     if ($ato && $ato->uploads) {
         foreach ($ato->uploads as $upload) {
@@ -106,7 +106,7 @@ class ATOController extends Controller
             $upload->file_url = Storage::url($upload->file_path);
         }
     }
-
+       
     return Inertia::render('ATO/Show', [
         'ATOapplication' => $ato,
     ]);

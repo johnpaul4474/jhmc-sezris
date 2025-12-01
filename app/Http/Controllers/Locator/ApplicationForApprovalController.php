@@ -18,7 +18,7 @@ class ApplicationForApprovalController extends Controller
      */
     public function index()
     {
-        //
+        
     }
 
     /**
@@ -66,7 +66,7 @@ class ApplicationForApprovalController extends Controller
      * Approve the application for the given approver.
      */
    public function approve(Request $request, $formNumber, $approverId)
-{ 
+{    
     $appForm = ApplicationModel::where('form_number', $formNumber)->firstOrFail();
     
     $applicationForApproval = ApplicationForApproval::where('application_id', $appForm->id)
@@ -107,7 +107,7 @@ class ApplicationForApprovalController extends Controller
 
 public function returnApproval(Request $request, $formNumber, $approverId)
 {  
-    $appForm= ApplicationModel::where('form_number', $request->form_number)->first();
+    $appForm= ApplicationModel::where('form_number', $formNumber)->first();
 
     $applicationForApproval = ApplicationForApproval::where('application_id', $appForm->id)
                             ->with('approverGroup')
@@ -115,19 +115,19 @@ public function returnApproval(Request $request, $formNumber, $approverId)
 
     $group = $applicationForApproval->approverGroup;
     
-     $approver = ApproverGroupApprover::where('approver_id', $request->currentApproverId)
+     $approver = ApproverGroupApprover::where('approver_id', $approverId)
                ->where('application_form_id',$applicationForApproval->application_id)
                ->first();
-     
+          
                 if ($approver) {
                     $prevApprover = ApproverGroupApprover::where('approver_group_id', $approver->approver_group_id)
-                    ->where('application_form_id', $applicationForApproval->application_id)
+                        ->where('application_form_id', $applicationForApproval->application_id)
                         ->where('sequence', ($approver->sequence - 1))
                         ->first();
-                       
+                
                     if ($prevApprover) {
                         $prevApprover->status = 'Pending';
-                        $prevApprover->remark = $request->remark;
+                        $prevApprover->remark = $request->comment;
                         $prevApprover->save();
                        
                     } 
@@ -137,7 +137,7 @@ public function returnApproval(Request $request, $formNumber, $approverId)
      // Optionally mark the whole application as returned
     $applicationForApproval->update([
         'status'   => 'Returned',
-        'remark'   => $request->input('remark'),
+        'remark'   => $request->comment,
         'acted_at' => now(),
     ]);
 
@@ -145,7 +145,7 @@ public function returnApproval(Request $request, $formNumber, $approverId)
         'success' => 'Returned',
         'application' => $appForm,
         'approvers' => $group->approvers,
-        'remark' =>$request->remark,
+        'remark' =>$request->comment,
     ]);
 }
 
@@ -185,4 +185,37 @@ public function returnApproval(Request $request, $formNumber, $approverId)
     {
         //
     }
+    public function reject(Request $request, $formNumber, $approverId)
+    {
+      
+      $applicationForApproval = ApplicationForApproval::where('form_number', $formNumber)->first();
+      $applicationForm = ApplicationModel::where('form_number', $applicationForApproval->form_number)->first();
+      if ($applicationForApproval) {
+            $applicationForApproval->status = 'Rejected';
+            $applicationForApproval->remark = $request->comment;
+            $applicationForApproval->acted_at = now();
+        
+            $applicationForApproval->save();
+            $applicationForm->status= 'Rejected';
+            $applicationForm->save();
+}
+
+$totalApprovers = ApproverGroupApprover::where('application_form_id', $applicationForApproval->application_id)
+    ->where('approver_group_id', $applicationForApproval->approver_group_id)
+    ->count();
+   
+    $rejectedApprovers = ApproverGroupApprover::where('application_form_id', $applicationForApproval->application_id)
+    ->where('approver_group_id', $applicationForApproval->approver_group_id)
+    ->where('status', 'Rejected')
+    ->count();
+    $AppForm =ApplicationModel::where('form_number',$formNumber)->first();
+    if($totalApprovers === $rejectedApprovers){
+        
+        $AppForm->status = 'Rejected';
+        $AppForm->save();
+     }else{
+        $AppForm->status = 'Pending';
+        $AppForm->save();
+     }
+    } 
 }
