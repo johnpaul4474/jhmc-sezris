@@ -66,6 +66,12 @@ class AuthenticatedSessionController extends Controller
                  && $user_details->permission_id == 2 ){
             return redirect()->intended('/cco');
         }else if($user_details && $user_details->department_id == 12
+                && $user_details->user_function_id == 5
+                && $user_details->role_id == 2
+                && $user_details->permission_id == 1)
+        {
+            return redirect()->intended('/manager');
+        }else if($user_details && $user_details->department_id == 12
                 && $user_details->division_id == null
                 && $user_details->role_id == 2
                 && $user_details->permission_id == 2)
@@ -74,6 +80,7 @@ class AuthenticatedSessionController extends Controller
         }else{
             return redirect()->intended(route('bddDashboard', absolute: false));
         }
+         
         
     }
 

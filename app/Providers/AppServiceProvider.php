@@ -42,5 +42,14 @@ class AppServiceProvider extends ServiceProvider
         return  optional($user->details)->role_id == 3 &&
             optional($user->details)->permission_id == 2;
           });
+          Gate::define('access-sezadManager', function($user){
+            return optional($user->details)->position_id == 50  &&
+                 optional($user->details)->department_id === 12 &&
+                 optional($user->details)->user_function_id === 5 &&
+                 optional($user->details)->role_id === 2 &&
+                 optional($user->details)->permission_id === 1;
+          }
+
+        );
     }
 }
