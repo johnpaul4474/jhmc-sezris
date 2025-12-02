@@ -70,7 +70,7 @@ class AuthenticatedSessionController extends Controller
                 && $user_details->role_id == 2
                 && $user_details->permission_id == 1)
         {
-            return redirect()->intended('/manager');
+            return redirect()->intended('manager/manager');
         }else if($user_details && $user_details->department_id == 12
                 && $user_details->division_id == null
                 && $user_details->role_id == 2
