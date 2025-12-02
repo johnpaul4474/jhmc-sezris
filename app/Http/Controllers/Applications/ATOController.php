@@ -42,52 +42,53 @@ class ATOController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request, UploadService $uploadService)
-{ 
-   $userId = auth()->id();
+    { 
+          $userId = auth()->id();
     //for Approval I need(a pplication_id, approver_group_id,form_number, )
     // Create ATO application
-    $ato = AtoApplication::create([
-        'application_id'        => $request->application_id,
-        'application_date'      => now(),
-        'application_type'      => $request->applicationType,
-        'business_structure'    => $request->businessStructure,
-        'trades_name'           => $request->businessProfile['businessName'],
-        'parent_company'        => $request->businessProfile['parentCompany'],
-        'taxpayer_name'         => $request->businessProfile['taxpayerName'],
-        'TIN'                   => $request->businessProfile['TIN'],
-        'PrimaryLine'           => $request->pcic['primaryLine'],
-        'SecondaryLine'         => $request->pcic['secondaryLine'],
-        'nature_of_contract'    => $request->natureOfContract,
-        'pcic_primary_line'     => $request->pcic['PCICPrimary'],
-        'pcic_secondary_line'   => $request->pcic['PCICSecondary'],
-        'pcic_Primary_email'    => $request->pcic['emailPrimary'],
-        'pcic_Secondary_email'  => $request->pcic['emailSecondary'],
-        'pcic_location'         => $request->pcic['location'],
-        'pcic_office_address'   => $request->pcic['officeAddress'],
-        'pcic_contact_person'   => $request->pcic['contactPerson'],
-        'pcic_contact_number'   => $request->pcic['contactNumber'],
-        'user_id'               => $userId,
-    ]);
-    ApplicationForApproval::create([
-            'application_id'    => $request->application_id,
-            'approver_group_id' => $request->approver_group_id,
-            'form_number'       => $request->application_form_number,
-            'status'            => 'Pending',
+        $ato = AtoApplication::create([
+            'application_id'        => $request->application_id,
+            'application_date'      => now(),
+            'application_type'      => $request->applicationType,
+            'business_structure'    => $request->businessStructure,
+            'trades_name'           => $request->businessProfile['businessName'],
+            'parent_company'        => $request->businessProfile['parentCompany'],
+            'taxpayer_name'         => $request->businessProfile['taxpayerName'],
+            'TIN'                   => $request->businessProfile['TIN'],
+            'PrimaryLine'           => $request->pcic['primaryLine'],
+            'SecondaryLine'         => $request->pcic['secondaryLine'],
+            'nature_of_contract'    => $request->natureOfContract,
+            'pcic_primary_line'     => $request->pcic['PCICPrimary'],
+            'pcic_secondary_line'   => $request->pcic['PCICSecondary'],
+            'pcic_Primary_email'    => $request->pcic['emailPrimary'],
+            'pcic_Secondary_email'  => $request->pcic['emailSecondary'],
+            'pcic_location'         => $request->pcic['location'],
+            'pcic_office_address'   => $request->pcic['officeAddress'],
+            'pcic_contact_person'   => $request->pcic['contactPerson'],
+            'pcic_contact_number'   => $request->pcic['contactNumber'],
+            'user_id'               => $userId,
         ]);
+        ApplicationForApproval::create([
+                'application_id'    => $request->application_id,
+                'approver_group_id' => $request->approver_group_id,
+                'form_number'       => $request->application_form_number,
+                'status'            => 'Pending',
+            ]);
     // Use $request->all()['files'] to handle both title & file
-    $files = $request->all()['files'] ?? [];
+        $files = $request->all()['files'] ?? [];
 
-    foreach ($files as $item) {
-        $file = $item['file'] ?? null;
-        $title = $item['title'] ?? null;
+            foreach ($files as $item) {
+                $file = $item['file'] ?? null;
+                $title = $item['title'] ?? null;
 
-        if ($file) {
-            $uploadService->uploadFile($file, $title, $request->application_id, $userId);
-        }
+                    if ($file) 
+                    {
+                    $uploadService->uploadFile($file, $title, $request->application_id, $userId);
+                    }
+            }
+
+        return redirect()->route('ATO.show', $request->application_id);
     }
-
-     return redirect()->route('ATO.show', $request->application_id);
-}
 
     
     
@@ -96,21 +97,21 @@ class ATOController extends Controller
      * Display the specified resource.
      */
     public function show(string $id)
-{
-    $ato = AtoApplication::with('uploads', 'applicationForm')->where('application_id', $id)->first();
+    {
+            $ato = AtoApplication::with('uploads', 'applicationForm')->where('application_id', $id)->first();
     
     // Fix file paths
-    if ($ato && $ato->uploads) {
-        foreach ($ato->uploads as $upload) {
-            // Convert stored path to a real URL
-            $upload->file_url = Storage::url($upload->file_path);
-        }
-    }
+            if ($ato && $ato->uploads) {
+                foreach ($ato->uploads as $upload) {
+                    // Convert stored path to a real URL
+                    $upload->file_url = Storage::url($upload->file_path);
+                }
+            }
        
-    return Inertia::render('ATO/Show', [
-        'ATOapplication' => $ato,
-    ]);
-}
+                    return Inertia::render('ATO/Show', [
+                                                'ATOapplication' => $ato,
+                                            ]);
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -135,17 +136,14 @@ class ATOController extends Controller
     {
         //
     }
-    public function CreateApp(){
-        return Inertia::render('Locator/Application/Create2',[]);
-    }
     
     public function MyAto()
     {   
-        $user = auth()->user(); // safer
+        $user = auth()->user(); 
 
-    $atoApplications = $user->applications()
-        ->where('form_title', 'ATO')
-        ->first();
+            $atoApplications = $user->applications()
+                            ->where('form_title', 'ATO')
+                            ->first();
       
        return redirect()->route('ATO.show', $atoApplications->id);
     }

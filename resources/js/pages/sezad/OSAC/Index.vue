@@ -10,7 +10,7 @@ const p = defineProps({
 })
 const handleView = (application)=>{
   console.log('osac Viewing:',application.application_form_id)
-  router.visit(`/osac/${application.application_form_id}/show`)
+  router.visit(`/sezad/osac/${application.application_form_id}/show`)
 }
 const handleEdit = (application) =>{
   console.log(application)

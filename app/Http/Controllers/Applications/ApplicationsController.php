@@ -33,7 +33,7 @@ class ApplicationsController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-     { abort(403);
+    { abort(403);
         $application = ApplicationModel::with(['selections.option', 'selections.user'])
             ->latest()
             ->first();
@@ -50,7 +50,7 @@ class ApplicationsController extends Controller
                 'amount'      => $selection->amount,
                 'validity'    => $selection->option->validity,
                 'selected_at' => $selection->selected_at,
-                'user_name'   => $selection->user->name, // or email/id
+                'user_name'   => $selection->user->name,
             ];
         });
         $totalAmount = $application->selections->sum('amount');
@@ -71,7 +71,6 @@ class ApplicationsController extends Controller
      * Show the form for creating a new resource.
      */
     public function create()
-
     {   //check if user has approved ATO if it does remove ATO to the Option
          $user = auth()->user();
 
@@ -79,84 +78,85 @@ class ApplicationsController extends Controller
 
     
     return Inertia::render('Locator/Application/Create', [
-        'user' => $user,
-        'application_form_id' => null,
-        'form' => $formOptions,
-        'approverGroupId' => null,
+                                            'user' => $user,
+                                            'application_form_id' => null,
+                                            'form' => $formOptions,
+                                            'approverGroupId' => null,
         
-    ]);
-}
+                             ]);
+    }
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-{    $user = auth()->user();
-    $result = $this->service->createApplication($request->type);
+    {    
+        $user = auth()->user();
+        $result = $this->service->createApplication($request->type);
     
-    $application = $result['application'];
-    $approverForm = $result['approverForm'];
+        $application = $result['application'];
+        $approverForm = $result['approverForm'];
 
-    if ($request->type === 'ATO') {
-        return Inertia::render('ATO/Create2', [
-            'application_id' => $application->id,
-            'approver_group_id' => $approverForm->approver_group_id,
-            'application_form_number' => $application->form_number
-        ]);
-    }else{ return Inertia::render('Locator/Application/Create', [ 
-        'user' => $user, 
-        'application_form_id' => $application->id, // Pass the new ID 
-        'control_number' => $application->control_number, 
-        'form_number' => $application->form_number, 
-        'form_title' => $application->form_title,
-         'start_date' => $application->created_at,
-          'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
-          'approverGroupId' => $approverForm->approver_group_id, 
-        ]); 
+        if ($request->type === 'ATO') {
+            return Inertia::render('ATO/Create2', [
+                'application_id' => $application->id,
+                'approver_group_id' => $approverForm->approver_group_id,
+                'application_form_number' => $application->form_number
+            ]);
+        }else{ return Inertia::render('Locator/Application/Create', [ 
+            'user' => $user, 
+            'application_form_id' => $application->id, // Pass the new ID 
+            'control_number' => $application->control_number, 
+            'form_number' => $application->form_number, 
+            'form_title' => $application->form_title,
+            'start_date' => $application->created_at,
+            'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
+            'approverGroupId' => $approverForm->approver_group_id, 
+            ]); 
     }
 }
 
     /**
      * Display the specified resource.
      */
-        public function show(String $id)
-{      
-    $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
-                   ->findOrFail($id);
-    $approvers = ApplicationForApproval::with('approverGroup.approvers')
-                    ->where('application_id', $id)
-                    ->first();
+    public function show(String $id)
+    {
+            $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
+                        ->findOrFail($id);
+            $approvers = ApplicationForApproval::with('approverGroup.approvers')
+                            ->where('application_id', $id)
+                            ->first();
     
-    $approver = ApproverGroupApprover::with(['approver', 'approverGroup'])
-    ->where('approver_group_id', $approvers->approverGroup->id)
-    ->where('application_form_id', $id)
-    ->get(['id', 'approver_id', 'sequence', 'role','remark', 'status', 'acted_at', 'approver_group_id']);
+            $approver = ApproverGroupApprover::with(['approver', 'approverGroup'])
+            ->where('approver_group_id', $approvers->approverGroup->id)
+            ->where('application_form_id', $id)
+            ->get(['id', 'approver_id', 'sequence', 'role','remark', 'status', 'acted_at', 'approver_group_id']);
      
-     if($approvers->approverGroup->allApproversStatusApproved()){
-          $application->status= AppConstants::STATUS_APPROVED;
-          $application->save();
-          $approvers->status = AppConstants::STATUS_APPROVED;
-          $approvers->save();
-     }   
+            if($approvers->approverGroup->allApproversStatusApproved()){
+                $application->status= AppConstants::STATUS_APPROVED;
+                $application->save();
+                $approvers->status = AppConstants::STATUS_APPROVED;
+                $approvers->save();
+            }   
     
-    return Inertia::render('Locator/Application/Show', [
-    'application' => $application,
-    'approverGroup' => $approvers?->approverGroup,
-    'approvers' => $approver->map(function ($item) {
-        return [
-            'id' => $item->approver->id ?? null,
-            'name' => $item->approver->name ?? '(Unknown)',
-            'email' => $item->approver->email ?? null,
-            'pivot' => [
-                'role' => $item->role ?? null,
-                'sequence' => $item->sequence ?? null,
-                'status' => $item->status ?? null,
-                'acted_at' => $item->acted_at ?? null,
-                'remark' => $item->remark ?? null,
-            ],
-        ];
-    }),
-]);
-}
+        return Inertia::render('Locator/Application/Show', [
+        'application' => $application,
+        'approverGroup' => $approvers?->approverGroup,
+        'approvers' => $approver->map(function ($item) {
+            return [
+                'id' => $item->approver->id ?? null,
+                'name' => $item->approver->name ?? '(Unknown)',
+                'email' => $item->approver->email ?? null,
+                'pivot' => [
+                    'role' => $item->role ?? null,
+                    'sequence' => $item->sequence ?? null,
+                    'status' => $item->status ?? null,
+                    'acted_at' => $item->acted_at ?? null,
+                    'remark' => $item->remark ?? null,
+                ],
+            ];
+                        }),
+        ]);
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -181,24 +181,25 @@ class ApplicationsController extends Controller
     {
         //
     }
-    public function pendingList(){
-       
-        $ato = ApplicationModel::where('user_id', Auth::id())->where('form_title', 'ATO')->get();
-        $appForm_number = ApplicationModel::where('user_id', Auth::id())->pluck('form_number');
-        $applications = ApplicationForApproval::with([
-                                'application',
-                                'approverGroup.approvers'
-                            ])
-                            ->whereIn('form_number', $appForm_number)
-                            ->where('status', 'Pending')
-                            ->get();
+    public function pendingList()
+    {
+            $ato = ApplicationModel::where('user_id', Auth::id())->where('form_title', 'ATO')->get();
+            $appForm_number = ApplicationModel::where('user_id', Auth::id())->pluck('form_number');
+            $applications = ApplicationForApproval::with([
+                                    'application',
+                                    'approverGroup.approvers'
+                                ])
+                                ->whereIn('form_number', $appForm_number)
+                                ->where('status', 'Pending')
+                                ->get();
          return Inertia::render('Locator/Application/Pending', [
-            'applications' => $applications,
-            'ATO' => $ato,
+                            'applications' => $applications,
+                            'ATO' => $ato,
         ]);
     }
 
-    public function approvedList(){
+    public function approvedList()
+    {
             $appIds = ApplicationModel::where('user_id', Auth::id())->pluck('id');
             $applications = ApplicationForApproval::with([
                             'application',

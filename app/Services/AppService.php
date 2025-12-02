@@ -190,4 +190,53 @@ class AppService
             'approverGroupId'  => $form->approver_group_id,
         ];
     }
+    public function getApplicationData(string $id)
+    {
+        // Fetch the application with relations
+        $application = ApplicationModel::with([
+            'articleDetails',
+            'uploads',
+            'selections'
+        ])->findOrFail($id);
+
+        // Fetch approvers
+        $approversForApproval = ApplicationForApproval::with('approverGroup.approvers')
+            ->where('application_id', $id)
+            ->first();
+
+        // Approver group users
+        $approverList = ApproverGroupApprover::with(['approver', 'approverGroup'])
+            ->where('approver_group_id', $approversForApproval->approverGroup->id)
+            ->where('application_form_id', $id)
+            ->get(['id', 'approver_id', 'sequence', 'role', 'remark', 'status', 'acted_at', 'approver_group_id']);
+
+        // Auto update status if all approved
+        if ($approversForApproval->approverGroup->allApproversStatusApproved()) {
+            $application->status = AppConstants::STATUS_APPROVED;
+            $application->save();
+
+            $approversForApproval->status = AppConstants::STATUS_APPROVED;
+            $approversForApproval->save();
+        }
+
+        // Return packed data (controller-ready)
+        return [
+            'application'     => $application,
+            'approverGroup'   => $approversForApproval?->approverGroup,
+            'approvers'       => $approverList->map(function ($item) {
+                return [
+                    'id' => $item->approver->id ?? null,
+                    'name' => $item->approver->name ?? '(Unknown)',
+                    'email' => $item->approver->email ?? null,
+                    'pivot' => [
+                        'role' => $item->role,
+                        'sequence' => $item->sequence,
+                        'status' => $item->status,
+                        'acted_at' => $item->acted_at,
+                        'remark' => $item->remark,
+                    ],
+                ];
+            }),
+        ];
+    }
 }

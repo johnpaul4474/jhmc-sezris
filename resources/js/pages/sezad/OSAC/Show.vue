@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import OsacViewer from './OsacComponents/OsacViewer.vue';
 import Button from '@/components/ui/button/Button.vue';
-import CcoAppSidebarLayout from '@/layouts/Cco/CcoAppSidebarLayout.vue';
+import OsacAppSidebarLayout from '@/layouts/Osac/OsacAppSidebarLayout.vue';
 const page = usePage();
 const props = defineProps({
   application: {
@@ -76,7 +76,7 @@ const cancelAction = () => {
 </script>
 
 <template>
-  <CcoAppSidebarLayout>
+  <OsacAppSidebarLayout>
    
     <OsacViewer :application="props.application" :group="props.group" />
     
@@ -143,5 +143,5 @@ const cancelAction = () => {
         </div>
       </div>
     </div>
-  </CcoAppSidebarLayout>
+  </OsacAppSidebarLayout>
 </template>

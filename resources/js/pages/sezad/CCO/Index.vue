@@ -12,7 +12,7 @@ const p = defineProps({
 })
 const handleView = (application)=>{
   console.log('Inspector viewing:', application.application_form_id)
- router.visit(`/cco/${application.application_form_id}/show`)
+ router.visit(`/sezad/cco/${application.application_form_id}/show`)
 }
 const handleEdit = (application) =>{
   console.log(application)
