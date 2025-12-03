@@ -121,24 +121,20 @@ class ApplicationsController extends Controller
     public function show(String $id)
     {
        $data = $this->service->getApplicationData($id);
-       
-            // $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
-            //             ->findOrFail($id);
-            // $approvers = ApplicationForApproval::with('approverGroup.approvers')
-            //                 ->where('application_id', $id)
-            //                 ->first();
-    
-            // $approver = ApproverGroupApprover::with(['approver', 'approverGroup'])
-            // ->where('approver_group_id', $approvers->approverGroup->id)
-            // ->where('application_form_id', $id)
-            // ->get(['id', 'approver_id', 'sequence', 'role','remark', 'status', 'acted_at', 'approver_group_id']);
-     
-            // if($approvers->approverGroup->allApproversStatusApproved()){
-            //     $application->status= AppConstants::STATUS_APPROVED;
-            //     $application->save();
-            //     $approvers->status = AppConstants::STATUS_APPROVED;
-            //     $approvers->save();
-            // }   
+       $applicationForApproval = ApplicationForApproval::with('approverGroup.approvers')
+                            ->where('application_id', $id)
+                            ->first();
+       $approver = ApproverGroupApprover::with(['approver', 'approverGroup'])
+                            ->where('approver_group_id', $data['approverGroup']->id)
+                            ->where('application_form_id', $id)
+                            ->get(['id', 'approver_id', 'sequence', 'role','remark', 'status', 'acted_at', 'approver_group_id']);
+        
+            if($data['approverGroup']->allApproversStatusApproved()){
+                $data['application']->status= AppConstants::STATUS_APPROVED;
+                $application->save();
+                $applicationForApproval->status = AppConstants::STATUS_APPROVED;
+                $applicationForApproval->save();
+            }   
     
         return Inertia::render('Locator/Application/Show', [
         'application' => $data['application'],
@@ -148,7 +144,7 @@ class ApplicationsController extends Controller
             return [
                 'id' => $item['id'] ?? null,
                 'name' => $item['name'] ?? '(Unknown)',
-                'email' => $item-['email'] ?? null,
+                'email' => $item['email'] ?? null,
                 'pivot' => [
                     'role' => $item['pivot']['role'] ?? null,
                     'sequence' => $item['pivot']['sequence'] ?? null,
