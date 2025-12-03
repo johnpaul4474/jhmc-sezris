@@ -120,38 +120,41 @@ class ApplicationsController extends Controller
      */
     public function show(String $id)
     {
-            $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
-                        ->findOrFail($id);
-            $approvers = ApplicationForApproval::with('approverGroup.approvers')
-                            ->where('application_id', $id)
-                            ->first();
+       $data = $this->service->getApplicationData($id);
+       
+            // $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
+            //             ->findOrFail($id);
+            // $approvers = ApplicationForApproval::with('approverGroup.approvers')
+            //                 ->where('application_id', $id)
+            //                 ->first();
     
-            $approver = ApproverGroupApprover::with(['approver', 'approverGroup'])
-            ->where('approver_group_id', $approvers->approverGroup->id)
-            ->where('application_form_id', $id)
-            ->get(['id', 'approver_id', 'sequence', 'role','remark', 'status', 'acted_at', 'approver_group_id']);
+            // $approver = ApproverGroupApprover::with(['approver', 'approverGroup'])
+            // ->where('approver_group_id', $approvers->approverGroup->id)
+            // ->where('application_form_id', $id)
+            // ->get(['id', 'approver_id', 'sequence', 'role','remark', 'status', 'acted_at', 'approver_group_id']);
      
-            if($approvers->approverGroup->allApproversStatusApproved()){
-                $application->status= AppConstants::STATUS_APPROVED;
-                $application->save();
-                $approvers->status = AppConstants::STATUS_APPROVED;
-                $approvers->save();
-            }   
+            // if($approvers->approverGroup->allApproversStatusApproved()){
+            //     $application->status= AppConstants::STATUS_APPROVED;
+            //     $application->save();
+            //     $approvers->status = AppConstants::STATUS_APPROVED;
+            //     $approvers->save();
+            // }   
     
         return Inertia::render('Locator/Application/Show', [
-        'application' => $application,
-        'approverGroup' => $approvers?->approverGroup,
-        'approvers' => $approver->map(function ($item) {
+        'application' => $data['application'],
+        'approverGroup' => $data['approverGroup'],
+        'approvers' => $data['approvers']->map(function ($item) {
+           
             return [
-                'id' => $item->approver->id ?? null,
-                'name' => $item->approver->name ?? '(Unknown)',
-                'email' => $item->approver->email ?? null,
+                'id' => $item['id'] ?? null,
+                'name' => $item['name'] ?? '(Unknown)',
+                'email' => $item-['email'] ?? null,
                 'pivot' => [
-                    'role' => $item->role ?? null,
-                    'sequence' => $item->sequence ?? null,
-                    'status' => $item->status ?? null,
-                    'acted_at' => $item->acted_at ?? null,
-                    'remark' => $item->remark ?? null,
+                    'role' => $item['pivot']['role'] ?? null,
+                    'sequence' => $item['pivot']['sequence'] ?? null,
+                    'status' => $item['pivot']['status'] ?? null,
+                    'acted_at' => $item['pivot']['acted_at'] ?? null,
+                    'remark' => $item['pivot']['remark'] ?? null,
                 ],
             ];
                         }),

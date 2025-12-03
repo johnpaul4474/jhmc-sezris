@@ -165,5 +165,17 @@ class ApplicationService implements ISezrisService
             'approverGroupId'  => $form->approver_group_id,
         ];
     }
+    public function getApplicationById(String $id)
+    {
+        $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
+                        ->findOrFail($id);
+            $approvers = ApplicationForApproval::with('approverGroup.approvers')
+                            ->where('application_id', $id)
+                            ->first();
+             return [
+                        'application' => $application,
+                        'approversGroupApprovers' => $approvers,
+              ];
+    }
 
 }
