@@ -65,7 +65,12 @@ class AuthenticatedSessionController extends Controller
                  $user_details->role_id == 2 
                  && $user_details->permission_id == 2 ){
             return redirect()->intended('sezad/cco');
-        }else if($user_details && $user_details->department_id == 12
+        }else if($user_details && $user_details->department_id == 10 
+                && $user_details->role_id == 2
+                && $user_details->position_id = 53
+                && $user_details->permission_id == 2){
+               return redirect()->intended('fsd/finance');
+    }else if($user_details && $user_details->department_id == 12
                 && $user_details->user_function_id == 5
                 && $user_details->role_id == 2
                 && $user_details->permission_id == 1)

@@ -2,8 +2,10 @@
 use App\Http\Controllers\OSAC\OsacController;
 use App\Http\Controllers\SEZAD\SezadManagerController;
 use App\Http\Controllers\CCO\CcoController;
+use App\Http\Controllers\FINANCE\FinanceController;
 
      Route::prefix('sezad')->group(function () {
+        
         //CCO/CCA
         Route::get('/cco', [CcoController::class, 'index'])->name('cco.index');
         Route::get('/cco/{id}/show', [CcoController::class, 'show'])->name('cco.show');
@@ -16,3 +18,9 @@ use App\Http\Controllers\CCO\CcoController;
          Route::get('/manager/{id}/show', [SezadManagerController::class, 'show'])->name('sezad.manager.show');
      })->name('sezad');
    
+      //FSD
+      Route::prefix('fsd')->group(function(){
+            //FINANCE
+        Route::get('/finance',[FinanceController::class, 'index'])->name('finance.index');
+        Route::get('/finance/{id}/show', [FinanceController::class, 'show'])->name('finance.show');
+      })->name('fsd');

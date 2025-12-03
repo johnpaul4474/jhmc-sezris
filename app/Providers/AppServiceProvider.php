@@ -48,8 +48,15 @@ class AppServiceProvider extends ServiceProvider
                  optional($user->details)->user_function_id === 5 &&
                  optional($user->details)->role_id === 2 &&
                  optional($user->details)->permission_id === 1;
-          }
+          });
+          Gate:: define('access-finance', function($user){
+             return optional($user->details)->position_id == 53  &&
+                 optional($user->details)->department_id === 10 &&
+                 optional($user->details)->user_function_id === null &&
+                 optional($user->details)->role_id === 2 &&
+                 optional($user->details)->permission_id === 2;
+          });
 
-        );
+        
     }
 }

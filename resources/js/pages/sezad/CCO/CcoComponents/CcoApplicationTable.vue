@@ -59,13 +59,13 @@ const emit = defineEmits(['view', 'edit', 'delete'])
             >
               <Eye class="w-5 h-5" />
             </button>
-            <button
+            <!-- <button
               @click="emit('edit', app)"
               class="text-green-600 hover:text-green-800 p-1 rounded-full hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-900/30 transition"
               title="Edit"
             >
               <Pencil class="w-5 h-5" />
-            </button>
+            </button> -->
             <!-- Uncomment if delete is needed
             <button
               @click="emit('delete', app)"
