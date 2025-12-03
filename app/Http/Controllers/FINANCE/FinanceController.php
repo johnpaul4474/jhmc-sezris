@@ -26,24 +26,41 @@ class FinanceController extends Controller
                                  'applications'=> $applications,
                                 ]);
         }
-    public function show($id){
-        $user = auth()->user();
-         if (Gate::denies('access-finance')) {
-            abort(403, 'Unauthorized');
-        }
-        $application = ApplicationModel::with(['articleDetails','approval', 'uploads', 'selections','options'])
-                        ->where('id', $id)
-                        ->first();
-        $approver = ApproverGroupApprover::where('approver_group_id', $application->approval->approver_group_id)
+    public function show($id)
+{
+    $user = auth()->user();
+
+    if (Gate::denies('access-finance')) {
+        abort(403, 'Unauthorized');
+    }
+
+    $application = ApplicationModel::with(['articleDetails','approval', 'uploads', 'selections','options'])
+                    ->find($id);
+
+    if (!$application) {
+        abort(404, 'Application not found');
+    }
+
+    if (!$application->approval) {
+        abort(404, 'Approval not found');
+    }
+
+    $approver = ApproverGroupApprover::where('approver_group_id', $application->approval->approver_group_id)
                   ->where('approver_id', $user->id)
                   ->where('application_form_id', $application->id)
                   ->first();
-        $group = ApproverGroup::where('id', $application->approval->approver_group_id)->first();
-         
-       return Inertia::render('FSD/FINANCE/Show',[
+
+    if (!$approver || !$approver->status) {
+        abort(404, 'Approver not found or no status yet');
+    }
+
+    $group = ApproverGroup::find($application->approval->approver_group_id);
+
+    return Inertia::render('FSD/FINANCE/Show', [
         'application' => $application,
         'approver_status' => $approver->status,
         'group' => $group,
-       ]);
-    }
+    ]);
+}
+
 }

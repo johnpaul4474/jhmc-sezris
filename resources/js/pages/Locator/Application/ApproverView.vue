@@ -360,5 +360,6 @@ function handleDelete(article: ArticleDetail) {
     </div>
    
     <TimeLine :data="props.approvers" />
+    {{ props.approvers }}
   </LocatorAppSidebarLayout>
 </template>

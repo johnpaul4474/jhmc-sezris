@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ATO\AtoApplication;
 use App\Services\AppService;
+use Illuminate\Support\Facades\Gate;
 
 class ApplicationsController extends Controller
 {
@@ -120,6 +121,9 @@ class ApplicationsController extends Controller
      */
     public function show(String $id)
     {
+       if (Gate::denies('access-locator')) {
+        abort(403, 'Unauthorized');
+        }
        $data = $this->service->getApplicationData($id);
        $applicationForApproval = ApplicationForApproval::with('approverGroup.approvers')
                             ->where('application_id', $id)
@@ -131,7 +135,7 @@ class ApplicationsController extends Controller
         
             if($data['approverGroup']->allApproversStatusApproved()){
                 $data['application']->status= AppConstants::STATUS_APPROVED;
-                $application->save();
+                $data['application']->save();
                 $applicationForApproval->status = AppConstants::STATUS_APPROVED;
                 $applicationForApproval->save();
             }   
