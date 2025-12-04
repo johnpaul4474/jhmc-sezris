@@ -19,6 +19,9 @@ import AppLogo from './AppLogo.vue';
 import { usePage } from '@inertiajs/vue3'
 import type { PageProps } from '@inertiajs/core'
 import { BookOpen, Folder, LayoutGrid, SquareUserRound, Clock, Eye } from 'lucide-vue-next';
+import { ref, onMounted } from "vue";
+import * as Ably from "ably";
+import UserInfo from '@/components/UserInfo.vue';
 
 
 interface UserDetails {
@@ -58,6 +61,30 @@ const admin =
     user.details.user_function_id === null
 
 //change this for other roles
+const sezadAccreditation =
+    user?.details &&
+    user.details.role_id === 2 &&
+    user.details.permission_id === 2 &&
+    user.details.department_id === 12 &&
+    user.details.division_id === null &&
+    user.details.user_function_id === 1
+
+const sezadCustoms =
+    user?.details &&
+    user.details.role_id === 2 &&
+    user.details.permission_id === 2 &&
+    user.details.department_id === 12 &&
+    user.details.division_id === null &&
+    user.details.user_function_id === 2
+
+const sezadLabor =
+    user?.details &&
+    user.details.role_id === 2 &&
+    user.details.permission_id === 2 &&
+    user.details.department_id === 12 &&
+    user.details.division_id === null &&
+    user.details.user_function_id === 3
+
 const sezadOSAC =
     user?.details &&
     user.details.role_id === 2 &&
@@ -65,6 +92,14 @@ const sezadOSAC =
     user.details.department_id === 12 &&
     user.details.division_id === null &&
     user.details.user_function_id === 4
+
+const sezadManager =
+    user?.details &&
+    user.details.role_id === 2 &&
+    user.details.permission_id === 2 &&
+    user.details.department_id === 12 &&
+    user.details.division_id === null &&
+    user.details.user_function_id === 5
 
 const mainNavItems: NavItem[] = [];
 
@@ -108,7 +143,18 @@ if (admin) {
         icon: Eye,
     },
     );
-} else if (sezadOSAC) {
+} else if (sezadManager) {
+    mainNavItems.push(
+
+        {
+            title: 'DASHBOARD',
+            href: sezadDashboard(),
+            icon: LayoutGrid,
+        }
+    );
+}
+
+else if (sezadOSAC) {
     mainNavItems.push(
 
         {
@@ -141,6 +187,37 @@ const footerNavItems: NavItem[] = [
     //     icon: BookOpen,
     // },
 ];
+
+const hasNotification = ref(false);
+
+onMounted(() => {
+    // Load persisted notification state
+    const saved = localStorage.getItem("hasNotification");
+    hasNotification.value = saved === "true";
+
+    const ablyKey = import.meta.env.VITE_ABLY_KEY;
+    if (!ablyKey) return;
+
+    const client = new Ably.Realtime({ key: ablyKey });
+    const channel = client.channels.get("notifications");
+
+    channel.subscribe((msg: any) => {
+        console.log("Ably message received:", msg);
+
+        hasNotification.value = true;
+
+        // Persist notification state
+        localStorage.setItem("hasNotification", "true");
+    });
+});
+
+function clearNotification() {
+    //alert("Notifications cleared");
+    hasNotification.value = false;
+    localStorage.setItem("hasNotification", "false");
+}
+
+
 </script>
 
 <template>
@@ -149,8 +226,9 @@ const footerNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link >
 
+                        <AppLogo class="h-8 w-auto" />
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -162,8 +240,12 @@ const footerNavItems: NavItem[] = [
         </SidebarContent>
 
         <SidebarFooter>
+            
             <NavFooter :items="footerNavItems" />
-            <NavUser />
+            <NavUser  
+            :user="user"
+            :has-notification="hasNotification" 
+            @clear-notification="clearNotification"/>
         </SidebarFooter>
     </Sidebar>
     <slot />

@@ -18,8 +18,9 @@
                     }
                 }
             })();
+           
         </script>
-
+         <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {
@@ -39,7 +40,7 @@
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
-
+            
         @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         @inertiaHead
     </head>

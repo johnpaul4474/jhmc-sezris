@@ -16,6 +16,14 @@ use App\Http\Controllers\Auth\GoogleOAuthController;
 use App\Mail\ChangePasswordMail;
 use App\Services\GmailService;
 use App\Http\Controllers\SEZAD\Clearances\BringInController;
+use App\Http\Controllers\SEZAD\Accreditation\AccreditationController;
+
+use App\Http\Controllers\SEZAD\Accreditation\ServiceProviderSupplierController;
+use App\Http\Controllers\Signup\SignupController;
+use App\Http\Controllers\Signup\BusinessTypeController;
+use App\Http\Controllers\Signup\LocatorController;
+use App\Http\Controllers\Signup\TemporaryUserController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -37,6 +45,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('Dashboard', ['auth' => ['user' => $user]]);
     })->name('dashboard');
 
+    Route::prefix('users')->group(function () {
+            Route::get('/', [UserDetailsController::class, 'index'])->name('usersDashboard');
+            Route::get('/list', [UserDetailsController::class, 'index'])->name('users.list');
+            Route::post('/addUser', [UserDetailsController::class, 'store'])->name('userDetails.store');
+        });
 
 
     /*
@@ -50,11 +63,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         | Users
         |--------------------------------------------------------------------------
         */
-        Route::prefix('users')->group(function () {
-            Route::get('/', [UserDetailsController::class, 'index'])->name('usersDashboard');
-            Route::get('/list', [UserDetailsController::class, 'index'])->name('users.list');
-            Route::post('/addUser', [UserDetailsController::class, 'store'])->name('userDetails.store');
-        });
+        
         /*
         |--------------------------------------------------------------------------
         | BDD
@@ -67,11 +76,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::prefix('clearances')->group(function () {
                 Route::get('/bring-in', [BringInController::class, 'index'])->name('bringInclearance');
             });
+            Route::prefix('accreditation')->group(function () {
+                Route::get('/', [AccreditationController::class, 'index'])->name('accreditation');
+                //Route::get('/new', [AccreditationNewController::class, 'index'])->name('accreditationNew');
+                //Route::get('/renewal', [AccreditationRenewalController::class, 'index'])->name('accreditationRenewal');
+                //Route::get('/provisional', [AccreditationProvisionalController::class, 'index'])->name('accreditationProvisional');
+                Route::get('service-provider', [ServiceProviderSupplierController::class, 'index'])->name('serviceProviderSupplier');
+                Route::prefix('service-provider')->group(function () {
+                    Route::get('/new', [ServiceProviderSupplierController::class, 'index'])->name('serviceProvidernNew');
+                    Route::get('/renewal', [ServiceProviderSupplierController::class, 'index'])->name('serviceProviderRenewal');
+                });
+                Route::get('event-operator', [ServiceProviderSupplierController::class, 'index'])->name('eventOperator');
+                Route::prefix('vendor')->group(function () {
+                    Route::get('/new', [ServiceProviderSupplierController::class, 'index'])->name('vendorNew');
+                    Route::get('/renewal', [ServiceProviderSupplierController::class, 'index'])->name('vendorRenewal');
+                });
+                Route::get('provitional', [ServiceProviderSupplierController::class, 'index'])->name('provitional');
+
+                Route::get('/temporary-users', [TemporaryUserController::class, 'index']);
+                Route::post('/temporary-users', [TemporaryUserController::class, 'store']);
+                Route::delete('/temporary-users/{id}', [TemporaryUserController::class, 'destroy']);
+            });
+            Route::post('/temp-users/update', [SEZADController::class, 'updateTempUser']);
+
         });
     });
-
-    
-
     /*
     |--------------------------------------------------------------------------
     | Address
@@ -96,6 +125,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
     Route::get('/sendChangePassword', [UserDetailsController::class, 'sendChangePassword'])->name('sendChangePassword');
 });
+//sign up
+Route::get('/signup', [SignupController::class, 'index'])->name('signup');
+Route::post('/signupSave', [SignupController::class, 'store'])->name('signupSave');
+Route::get('/business-types', [BusinessTypeController::class, 'index']);
+Route::get('/business-types/{id}/categories', [BusinessTypeController::class, 'categories'])->name('getBusinessCategories');
+Route::get('/locatorsSignUp', [LocatorController::class, 'index'])->name('locatorsSignUp');
+
+
+
+
+
+
+
 
 // 🔹 Include other route files
 require __DIR__ . '/settings.php';
