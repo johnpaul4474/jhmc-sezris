@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Locator\LocatorModel;
 use App\Models\UserDetails\Userdetail;
@@ -15,33 +16,40 @@ use App\Http\Requests\SaveLocatorProfileRequest;
 class BDDController extends Controller
 {
     public function index()
-    { 
-         $usersWithProfile = User::has('profile')->with('profile')->get();
-           dd($usersWithProfile);
-         $users = User::query()->paginate(3);
-        $user = Auth::user();
-        if ($user instanceof \App\Models\User) { 
-            if ($user && method_exists($user, 'load')) {
-                $user->load([
-                    'details' => function ($query) {
-                        $query->select(
-                            'id',
-                            'user_id',
-                            'permission_id',
-                            'role_id',
-                            'department_id',
-                            'division_id',
-                            'user_function_id'
-                        );
-                    },
-                ]);
-            }
-        }
-        return Inertia::render('bdd/BddDashboard', [
-            'user' => $user,
-            'users'=> $users,
+{
+    // 1. Get all users that have a locator profile
+    $registered_locators = User::has('profile')->with('profile')->get();
+
+    // 2. Paginate all users (without filtering)
+    $users = User::paginate(3);
+
+    // 3. Load details for the authenticated user
+    $user = Auth::user();
+    if ($user instanceof \App\Models\User && method_exists($user, 'load')) {
+        $user->load([
+            'details' => function ($query) {
+                $query->select(
+                    'id',
+                    'user_id',
+                    'permission_id',
+                    'role_id',
+                    'department_id',
+                    'division_id',
+                    'user_function_id'
+                );
+            },
+            'profile', // optional: also eager-load the profile for current user
         ]);
     }
+
+    // 4. Return Inertia
+    return Inertia::render('bdd/BddDashboard', [
+        'user'                => $user,
+        'users'               => $users,
+        'registered_locators' => $registered_locators,
+    ]);
+}
+
     public function locators()
     {
        $locator = User::with('profile')->find(86);
@@ -72,7 +80,8 @@ class BDDController extends Controller
 
             /* 4. Create Locator Profile using $data */
             $locator = LocatorModel::create($data);
-
+           //if successful Sezris should send temporary Login Credetials(username and temporary password) to the Locator
+        Log::info('Sending Email to:', ['user Email: ' => $user->email ,"Usernme" =>$user->email, "Temporary password"=> 'password123']);
             return response()->json([
                 'success' => true,
                 'user'    => $user,
