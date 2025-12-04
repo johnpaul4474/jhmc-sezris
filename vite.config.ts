@@ -5,14 +5,14 @@ import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-    server: {
-        host: '0.0.0.0',
-        strictPort: true,
-        port: 5173,
-        hmr: {
-            host: '192.168.100.185',
-        },
-    },
+    // server: {
+    //     host: '0.0.0.0',
+    //     strictPort: true,
+    //     port: 5173,
+    //     hmr: {
+    //         host: '192.168.100.185',
+    //     },
+    // },
 
     plugins: [
         laravel({

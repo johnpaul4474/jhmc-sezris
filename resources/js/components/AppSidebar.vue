@@ -11,7 +11,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, usersDashboard, sezadDashboard, bddDashboard, ATO } from '@/routes';
+import { dashboard, usersDashboard, sezadDashboard} from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 
@@ -123,7 +123,7 @@ if (admin) {
         },
         {
             title: 'BDD Created Users',
-            href: bddDashboard(),
+            href:'#',
             icon: BookOpen,
         }, {
         title: 'Locator',

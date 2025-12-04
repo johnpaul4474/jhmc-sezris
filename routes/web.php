@@ -38,7 +38,13 @@ Route::get('/', fn() => Inertia::render('Welcome'))->name('home');
 
 // 🔹 Authenticated Routes
 Route::middleware(['auth', 'verified'])->group(function () {
-
+    //BDD
+    Route::prefix('bdd')->group(function (){
+        Route::get('/dash', [BDDController::class, 'index'])->name('bdd.Dashboard');
+        Route::get('/mylocators',[BDDController::class, 'locators'])->name('bdd.myLocators');
+        Route::post('/locator/saveProfile', [BDDController::class, 'saveLocatorProfile'])->name('locator.save');
+    });
+    
     // Dashboard
     Route::get('dashboard', function () {
         $user = UserHelper::loadUserWithDetails();
@@ -50,7 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/list', [UserDetailsController::class, 'index'])->name('users.list');
             Route::post('/addUser', [UserDetailsController::class, 'store'])->name('userDetails.store');
         });
-
+   
 
     /*
     |--------------------------------------------------------------------------
@@ -69,7 +75,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         | BDD
         |--------------------------------------------------------------------------
         */
-        Route::get('/bdd', [BDDController::class, 'index'])->name('bddDashboard');
+        
         Route::prefix('sezad')->group(function () {
             Route::get('/', [SEZADController::class, 'index'])->name('sezadDashboard');
 

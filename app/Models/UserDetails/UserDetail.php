@@ -12,7 +12,7 @@ class UserDetail extends Model
     protected $table = 'user_details';  
     protected $fillable = [
         'id',
-        'users_id',
+        'user_id',
         'employee_id',
         'email',
         'status',
