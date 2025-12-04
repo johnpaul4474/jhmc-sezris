@@ -10,6 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "ably/laravel-broadcaster": "*",
         "google/apiclient": "^2.18",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/fortify": "^1.30",

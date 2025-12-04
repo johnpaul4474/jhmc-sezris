@@ -12,8 +12,8 @@ const props = defineProps<{
     data-slot="sidebar-header"
     data-sidebar="header"
     :class="cn('flex flex-col gap-1 p-1', props.class)"
-    style = "background-color:#0F75BC;
-;"
+    style = "background-color:white"
+
   >
     <slot />
   </div>

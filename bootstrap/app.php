@@ -10,7 +10,9 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
+        channels: __DIR__.'/../routes/channels.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -22,6 +24,8 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        $middleware->alias([
+            'role.access' => \App\Http\Middleware\RoleAccessMiddleware::class,
          $middleware->alias([
         'role.access' => \App\Http\Middleware\RoleAccessMiddleware::class,
          'ensure.cco' => \App\Http\Middleware\EnsureUserIsCCO::class,
@@ -29,4 +33,5 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->create();

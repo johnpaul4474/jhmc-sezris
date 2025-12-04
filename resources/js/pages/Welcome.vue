@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { dashboard, login, register } from '@/routes';
+import { dashboard, login, register ,signup} from '@/routes';
 import { Head, Link } from '@inertiajs/vue3';
 </script>
 
@@ -32,10 +32,10 @@ import { Head, Link } from '@inertiajs/vue3';
       <nav class="flex flex-col items-center gap-4 w-full">
         <Link
           v-if="$page.props.auth.user"
-          :href="dashboard()"
+          :href="login()"
           class="w-full text-center rounded-lg border border-[#19140035] px-5 py-2 text-sm font-medium text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
         >
-          Dashboard
+          Login
         </Link>
         <template v-else>
           <Link
@@ -53,6 +53,12 @@ import { Head, Link } from '@inertiajs/vue3';
           >
             Register
           </Link> -->
+          <Link
+            :href="signup()"
+            class="w-full text-center rounded-lg border border-[#19140035] px-5 py-2 text-sm font-medium text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
+          >
+           Sign up
+          </Link> 
         </template>
       </nav>
     </div>

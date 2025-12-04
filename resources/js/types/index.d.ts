@@ -45,3 +45,8 @@ export interface User {
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
+
+export const signup = { /* route configuration */ };
+// OR
+const signupRoute = { /* route configuration */ };
+export { signupRoute as signup };
