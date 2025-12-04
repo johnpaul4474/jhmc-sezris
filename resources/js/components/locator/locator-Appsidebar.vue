@@ -11,36 +11,22 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard,usersDashboard,sezadDashboard,bddDashboard } from '@/routes';
+import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid,SquareUserRound, Clock, Eye } from 'lucide-vue-next';
+import { File, LayoutGrid, SquareUserRound, Clock, Eye } from 'lucide-vue-next';
 import AppLogo from '../AppLogo.vue';
-
-
+import { usePage} from '@inertiajs/vue3';
+import app from '@/routes/app';
+const page = usePage()
 const mainNavItems: NavItem[] = [
-    {
-        title: 'Locator',
-        href: '/locator',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Create Application',
-        href: '/loctr/applications/create',
-        icon: SquareUserRound,
-    },{
-        title: 'Pending Application',
-        href: '/loctr/applications/pending',
-        icon: Clock,
-    },{
-        title: 'Approved Applications',
-        href: '/loctr/applications/approved',
-        icon: Eye,
-    },
-];
+    { title: 'Locator', href: '/locator', icon: LayoutGrid },
+    { title: 'Create Application', href: '/loctr/applications/create', icon: SquareUserRound },
+    { title: 'Pending Application', href: '/loctr/applications/pending', icon: Clock },
+    { title: 'Approved Applications', href: '/loctr/applications/approved', icon: Eye },
+    { title: 'My ATO', href: `/ato/viewer`, icon: File } ];
 
-const footerNavItems: NavItem[] = [
-];
+const footerNavItems: NavItem[] = [];
 </script>
 
 <template>
@@ -51,7 +37,6 @@ const footerNavItems: NavItem[] = [
                     <SidebarMenuButton size="lg" as-child>
                         <Link :href="dashboard()">
                             <AppLogo />
-                        
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -59,6 +44,7 @@ const footerNavItems: NavItem[] = [
         </SidebarHeader>
 
         <SidebarContent>
+          
             <NavMain :items="mainNavItems" />
         </SidebarContent>
 
@@ -67,6 +53,4 @@ const footerNavItems: NavItem[] = [
             <NavUser />
         </SidebarFooter>
     </Sidebar>
-   
-
 </template>

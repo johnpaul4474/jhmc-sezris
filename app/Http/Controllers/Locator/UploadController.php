@@ -43,42 +43,44 @@ class UploadController extends Controller
      * Store uploaded files.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'file' => 'required_without:files|file|max:5120',
-            'files.*' => 'sometimes|file|max:5120',
-            'application_form_id' => 'required|exists:application_forms,id',
+{
+    $request->validate([
+        'file' => 'required_without:files|file|max:5120',
+        'files.*' => 'sometimes|file|max:5120',
+        'application_form_id' => 'required|exists:application_forms,id',
+    ]);
+
+    $savedFiles = [];
+    $files = $request->file('files') ?? [$request->file('file')];
+
+    foreach ($files as $file) {
+        if (!$file) continue;
+
+        // store file
+        $storedPath = $file->store('loctr', 'public');
+
+        // create DB record
+        $upload = Upload::create([
+            'file_name' => $file->getClientOriginalName(),
+            'file_path' => $storedPath,
+            'file_type' => $file->getClientMimeType(),
+            'file_size' => $file->getSize(),
+            'description' => $request->input('description'),
+            'user_id' => Auth::id(),
+            'application_form_id' => $request->application_form_id,
         ]);
 
-        $savedFiles = [];
-        $files = $request->file('files') ?? [$request->file('file')];
+        // URL only for returning
+        $upload->url = Storage::url($storedPath);
 
-        foreach ($files as $file) {
-            if (!$file) continue;
-
-            $storedPath = $file->store('loctr', 'public');
-
-            $upload = Upload::create([
-                'file_name' => $file->getClientOriginalName(),
-                'file_path' => $storedPath,
-                'file_type' => $file->getClientMimeType(),
-                'file_size' => $file->getSize(),
-                'description' => $request->input('description'),
-                'user_id' => Auth::id(),
-                'application_form_id' => $request->input('application_form_id'),
-            ]);
-
-            // Add public URL
-            $upload->url = Storage::url($storedPath);
-
-            $savedFiles[] = $upload;
-        }
-        
-        return response()->json([
-            'message' => 'File(s) uploaded successfully',
-            'files' => $savedFiles,
-        ]);
+        $savedFiles[] = $upload;
     }
+
+    return response()->json([
+        'message' => 'File(s) uploaded successfully',
+        'files' => $savedFiles,
+    ]);
+}
 
     /**
      * Delete a specific upload.
@@ -99,4 +101,17 @@ class UploadController extends Controller
 
         return response()->json(['message' => 'Upload deleted successfully']);
     }
+   
+    public function verify($id)
+    { dd($id);
+    $upload = Upload::findOrFail($id);
+
+    $upload->status = 'verified';
+    $upload->save();
+
+    return response()->json([
+        'message' => 'Document has been verified successfully.',
+        'upload' => $upload
+    ]);
+}
 }

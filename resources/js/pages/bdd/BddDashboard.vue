@@ -5,6 +5,10 @@ import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { ref, computed } from "vue";
 import { Dialog, DialogPanel, TransitionRoot } from "@headlessui/vue";
+const props = defineProps({
+  user: Object,
+  users: Array
+})
 
 interface Locator {
     id: number;
@@ -115,10 +119,39 @@ const breadcrumbs: BreadcrumbItem[] = [
 <template>
 
     <Head title="BDD Dashboard" />
-
+     
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-6 space-y-6">
             <!-- Search + Add -->
+             
+           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div 
+      v-for="u in props.users.data" 
+      :key="u.id"
+      class="p-4 bg-white dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition"
+    >
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        {{u.id}}-{{ u.name }}
+      </h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        {{ u.email }}
+      </p>
+    </div>
+    
+  </div>
+  <div class="grid grid-cols-16 sm:grid-cols-1 lg:grid-cols-16">
+  <button
+  v-for="page in props.users.last_page"
+  :key="page"
+  @click="$inertia.get('/bdd', { page })"
+  :class="page === props.users.current_page 
+           ? 'bg-blue-500 rounded text-white' 
+           : 'px-1 py-1 border rounded hover:bg-gray-200 dark:hover:bg-gray-700'"
+>
+  {{ page }}
+</button>
+</div>
+<pre>{{ props.user.details }}</pre>
             <div class="flex items-center justify-between">
                 <input v-model="search" type="text" placeholder="Search..."
                     class="border rounded-lg px-4 py-2 w-1/3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />

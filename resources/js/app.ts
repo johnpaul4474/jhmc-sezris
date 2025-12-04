@@ -1,3 +1,4 @@
+// resources/js/app.ts
 import '../css/app.css'
 
 import { createInertiaApp } from '@inertiajs/vue3'
@@ -9,12 +10,27 @@ import axios from 'axios'
 import Vue3EasyDataTable from 'vue3-easy-data-table'
 import 'vue3-easy-data-table/dist/style.css'
 
-
-// --- Global Axios defaults ---
+// --------------------
+// Axios global setup
+// --------------------
+axios.defaults.withCredentials = true               // send cookies for Sanctum
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
-axios.defaults.headers.common['X-CSRF-TOKEN'] =
-  document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
 
+// Optional: helper for POST requests with CSRF
+export async function postWithCsrf(url: string, data: object) {
+  await axios.get('/sanctum/csrf-cookie')           // ensure CSRF token cookie
+  return axios.post(url, data)
+}
+
+// Similarly, you can make helpers for PUT, PATCH, DELETE:
+export async function putWithCsrf(url: string, data: object) {
+  await axios.get('/sanctum/csrf-cookie')
+  return axios.put(url, data)
+}
+
+// --------------------
+// Inertia app setup
+// --------------------
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel'
 
 createInertiaApp({
@@ -28,13 +44,13 @@ createInertiaApp({
     const vueApp = createApp({ render: () => h(App, props) })
     vueApp.use(plugin)
 
-    // ✅ Register your data table component globally
+    // Register global components
     vueApp.component('EasyDataTable', Vue3EasyDataTable)
 
     vueApp.mount(el)
   },
   progress: {
-    color: '#4B5563',
+    color: '#FFFFFF',
   },
 })
 

@@ -11,7 +11,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, usersDashboard, sezadDashboard, bddDashboard } from '@/routes';
+import { dashboard, usersDashboard, sezadDashboard, bddDashboard, ATO } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 
@@ -47,8 +47,9 @@ interface CustomPageProps extends PageProps {
 
 const page = usePage<CustomPageProps>()
 const user = page.props.auth.user
-
-
+const cco = user?.details && user.details.role_id ===2 && user.details.department_id === 12 && user.details.user_function_id === 2
+const locator = user?.details && user.details.role_id ===3
+    
 const admin =
     user?.details &&
     user.details.role_id === 1 &&
@@ -117,18 +118,32 @@ if (admin) {
             icon: LayoutGrid,
         }
     );
-} else {
+} else if(locator){
+    mainNavItems.push(
+        {
+            title: 'ATO',
+            href: '/ATO',
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Apply For ATO',
+            href: '/loctr/applications/create',
+            icon: LayoutGrid,
+        }
+    );
+}else {
     mainNavItems.push(
 
         {
             title: 'Others',
             href: sezadDashboard(),
             icon: LayoutGrid,
+            
         }
     );
 }
 
-console.log(user.details)
+
 const footerNavItems: NavItem[] = [
     // {
     //     title: 'Github Repo',
@@ -145,6 +160,7 @@ const footerNavItems: NavItem[] = [
 
 <template>
     <Sidebar collapsible="icon" variant="inset">
+       
         <SidebarHeader>
             <SidebarMenu>
                 <SidebarMenuItem>

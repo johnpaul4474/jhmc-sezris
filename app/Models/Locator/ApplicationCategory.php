@@ -9,12 +9,11 @@ class ApplicationCategory extends Model
 {
     use HasFactory;
 
-    protected $table = 'application_categories'; // optional if naming follows convention
+    protected $table = 'application_categories'; 
     protected $fillable = [
         'name',
     ];
 
-    // Example: if ApplicationCategory has many options
     public function options()
     {
         return $this->hasMany(ApplicationOption::class, 'category_id');

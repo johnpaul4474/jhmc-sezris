@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Locator;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\UpdateArticleDetail;
+use App\Http\Requests\StoreArticleDetail;
 use App\Models\Locator\ArticleDetail;
 use Inertia\Inertia;
 
@@ -29,16 +31,10 @@ class ArticleDetailController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-{
-    $validated = $request->validate([
-        'application_form_id' => 'required|integer|exists:application_forms,id',
-        'marks_and_number' => 'required|string|max:255',
-        'qty' => 'required|integer|min:1',
-        'detailed_description_of_article' => 'required|string|max:500',
-        'gross_weight' => 'nullable|string|max:255',
-    ]);
-
+    public function store(StoreArticleDetail $request)
+{  
+    $validated = $request->validated();
+      
     $article = ArticleDetail::create([
         'application_form_id' => $validated['application_form_id'],
         'marks_and_number' => $validated['marks_and_number'],
@@ -70,16 +66,13 @@ class ArticleDetailController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
-{
+    public function update(UpdateArticleDetail $request, $id)
+{   
     $article = ArticleDetail::findOrFail($id);
+    if($article){
 
-    $validated = $request->validate([
-        'marks_and_number' => 'sometimes|required|string',
-        'qty' => 'sometimes|required|integer|min:1',
-        'detailed_description_of_article' => 'sometimes|required|string',
-        'gross_weight' => 'sometimes|nullable|string',
-    ]);
+    }
+    $validated = $request->$request->validated();
 
     $article->update($validated);
 
@@ -94,7 +87,24 @@ class ArticleDetailController extends Controller
     $article = ArticleDetail::findOrFail($id);
     $article->delete();
 
-    // Return 204 for AJAX
+    
     return response()->noContent(); 
+}
+public function verifyArticle(Request $request, $id)
+{      dd($id);
+    
+    $article = ArticleDetail::find($id);
+
+    if (!$article) {
+        return response()->json(['message' => 'Article not found'], 404);
+    }
+
+    
+    $article->status = 'Verified';
+    $article->verified_at = now(); // optional timestamp
+    $article->save();
+
+    
+    return redirect()->back()->with('success', 'Article verified successfully');
 }
 }

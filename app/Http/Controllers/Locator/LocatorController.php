@@ -7,39 +7,43 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Locator\ApplicationModel;
 use Illuminate\Support\Facades\Auth;
-
+use App\Models\Locator\ApplicationForApproval;
+use App\Helpers\AppConstants;
+use App\Models\Locator\ApproverGroupApprover;
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 
 class LocatorController extends Controller
 {
     public function index(){
-        $applications = auth()->user()->applications;
-        return Inertia::render('Locator/Index', [
-            'applications' => $applications,
-        ]);
-       
-    }
-    public function show($id){
-       return $id;
-    }
-    public function pendingList()
-    {
-        $applications = ApplicationModel::where('user_id', Auth::id())
-    ->where('status', 'pending')
-    ->get();
         
-        return Inertia::render('Locator/Application/Pending', [
-            'applications' => $applications,
+       
+  if (Gate::denies('access-locator')) {
+            abort(403, 'Unauthorized');
+        }
+        $user = auth()->user();
+       $AppForapprovals = $user->approvals;
+       
+         $applications = auth()->user()?->applications ?? [];
+        return Inertia::render('Locator/Index', [
+            'applications' => $AppForapprovals,
         ]);
     }
+    
+    public function show(String $id){
 
-    public function approvedList(){
-        $applications = ApplicationModel::where('user_id', Auth::id())
-    ->where('status', 'approved')
-    ->get();
 
-        return Inertia::render('Locator/Application/Approved', [
-            'applications' => $applications,
-        ]);
+        if (Gate::denies('access-locator')) {
+            abort(403, 'Unauthorized');
+        }
+       $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
+    ->where('id', $id)
+    ->first();
+    
+       return Inertia::render('Locator/View',[
+        'app' => $application,
+       ]);
     }
+    
 }

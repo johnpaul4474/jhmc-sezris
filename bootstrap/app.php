@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
          $middleware->alias([
         'role.access' => \App\Http\Middleware\RoleAccessMiddleware::class,
+         'ensure.cco' => \App\Http\Middleware\EnsureUserIsCCO::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

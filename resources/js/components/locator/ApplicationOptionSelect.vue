@@ -54,7 +54,7 @@ const handleSelect = (option: any) => {
                dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:focus:ring-gray-500"
       >
         <span v-if="selectedOption">{{ selectedOption.name }}</span>
-        <span v-else class="text-gray-600 italic dark:text-gray-400">-- Select option --</span>
+        <span v-else class="text-gray-600 italic dark:text-gray-400">-- Select Declared Value --</span>
       </button>
     </DropdownMenuTrigger>
 

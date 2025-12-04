@@ -12,18 +12,19 @@ class RoleAccessMiddleware
     {
         $user = Auth::user();
 
-        if ($request->is('login') || $request->is('logout') || $request->is('sanctum/csrf-cookie')) {
+        if ($request->is('login') || $request->is('logout')) {
             return $next($request);
         }
 
+        // Redirect guest users to login
         if (!$user) {
             return redirect('/login');
         }
 
         $details = $user->details;
 
-        // Super Admin — access dashboard only
         if ($details) {
+            // Determine roles
             $isSuperAdmin = (
                 $details->department_id == 9 &&
                 $details->division_id == 3 &&
@@ -31,19 +32,42 @@ class RoleAccessMiddleware
                 $details->permission_id == 1
             );
 
-            $isSezadUser = ($details->department_id == 12);
-
-            // Super admin: allow both dashboard & sezad
+            $isSezadUser = null;
+            $isLocator = ($details->role_id == 3);
+            $isOsac = ($details->position_id == 36 &&
+                        $details->department_id == 12 &&
+                        $details->role_id == 2 &&
+                        $details->permission_id == 2);
+            $isCco= ($details->position_id == 37 &&
+                     $details->department_id == 12 &&
+                     $details->role_id == 2 &&
+                     $details->permission_id == 2); 
+           
+            // Super Admin: allow only /dashboard and /sezad
             if ($isSuperAdmin) {
-                if (!$request->is('dashboard') && !$request->is('sezad')) {
+                if (! $request->is('dashboard') && ! $request->is('sezad') && ! $request->is('sezad/*')) {
                     return redirect('/dashboard');
                 }
             }
-            // SEZAD user: allow sezad only
+            // SEZAD user: allow only /sezad
             elseif ($isSezadUser) {
-                if (!$request->is('sezad') && !$request->is('sezad/*')) {
+                if (! $request->is('sezad') && ! $request->is('sezad/*')) {
                     return redirect('/sezad');
                 }
+            }
+            // // Locator user: allow only /locator
+            elseif ($isLocator) {
+                
+                     return redirect('/locator');
+             
+             } elseif($isCco){
+                 return redirect('/cco');
+             }elseif($isOsac){
+                return redirect('/osac');
+             }
+            // Optionally: handle users with unknown roles
+            else {
+                return redirect('/login');
             }
         }
 

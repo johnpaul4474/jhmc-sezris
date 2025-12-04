@@ -7,7 +7,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.ts'], // 💡 ADDED CSS FILE
+            input: ['resources/css/app.css', 'resources/js/app.ts'],
             ssr: 'resources/js/ssr.ts',
             refresh: true,
         }),
@@ -24,4 +24,8 @@ export default defineConfig({
             },
         }),
     ],
+
+    optimizeDeps: {
+        include: ['@vuepic/vue-datepicker'], // 💡 ADD THIS
+    },
 });
