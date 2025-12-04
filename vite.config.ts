@@ -41,4 +41,7 @@ export default defineConfig({
         include: ["ably"]
     },
     
+    optimizeDeps: {
+        include: ['@vuepic/vue-datepicker'], // 💡 ADD THIS
+    },
 });

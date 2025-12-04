@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Services\Contracts\ISezrisService;
-
+use App\Models\Locator\Upload;
 class UploadService implements ISezrisService
 {
     public function fetchData(array $filters): array
@@ -48,4 +48,50 @@ class UploadService implements ISezrisService
 
         return null;
     }
+    public function uploadFiles(array $files, $description, $applicationFormId, $userId)
+{ 
+    foreach ($files as $fileItem) {
+
+        // Extract title + file object
+        $title = $fileItem['title'] ?? null;
+        $file = $fileItem['file'] ?? null;
+
+        if (!$file) {
+            continue; // skip rows with no file
+        }
+
+        // Upload file
+        $path = $file->store('uploads', 'public');
+
+        // Save upload record
+        Upload::create([
+            'file_name' => $title,                      // use title as requested
+            'file_path' => $path,
+            'file_type' => $file->getClientMimeType(),
+            'file_size' => $file->getSize(),
+            'description' => $description,
+            'user_id' => $userId,
+            'application_form_id' => $applicationFormId,
+        ]);
+    }
+}
+public function uploadFile($file, $title, $applicationFormId, $userId)
+    {
+        if (!$file || !method_exists($file, 'store')) {
+            return;
+        }
+
+        $path = $file->store('uploads', 'public');
+
+        Upload::create([
+            'file_name'           => $title ?: $file->getClientOriginalName(),
+            'file_path'           => $path,
+            'file_type'           => $file->getClientMimeType(),
+            'file_size'           => $file->getSize(),
+            'description'         => null,
+            'user_id'             => $userId,
+            'application_form_id' => $applicationFormId,
+        ]);
+    }
+
 }

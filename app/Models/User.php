@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use App\Models\Locator\ApplicationModel;
+use App\Models\Locator\ApplicationForApproval;
 use App\Models\UserDetails\UserDetail;
 use App\Models\UserDetails\Department;
 use App\Models\UserDetails\Division;
@@ -66,6 +67,28 @@ class User extends Authenticatable
                 ->withPivot('sequence')
                 ->orderBy('pivot_sequence', 'asc');
     }
+    public function approverGroup()
+{
+    return $this->belongsToMany(
+        \App\Models\ApproverGroup::class,
+        'approver_group_approver',
+        'approver_id',
+        'approver_group_id'
+    )
+    ->withPivot('sequence')
+    ->orderBy('pivot_sequence', 'asc');
+}
+    public function approvals()
+{
+    return $this->hasManyThrough(
+        ApplicationForApproval::class, // Final model
+        ApplicationModel::class,       // Intermediate model
+        'user_id',                     // Foreign key on ApplicationModel
+        'application_id',              // Foreign key on ApplicationForApproval
+        'id',                          // Local key on User
+        'id'                           // Local key on ApplicationModel
+    );
+}
 
 
     public function details()

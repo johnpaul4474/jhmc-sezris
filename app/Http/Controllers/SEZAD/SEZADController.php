@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
 class SEZADController extends Controller
 {
     public function index()
-    {
+    {     dd(sezadController);
         $user = Auth::user();
         $businessTypes = BusinessType::all();
         $tempUsers = TemporaryUser::latest()->get();

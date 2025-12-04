@@ -56,15 +56,36 @@ class AuthenticatedSessionController extends Controller
         {
             return redirect()->intended(route('dashboard', absolute: false));
             
+        }else if($user_details && $user_details->role_id == 3){
+            return redirect()->intended('/locator');
+        }else if($user_details && $user_details->position_id == 36 && $user_details->department_id == 12) {
+            return redirect()->intended('sezad/osac');
+        }elseif ($user_details && $user_details->department_id == 12
+                 && $user_details->position_id == 37  &&
+                 $user_details->role_id == 2 
+                 && $user_details->permission_id == 2 ){
+            return redirect()->intended('sezad/cco');
+        }else if($user_details && $user_details->department_id == 10 
+                && $user_details->role_id == 2
+                && $user_details->position_id = 53
+                && $user_details->permission_id == 2){
+               return redirect()->intended('fsd/finance');
+    }else if($user_details && $user_details->department_id == 12
+                && $user_details->user_function_id == 5
+                && $user_details->role_id == 2
+                && $user_details->permission_id == 1)
+        {
+            return redirect()->intended('sezad/manager');
         }else if($user_details && $user_details->department_id == 12
                 && $user_details->division_id == null
                 && $user_details->role_id == 2
                 && $user_details->permission_id == 2)
         {
             return redirect()->intended('/sezad');
-        }else {
+        }else{
             return redirect()->intended(route('bddDashboard', absolute: false));
         }
+         
         
     }
 
@@ -72,7 +93,7 @@ class AuthenticatedSessionController extends Controller
      * Destroy an authenticated session.
      */
     public function destroy(Request $request): RedirectResponse
-    {
+    { 
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

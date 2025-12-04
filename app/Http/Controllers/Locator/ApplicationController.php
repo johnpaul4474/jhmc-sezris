@@ -13,16 +13,20 @@ use App\Helpers\PermitHelper;
 use App\Models\User;
 use App\Models\Locator\Form;
 use App\Models\ApproverGroup;
-
+use App\Models\ApproverSets;
+use App\Models\Locator\ApproverGroupApprover;
+use App\Models\Locator\ApplicationForApproval;
+use App\Helpers\AppConstants;
+use Illuminate\Support\Facades\Log;
 
 class ApplicationController extends Controller
 {
-  
     /**
      * Display a listing of the resource.
      */
     public function index()
      { 
+
         
         $application = ApplicationModel::with(['selections.option', 'selections.user'])
             ->latest()
@@ -63,12 +67,11 @@ class ApplicationController extends Controller
     public function create()
 {    $form = Form::all();
      $user = auth()->user();
-   
     return Inertia::render('Locator/Application/Create', [
         'user' => $user,
         'application_form_id' => null,
         'form' => $form,
-        'approverGroupId' => $form[0]->approver_group_id,
+        'approverGroupId' => null,
         
     ]);
 }
@@ -76,15 +79,39 @@ class ApplicationController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        
-       $user = auth()->user();
+    {  
+       
+         $user = auth()->user();
        $application = ApplicationModel::create([
             'form_title' => $request->input('type') ,
             'user_id'    => $user->id,
         ]);
-    // Collection of all options
+        
+        $approver = Form::where('name',$request->input('type'))->first();
+        $sets = ApproverSets::where('approver_group_id',$approver->approver_group_id)->get();
+        
+        //create new Sets of ApprovergroupApprover 
+        foreach ($sets as $set) {
+            //set the Role of reciever that needs to recieve emails
+            //it depends if admin wants to send email or notifications to all approver sets members
+            // if($set->role === 'Manager'){
+            //    $reciever = User::where('id',$set->user_id)->first();
+            //    Log::info('Send Email to:', ['user Email: ' => $reciever->email ,"id" =>$reciever->id]); 
+            // }
+    ApproverGroupApprover::query()->insert([
+    'approver_group_id' => $set->approver_group_id,
+    'approver_id'       => $set->user_id,
+    'sequence'          => $set->sequence,
+    'role'              => $set->role,
+    'application_form_id'=> $application->id,
+    'status'            => AppConstants::STATUS_PENDING,
+    'created_at'        => now(),
+    'updated_at'        => now(),
+]);
    
+}
+      
+    // Collection of all options
     return Inertia::render('Locator/Application/Create', [
         'user' => $user,
         'application_form_id' => $application->id, // Pass the new ID
@@ -93,25 +120,56 @@ class ApplicationController extends Controller
         'form_title' => $application->form_title,
         'start_date' => $application->created_at,
     'options' => ApplicationOption::select('id', 'name', 'value', 'validity')->get(),
-    'approverGroupId' => $application->approver_group_id,
+    'approverGroupId' => $approver->approver_group_id,
 
     ]);
 
     }
     
 
+
     /**
      * Display the specified resource.
      */
-    public function show(int $id)
-    {    
-        $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
-    ->findOrFail($id);
-        
-        return Inertia::render('Locator/Application/Show', [
-            'application' => $application,
-        ]);
-    }
+        public function show(String $id)
+{    
+    $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
+                   ->findOrFail($id);
+    $approvers = ApplicationForApproval::with('approverGroup.approvers')
+                    ->where('application_id', $id)
+                    ->first();
+    
+    $approver = ApproverGroupApprover::with(['approver', 'approverGroup'])
+    ->where('approver_group_id', $approvers->approverGroup->id)
+    ->where('application_form_id', $id)
+    ->get(['id', 'approver_id', 'sequence', 'role','remark', 'status', 'acted_at', 'approver_group_id']);
+     
+     if($approvers->approverGroup->allApproversStatusApproved()){
+          $application->status= AppConstants::STATUS_APPROVED;
+          $application->save();
+          $approvers->status = AppConstants::STATUS_APPROVED;
+          $approvers->save();
+     }   
+    
+    return Inertia::render('Locator/Application/Show', [
+    'application' => $application,
+    'approverGroup' => $approvers?->approverGroup,
+    'approvers' => $approver->map(function ($item) {
+        return [
+            'id' => $item->approver->id ?? null,
+            'name' => $item->approver->name ?? '(Unknown)',
+            'email' => $item->approver->email ?? null,
+            'pivot' => [
+                'role' => $item->role ?? null,
+                'sequence' => $item->sequence ?? null,
+                'status' => $item->status ?? null,
+                'acted_at' => $item->acted_at ?? null,
+                'remark' => $item->remark ?? null,
+            ],
+        ];
+    }),
+]);
+}
 
     /**
      * Show the form for editing the specified resource.

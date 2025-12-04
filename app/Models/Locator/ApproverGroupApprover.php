@@ -3,23 +3,28 @@
 namespace App\Models\Locator;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use App\Models\ApproverGroup;
+use App\Models\User;
+use App\Models\Locator\ApplicationModel;
 
 class ApproverGroupApprover extends Pivot
 {
     protected $table = 'approver_group_approver';
 
-    // If your pivot has timestamps
     public $timestamps = true;
 
-    // Mass assignable columns
     protected $fillable = [
         'approver_group_id',
         'approver_id',
         'sequence',
+        'status',
+        'role',
+        'remark',
+        'application_form_id',
     ];
 
     /**
-     * The approver group this pivot belongs to.
+     * 🔗 The approver group this pivot belongs to
      */
     public function approverGroup()
     {
@@ -27,10 +32,18 @@ class ApproverGroupApprover extends Pivot
     }
 
     /**
-     * The approver (user) linked to this pivot.
+     * 🔗 The user who is the approver
      */
     public function approver()
     {
-        return $this->belongsTo(\App\Models\User::class, 'approver_id');
+        return $this->belongsTo(User::class, 'approver_id');
     }
+    public function scopePending($query)
+{
+    return $query->where('status','!=' ,'Approved');
+}
+    public function application()
+{
+    return $this->belongsTo(ApplicationModel::class, 'application_form_id');
+}
 }

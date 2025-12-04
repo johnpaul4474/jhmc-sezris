@@ -1,5 +1,7 @@
 import { InertiaLinkProps } from '@inertiajs/vue3';
 import type { LucideIcon } from 'lucide-vue-next';
+import type { FunctionalComponent } from 'vue'
+import type { LucideProps } from 'lucide-vue-next'
 
 export interface Auth {
     user: User;
@@ -8,6 +10,12 @@ export interface Auth {
 export interface BreadcrumbItem {
     title: string;
     href: string;
+}
+export interface NavItem {
+  title: string
+  href?: string
+  icon?: string | FunctionalComponent<LucideProps>
+  children?: NavItem[] // ✅ allow nested navigation
 }
 
 export interface NavItem {
