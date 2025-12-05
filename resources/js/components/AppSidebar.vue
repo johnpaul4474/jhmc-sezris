@@ -18,7 +18,7 @@ import { Link } from '@inertiajs/vue3';
 import AppLogo from './AppLogo.vue';
 import { usePage } from '@inertiajs/vue3'
 import type { PageProps } from '@inertiajs/core'
-import { BookOpen, Folder, LayoutGrid, SquareUserRound, Clock, Eye } from 'lucide-vue-next';
+import { Users,UserRoundPen,BookOpen, Folder, LayoutGrid, SquareUserRound, Clock, Eye } from 'lucide-vue-next';
 import { ref, onMounted } from "vue";
 import * as Ably from "ably";
 import UserInfo from '@/components/UserInfo.vue';
@@ -102,6 +102,15 @@ const sezadManager =
     user.details.division_id === null &&
     user.details.user_function_id === 5
 
+const BDD = 
+     user?.details &&
+    user.details.role_id === 2 &&
+   // user.details?.position_id === 54 &&
+    user.details.permission_id === 2 &&
+    user.details.department_id === 5 &&
+    user.details.division_id === null &&
+    user.details.user_function_id === 6
+
 const mainNavItems: NavItem[] = [];
 
 if (admin) {
@@ -177,7 +186,22 @@ else if (sezadOSAC) {
             icon: LayoutGrid,
         }
     );
-}else {
+}else if(BDD){
+   mainNavItems.push(
+    {
+            title: 'registered Locators',
+            href: '/bdd/dash',
+            icon: Users,
+            
+        },
+        {
+            title: 'Locator with Profiles',
+            href: '#',
+            icon: UserRoundPen,
+            
+        },
+   );
+}else{
     mainNavItems.push(
 
         {

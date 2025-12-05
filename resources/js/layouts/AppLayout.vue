@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
 import AppSidebarLayout from '@/layouts/app/AppSidebarLayout.vue';
-
+import { Toaster } from 'vue-sonner';
 interface Props {
     breadcrumbs?: BreadcrumbItemType[];
 }
@@ -14,6 +14,7 @@ withDefaults(defineProps<Props>(), {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
+       <Toaster position="top-center" rich-colors />  
         
     <slot />
     </AppLayout>

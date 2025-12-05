@@ -57,36 +57,41 @@ class BDDController extends Controller
     }
 
     public function saveLocatorProfile(SaveLocatorProfileRequest $request)
-    {
-            $data = $request->validated();
+{
+    $data = $request->validated();
 
-            /* 1. Create User */
-            $user = User::create([
-                'name'     => $data['owner_name'],
-                'email'    => $data['official_email_gmail'],
-                'password' => bcrypt('password123'),
-            ]);
-             $data['user_id'] = $user->id;
-            /* 2. Create User Details */
-            UserDetail::create([
-                'user_id'   => $user->id,
-                'first_name' => $data['owner_name'],
-                'email'      => $data['company_email'],
-                'role_id'    => 3,
-            ]);
+    // 1. Create User
+    $user = User::create([
+        'name'     => $data['owner_name'],
+        'email'    => $data['official_email_gmail'],
+        'password' => bcrypt('password123'),
+    ]);
 
-            /* 3. Add user_id to validated data before saving locator */
-            $data['user_id'] = $user->id;
+    // 2. Create User Details
+    UserDetail::create([
+        'user_id'   => $user->id,
+        'first_name'=> $data['owner_name'],
+        'email'     => $data['company_email'],
+        'role_id'   => 3,
+        'permission_id'=> 2
+    ]);
 
-            /* 4. Create Locator Profile using $data */
-            $locator = LocatorModel::create($data);
-           //if successful Sezris should send temporary Login Credetials(username and temporary password) to the Locator
-        Log::info('Sending Email to:', ['user Email: ' => $user->email ,"Usernme" =>$user->email, "Temporary password"=> 'password123']);
-            return response()->json([
-                'success' => true,
-                'user'    => $user,
-                'locator' => $locator,
-            ]);
-    }
+    // 3. Add user_id to data
+    $data['user_id'] = $user->id;
+
+    // 4. Create Locator Profile
+    $locator = LocatorModel::create($data);
+
+    // 5. Log temporary credentials
+    Log::info('Sending Email to:', [
+        'user Email' => $user->email,
+        'Username' => $user->email,
+        'Temporary password' => 'password123'
+    ]);
+
+    // 6. Redirect back with success message only
+    return redirect()->back()->with('success', 'Locator saved successfully!');
+}
+
 
 }
