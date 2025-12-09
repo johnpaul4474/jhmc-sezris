@@ -44,7 +44,7 @@ class OsacController extends Controller
                         ->where('application_form_id', $application->id)
                         ->first();
             $group = ApproverGroup:: where('id', $application->approval->approver_group_id)->first();
-       
+         
          return Inertia::render('sezad/OSAC/Show',[
                                              'application' => $application,
                                              'approver_status' => $approver->status,

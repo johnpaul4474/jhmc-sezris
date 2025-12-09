@@ -13,8 +13,7 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbs">
-       <Toaster position="top-center" rich-colors />  
+    <AppLayout :breadcrumbs="breadcrumbs"> 
         
     <slot />
     </AppLayout>

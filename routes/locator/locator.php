@@ -10,7 +10,7 @@ use App\Models\User;
 use App\Http\Controllers\Applications\ATOController;
 use App\Data\ATOmeta;
 use Carbon\Carbon;
-
+use App\Models\ATO\AtoApplication;
 
 Route::get('/locator', [LocatorController::class, 'index'])->name('locator');
 Route:: get('/locator/{id}', [LocatorController::class, 'show'])->name('locator.app.show');
