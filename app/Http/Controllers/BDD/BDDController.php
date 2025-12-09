@@ -73,7 +73,7 @@ class BDDController extends Controller
         'first_name'=> $data['owner_name'],
         'email'     => $data['company_email'],
         'role_id'   => 3,
-        'permission_id'=> 2
+        'permission_id'=> 2,
     ]);
 
     // 3. Add user_id to data
