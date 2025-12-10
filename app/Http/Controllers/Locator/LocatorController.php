@@ -15,6 +15,7 @@ use App\Models\ATO\AtoApplication;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Signup\TemporaryUser;
 use Illuminate\Support\Facades\Log;
+use App\Models\UserDetails\UserDetail;
 
 
 class LocatorController extends Controller
@@ -22,10 +23,7 @@ class LocatorController extends Controller
     public function index(){
         
          $user = auth()->user();
-    //     $atoApp= AtoApplication::where('application_id', 169)
-    //    ->where('user_id',$user->id)
-    //    ->with(['uploads'])->get();
-    //    dd($atoApp->isEmpty());
+    
   if (Gate::denies('access-locator')) {
             abort(403, 'Unauthorized');
         }
@@ -70,10 +68,25 @@ class LocatorController extends Controller
     public function approveVendorRequest($id)
     {
         $vendor = TemporaryUser::findOrFail($id);
-        
-        // Update status
-        $vendor->status = 'approved';
-        $vendor->save();
+        $newVendorUser = User::create([
+        'name' => $vendor->name,
+        'email' => $vendor->email,
+        'password' => $vendor->temp_password,
+        'created_at'=> now(),
+        'upddated_at' =>now(),
+     
+    ]);
+
+    // Create associated UserDetails if needed
+    $userDetails = UserDetail::create([
+        'user_id' => $newVendorUser->id,
+        'role_id' => 7,
+        'permission_id' => 2,
+        'created_at'=> now(),
+        'upddated_at' =>now(),
+        // map other details from TemporaryUser as needed
+    ]);
+
         Log::info('Approved vendor: ', $vendor->toArray());
         return back()->with('success', 'Vendor Approved successfully');
     }
