@@ -11,7 +11,9 @@ use App\Http\Controllers\Applications\ATOController;
 use App\Data\ATOmeta;
 use Carbon\Carbon;
 use App\Models\ATO\AtoApplication;
-
+Route:: get('/MyVendors',[LocatorController::class, 'myVendors'])->name('locator.myvendor');
+Route::get('/VendorVerify',[LocatorController::class, 'vendorRequest'])->name('locator.vendor.request');
+Route::post('/locator/vendor/{id}/approve', [LocatorController::class, 'approveVendorRequest'])->name('locator.vendor.approve');
 Route::get('/locator', [LocatorController::class, 'index'])->name('locator');
 Route:: get('/locator/{id}', [LocatorController::class, 'show'])->name('locator.app.show');
 Route::resource('approval', ApplicationForApprovalController::class);

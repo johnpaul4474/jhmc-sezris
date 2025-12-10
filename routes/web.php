@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
-
+use App\Http\Controllers\Auth\TemporaryAuthController;
 use App\Helpers\UserHelper;
 use App\Models\UserDetails;
 use App\Http\Controllers\Users\UserDetailsController;
@@ -140,6 +140,24 @@ Route::get('/locatorsSignUp', [LocatorController::class, 'index'])->name('locato
 
 
 
+Route::prefix('temp')->name('temp.')->group(function () {
+
+    // GET /temp/login
+    Route::get('/login', function () {
+        return inertia('auth/TempLogin');
+    })->name('login');
+
+    // POST /temp/login
+    Route::post('/login', [TemporaryAuthController::class, 'login'])
+        ->name('login.submit');
+
+    // POST /temp/logout
+    Route::post('/logout', [TemporaryAuthController::class, 'logout'])
+        ->name('logout');
+    Route::get('/dashboard', function () {
+        return inertia('auth/TempDash');
+    });
+});
 
 
 

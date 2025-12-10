@@ -14,17 +14,20 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { File, LayoutGrid, SquareUserRound, Clock, Eye } from 'lucide-vue-next';
+import {Users, File, LayoutGrid, SquareUserRound, Clock, Eye } from 'lucide-vue-next';
 import AppLogo from '../AppLogo.vue';
 import { usePage} from '@inertiajs/vue3';
-import app from '@/routes/app';
+
 const page = usePage()
 const mainNavItems: NavItem[] = [
     { title: 'Locator', href: '/locator', icon: LayoutGrid },
     { title: 'Create Application', href: '/loctr/applications/create', icon: SquareUserRound },
     { title: 'Pending Application', href: '/loctr/applications/pending', icon: Clock },
     { title: 'Approved Applications', href: '/loctr/applications/approved', icon: Eye },
-    { title: 'My ATO', href: `/ato/viewer`, icon: File } ];
+    { title: 'My ATO', href: `/ato/viewer`, icon: File },
+    { title: 'Vendor Requests', href: `VendorVerify`, icon: Users },
+    { title: 'My Vendors', href: `/MyVendors`, icon: Users },
+]
 
 const footerNavItems: NavItem[] = [];
 </script>
