@@ -111,6 +111,12 @@ const BDD =
     user.details.division_id === null &&
     user.details.user_function_id === 6
 
+const vendor = user?.details &&
+    user.details.permission_id == 2 &&
+    user.details.role_id == 7 &&
+    user.details.department_id == null &&
+    user.details.user_function_id == null
+ console.log(user);   
 const mainNavItems: NavItem[] = [];
 
 if (admin) {
@@ -176,8 +182,8 @@ else if (sezadOSAC) {
 } else if(locator){
     mainNavItems.push(
         {
-            title: 'ATO',
-            href: '/ATO',
+            title: 'Apply',
+            href: '/loctr/applicaions/create',
             icon: LayoutGrid,
         },
         {
@@ -201,6 +207,22 @@ else if (sezadOSAC) {
             
         },
    );
+}else if(vendor){
+    mainNavItems.push(
+
+        {
+            title: 'Vendor',
+            href: '/',
+            icon: LayoutGrid,
+            
+        },
+        {
+            title: 'Accreditation',
+            href: '/',
+            icon: Eye,
+        }
+    );
+
 }else{
     mainNavItems.push(
 

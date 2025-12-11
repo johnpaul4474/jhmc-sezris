@@ -51,7 +51,7 @@ const approveVendor = (item : any) => {
   <locatorAppSidebarLayout :breadcrumbs="breadcrumbs">
 
     <h1 class="text-2xl font-bold mb-4">Vendor Requests</h1>
-
+    
     <div class="mt-6 overflow-x-auto bg-white rounded-lg shadow">
       <table class="min-w-full text-sm border">
         <thead class="bg-gray-100">

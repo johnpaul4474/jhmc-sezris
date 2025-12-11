@@ -23,7 +23,7 @@ use App\Http\Controllers\Signup\SignupController;
 use App\Http\Controllers\Signup\BusinessTypeController;
 use App\Http\Controllers\Signup\LocatorController;
 use App\Http\Controllers\Signup\TemporaryUserController;
-
+use App\Http\Controllers\VENDOR\LocatorVendorController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -158,6 +158,8 @@ Route::prefix('temp')->name('temp.')->group(function () {
         return inertia('auth/TempDash');
     });
 });
+//VENDOR
+Route::get('/locator-vendor',[LocatorVendorController::class,'index'])->name('locator.vendor.index');
 
 
 
