@@ -27,6 +27,8 @@ const mainNavItems: NavItem[] = [
     { title: 'My ATO', href: `/ato/viewer`, icon: File },
     { title: 'Vendor Requests', href: `/VendorVerify`, icon: Users },
     { title: 'My Vendors', href: `/MyVendors`, icon: Users },
+    { title: 'My Service Providers', href: `#`, icon: Users },
+     { title: 'ServiceProvider Requests', href: `#`, icon: Users },
 ]
 
 const footerNavItems: NavItem[] = [];

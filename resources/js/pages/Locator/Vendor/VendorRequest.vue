@@ -2,11 +2,10 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import locatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue';
 import { locator } from '@/routes';
-import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage, router } from '@inertiajs/vue3';
-import { ref } from "vue";
-import { Check } from "lucide-vue-next"; // icon for approve button
+import { ref, computed } from "vue";
+import { Check } from "lucide-vue-next";
 
 const page = usePage();
 
@@ -21,23 +20,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 // Props
 const props = defineProps({
   vendor: {
-    type: [Array, Object],
+    type: Array,
     default: () => [],
   },
 });
 
-// Decode helper
-const decodeLocator = (value: string) => {
-  try {
-    return JSON.parse(value);
-  } catch {
-    return [];
-  }
-};
+// Check if data is empty
+const isEmpty = computed(() => props.vendor.length === 0);
 
-// APPROVE ACTION
-const approveVendor = (item : any) => {
-    router.post(`/locator/vendor/${item.id}/approve`, {}, {
+// Approve vendor
+const approveVendor = (item: any) => {
+  router.post(`/locator/vendor/${item.id}/approve`, {}, {
     onSuccess: (page) => {
       console.log(page.props.flash.success);
     }
@@ -50,8 +43,8 @@ const approveVendor = (item : any) => {
 
   <locatorAppSidebarLayout :breadcrumbs="breadcrumbs">
 
-    <h1 class="text-2xl font-bold mb-4">Vendor Requests</h1>
-    
+    <h1 class="text-2xl font-bold mb-4 text-center">Vendor Requests</h1>
+
     <div class="mt-6 overflow-x-auto bg-white rounded-lg shadow">
       <table class="min-w-full text-sm border">
         <thead class="bg-gray-100">
@@ -66,39 +59,39 @@ const approveVendor = (item : any) => {
         </thead>
 
         <tbody>
+          <!-- EMPTY STATE ROW -->
+          <tr v-if="isEmpty">
+            <td colspan="6" class="text-center py-6 text-gray-500">
+              No vendor requests found.
+            </td>
+          </tr>
+
+          <!-- DATA ROWS -->
           <tr
+            v-else
             v-for="(item, index) in props.vendor"
             :key="item.id"
             class="hover:bg-gray-50"
           >
-            <td class="px-3 py-2 border">{{ index+1 }}</td>
+            <td class="px-3 py-2 border">{{ index + 1 }}</td>
             <td class="px-3 py-2 border">{{ item.email }}</td>
             <td class="px-3 py-2 border">{{ item.name }}</td>
             <td class="px-3 py-2 border">{{ item.business_type }}</td>
 
-            <!-- Decode JSON locator -->
-            <!-- <td class="px-3 py-2 border">
-              <div v-for="loc in decodeLocator(item.locator)" :key="loc">
-                {{ loc }}
-              </div>
-            </td> -->
-
             <td class="px-3 py-2 border capitalize">{{ item.status }}</td>
 
-            <!-- ACTION BUTTON -->
             <td class="px-3 py-2 border">
               <button
                 @click="approveVendor(item)"
                 :disabled="item.status === 'approved'"
                 class="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded shadow hover:bg-green-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
-                <Check class="w-4 h-4 rounded-b-full" />
-               
+                <Check class="w-4 h-4" />
               </button>
             </td>
-
           </tr>
         </tbody>
+
       </table>
     </div>
 
