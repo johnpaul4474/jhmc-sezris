@@ -92,8 +92,8 @@ const approveVendor = (item : any) => {
                 :disabled="item.status === 'approved'"
                 class="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded shadow hover:bg-green-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
-                <Check class="w-4 h-4" />
-                Approve
+                <Check class="w-4 h-4 rounded-b-full" />
+               
               </button>
             </td>
 

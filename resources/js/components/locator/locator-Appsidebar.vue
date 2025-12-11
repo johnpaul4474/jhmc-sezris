@@ -25,7 +25,7 @@ const mainNavItems: NavItem[] = [
     { title: 'Pending Application', href: '/loctr/applications/pending', icon: Clock },
     { title: 'Approved Applications', href: '/loctr/applications/approved', icon: Eye },
     { title: 'My ATO', href: `/ato/viewer`, icon: File },
-    { title: 'Vendor Requests', href: `VendorVerify`, icon: Users },
+    { title: 'Vendor Requests', href: `/VendorVerify`, icon: Users },
     { title: 'My Vendors', href: `/MyVendors`, icon: Users },
 ]
 

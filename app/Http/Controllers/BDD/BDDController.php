@@ -59,12 +59,12 @@ class BDDController extends Controller
     public function saveLocatorProfile(SaveLocatorProfileRequest $request)
 {
     $data = $request->validated();
-
+      $tempPassword = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 6);
     // 1. Create User
     $user = User::create([
         'name'     => $data['owner_name'],
         'email'    => $data['official_email_gmail'],
-        'password' => bcrypt('password123'),
+        'password' => bcrypt($tempPassword),
     ]);
 
     // 2. Create User Details
@@ -86,7 +86,7 @@ class BDDController extends Controller
     Log::info('Sending Email to:', [
         'user Email' => $user->email,
         'Username' => $user->email,
-        'Temporary password' => 'password123'
+        'Temporary password' => $tempPassword,
     ]);
 
     // 6. Redirect back with success message only

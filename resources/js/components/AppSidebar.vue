@@ -182,15 +182,26 @@ else if (sezadOSAC) {
 } else if(locator){
     mainNavItems.push(
         {
-            title: 'Apply',
-            href: '/loctr/applicaions/create',
+            title: 'Create Application',
+            href: '/loctr/applications/create',
             icon: LayoutGrid,
         },
         {
             title: 'Apply For ATO',
             href: '/loctr/applications/create',
             icon: LayoutGrid,
-        }
+        },
+        {
+            title: 'Vedor Requests',
+            href:'/VendorVerify',
+            icon: LayoutGrid,
+        },
+        {
+            title:'My Vendors',
+            href: '/MyVendors',
+            icon: LayoutGrid,
+        },
+        
     );
 }else if(BDD){
    mainNavItems.push(
@@ -217,7 +228,7 @@ else if (sezadOSAC) {
             
         },
         {
-            title: 'Accreditation',
+            title: 'Apply for Accreditation',
             href: '/',
             icon: Eye,
         }

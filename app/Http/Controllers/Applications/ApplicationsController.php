@@ -72,9 +72,12 @@ class ApplicationsController extends Controller
      * Show the form for creating a new resource.
      */
     public function create()
+
     {   //check if user has approved ATO if it does remove ATO to the Option
          $user = auth()->user();
-
+       if (Gate::denies('access-locator')) {
+            abort(403, 'Unauthorized');
+        } 
         $formOptions = $this->service->getFormOptionsForUser();
 
     

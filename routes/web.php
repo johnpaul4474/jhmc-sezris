@@ -161,7 +161,9 @@ Route::prefix('temp')->name('temp.')->group(function () {
 //VENDOR
 Route::get('/locator-vendor',[LocatorVendorController::class,'index'])->name('locator.vendor.index');
 
-
+Route::get('/422', function(){
+   abort(422);
+});
 
 
 
