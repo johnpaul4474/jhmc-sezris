@@ -50,7 +50,11 @@ class LocatorController extends Controller
         'app' => $application,
        ]);
     }
+    public function serviProviderRequest(){
+        $user = auth()->user();
 
+        $tempUsers = TemporaryUser::where('locator', '')
+    }
     public function vendorRequest()
     {
         $user = auth()->user();

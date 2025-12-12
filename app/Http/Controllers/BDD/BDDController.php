@@ -82,7 +82,7 @@ class BDDController extends Controller
     // 4. Create Locator Profile
     $locator = LocatorModel::create($data);
 
-    // 5. Log temporary credentials
+    // 5. for now Lets just Log temporary credentials we will make this Mail soon
     Log::info('Sending Email to:', [
         'user Email' => $user->email,
         'Username' => $user->email,

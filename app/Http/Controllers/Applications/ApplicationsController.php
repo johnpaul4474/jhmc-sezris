@@ -75,9 +75,9 @@ class ApplicationsController extends Controller
 
     {   //check if user has approved ATO if it does remove ATO to the Option
          $user = auth()->user();
-       if (Gate::denies('access-locator')) {
-            abort(403, 'Unauthorized');
-        } 
+    //    if (Gate::denies('access-locator')) {
+    //         abort(403, 'Unauthorized');
+    //     } 
         $formOptions = $this->service->getFormOptionsForUser();
 
     
