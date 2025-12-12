@@ -116,7 +116,12 @@ const vendor = user?.details &&
     user.details.role_id == 7 &&
     user.details.department_id == null &&
     user.details.user_function_id == null
- console.log(user);   
+//serviceProvider
+ const ServiceProvider = user?.details &&
+   user.details.role_id == 4 &&
+   user.details.permission_id == 2 &&
+   user.details.department_id == null &&
+   user.details.user_function_id == null   
 const mainNavItems: NavItem[] = [];
 
 if (admin) {
@@ -234,6 +239,21 @@ else if (sezadOSAC) {
         }
     );
 
+}else if(ServiceProvider){
+    mainNavItems.push(
+
+        {
+            title: 'ServiceProvider',
+            href: '/#',
+            icon: LayoutGrid,
+            
+        },
+        {
+             title:'Acreditation',
+             href: '/#',
+             icon: LayoutGrid,
+        }
+    );
 }else{
     mainNavItems.push(
 

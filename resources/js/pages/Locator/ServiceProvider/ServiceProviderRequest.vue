@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
-import locatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue';
+import ServiceProviderSidebarLayout from '@/layouts/ServiceProvider/ServiceProviderSidebarLayout.vue';
 import { locator } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage, router } from '@inertiajs/vue3';
@@ -20,18 +19,18 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 // Props
 const props = defineProps({
-  vendor: {
+  serviceProvider: {
     type: Array,
     default: () => [],
   },
 });
 
 // Check if data is empty
-const isEmpty = computed(() => props.vendor.length === 0);
+const isEmpty = computed(() => props.serviceProvider.length === 0);
 
 // Approve vendor
 const approveVendor = (item: any) => {
-  router.post(`/locator/vendor/${item.id}/approve`, {}, {
+  router.post(`/locator/serviceProviderRequest/${item.id}/approve`, {}, {
     onSuccess: (page) => {
       console.log(page.props.flash.success);
     }
@@ -42,9 +41,9 @@ const approveVendor = (item: any) => {
 <template>
   <Head title="Locator Dashboard" />
 
-  <locatorAppSidebarLayout :breadcrumbs="breadcrumbs">
+  <ServiceProviderSidebarLayout :breadcrumbs="breadcrumbs">
 
-    <h1 class="text-2xl font-bold mb-4 text-center">Vendor Requests</h1>
+    <h1 class="text-2xl font-bold mb-4 text-center">Service Provider Requests</h1>
 
     <div class="mt-6 overflow-x-auto bg-white rounded-lg shadow">
       <table class="min-w-full text-sm border">
@@ -63,14 +62,14 @@ const approveVendor = (item: any) => {
           <!-- EMPTY STATE ROW -->
           <tr v-if="isEmpty">
             <td colspan="6" class="text-center py-6 text-gray-500">
-              No vendor requests found.
+              No service provider requests found.
             </td>
           </tr>
 
           <!-- DATA ROWS -->
           <tr
             v-else
-            v-for="(item, index) in props.vendor"
+            v-for="(item, index) in props.serviceProvider"
             :key="item.id"
             class="hover:bg-gray-50"
           >
@@ -96,5 +95,5 @@ const approveVendor = (item: any) => {
       </table>
     </div>
 
-  </locatorAppSidebarLayout>
+  </ServiceProviderSidebarLayout>
 </template>

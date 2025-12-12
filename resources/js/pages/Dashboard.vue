@@ -62,8 +62,10 @@ const stats = ref({
     <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
+      
      <div class="grid gap-6 md:grid-cols-3 px-6 py-6">
     <!-- Active Users -->
+    
     <div
       class="flex flex-col items-center rounded-2xl bg-blue-500 p-6 shadow-lg transition hover:shadow-xl dark:bg-[#1b1b18]"
     >

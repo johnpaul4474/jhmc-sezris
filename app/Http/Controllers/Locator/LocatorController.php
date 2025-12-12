@@ -50,10 +50,18 @@ class LocatorController extends Controller
         'app' => $application,
        ]);
     }
-    public function serviProviderRequest(){
+    public function serviceProviderRequest()
+    { 
         $user = auth()->user();
-
-        $tempUsers = TemporaryUser::where('locator', '')
+         $status= "new";
+        $tempUsers = TemporaryUser::where('locator', 'like','%'. $user->email .'%')
+                                    ->where('business_type', 1)                
+                                    ->where('status','like','%'.$status.'%')
+                                    ->get();
+                       //dd($tempUsers);
+                return Inertia::render('Locator/ServiceProvider/ServiceProviderRequest',[
+                   'serviceProvider' => $tempUsers,  
+                ]);
     }
     public function vendorRequest()
     {
@@ -67,6 +75,35 @@ class LocatorController extends Controller
             return Inertia::render('Locator/Vendor/VendorRequest',[
             'vendor' => $tempUsers,
             ]);
+    }
+    public function approveServiceProviderRequest($id)
+    { $user = auth()->user();
+        $serviceprovider =  TemporaryUser::findOrFail($id);
+        if (User::where('email', $serviceprovider->email)->exists()) {
+    abort(422, 'Email already exists');
+}      
+      $newServiceProviderUser = User::create([
+        'name' => $serviceprovider->name,
+        'email' => $serviceprovider->email,
+        'password' => $serviceprovider->temp_password,
+        'created_at'=> now(),// date of vendor was verified
+        'updated_at' =>now(),
+      ]);
+      $userDetails = UserDetail::create([
+        'user_id' => $newServiceProviderUser->id,
+        'email' => $newServiceProviderUser->email,
+        'status' => 1,
+        'first_name'=> $newServiceProviderUser->name,
+        'role_id' => 4,
+        'permission_id' => 2,
+        'created_at'=> now(),
+        'upddated_at' =>now(),
+        
+    ]);
+   
+    $serviceprovider->status ='approved';
+    $serviceprovider->save();
+          //dd($id);
     }
     public function approveVendorRequest($id)
     {
@@ -102,6 +139,19 @@ class LocatorController extends Controller
         Log::info('User:'.$user->name.'Approved vendor: ', $vendor->toArray());
         return back()->with('success', 'Vendor Approved successfully');
     }
+    public function MyServiceProviders()
+    { 
+        $user = auth()->user();
+        $tempUsers = TemporaryUser::where('locator', 'like', '%' . $user->email . '%')
+        ->where('status','like','%approved%')
+        ->where('business_type', 1)
+        ->get();
+        return Inertia::render('Locator/ServiceProvider/MyServiceProvider',[
+                   'serviceProvider' => $tempUsers,  
+                ]);
+    }
+
+    
     public function myVendors(){
         $user = auth()->user();
         $tempUsers = TemporaryUser::where('locator', 'like', '%' . $user->email . '%')
