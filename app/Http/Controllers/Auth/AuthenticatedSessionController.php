@@ -83,7 +83,7 @@ class AuthenticatedSessionController extends Controller
         {
             return redirect()->intended('/sezad');
         }else{
-            return redirect()->intended(route('bddDashboard', absolute: false));
+            return redirect()->intended(route('dashboard', absolute: false));
         }
          
         

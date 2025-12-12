@@ -35,7 +35,7 @@ class UserDetailsController extends Controller
         $departmentId = $request->input('department_id', null);
         $divisionId   = $request->input('division_id', null);
         $offset       = $request->input('offset', 0);
-        $limit        = $request->input('limit', 10);
+        $limit        = $request->input('limit', 100);
 
         // Call stored procedure
         $users = DB::select("
@@ -68,6 +68,7 @@ class UserDetailsController extends Controller
     {
         //dd($request);
         //dd($request->all());
+        DB::beginTransaction();
         $validated = $request->validate([
             'employee_id'   => 'required|string|max:50',
             'email_address' => 'required|email|max:100',
@@ -87,8 +88,8 @@ class UserDetailsController extends Controller
             //'phone'         => 'nullable|string|max:20',
             //'address'       => 'nullable|array',
         ]);
-
-        DB::beginTransaction();
+    
+        
         try {
             $tempPassword = Str::random(8);
 
@@ -129,6 +130,11 @@ class UserDetailsController extends Controller
             ]);
 
             $this->sendChangePassword($full_name, $tempPassword, $validated['email_address']);
+            Log::info("User info created", [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'temp_password' => $tempPassword
+            ]);
             DB::commit();
 
             return redirect()->back()->with('success', 'User created successfully.');

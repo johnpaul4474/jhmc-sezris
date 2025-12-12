@@ -38,10 +38,8 @@ export default defineConfig({
 
     // ✅ Ably fix goes HERE (NOT inside plugins)
     optimizeDeps: {
-        include: ["ably"]
+        include: ["ably","@vuepic/vue-datepicker"]
     },
     
-    optimizeDeps: {
-        include: ['@vuepic/vue-datepicker'], // 💡 ADD THIS
-    },
+   
 });

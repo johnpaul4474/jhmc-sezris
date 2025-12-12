@@ -181,8 +181,8 @@ else if (sezadOSAC) {
     mainNavItems.push(
 
         {
-            title: 'Others',
-            href: sezadDashboard(),
+            title: 'Accreditation Dashboard',
+            href: dashboard(),
             icon: LayoutGrid,
             
         }
