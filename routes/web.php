@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
-
+use App\Http\Controllers\Auth\TemporaryAuthController;
 use App\Helpers\UserHelper;
 use App\Models\UserDetails;
 use App\Http\Controllers\Users\UserDetailsController;
@@ -23,7 +23,7 @@ use App\Http\Controllers\Signup\SignupController;
 use App\Http\Controllers\Signup\BusinessTypeController;
 use App\Http\Controllers\Signup\LocatorController;
 use App\Http\Controllers\Signup\TemporaryUserController;
-
+use App\Http\Controllers\VENDOR\LocatorVendorController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -38,7 +38,13 @@ Route::get('/', fn() => Inertia::render('Welcome'))->name('home');
 
 // 🔹 Authenticated Routes
 Route::middleware(['auth', 'verified'])->group(function () {
-
+    //BDD
+    Route::prefix('bdd')->group(function (){
+        Route::get('/dash', [BDDController::class, 'index'])->name('bdd.Dashboard');
+        Route::get('/mylocators',[BDDController::class, 'locators'])->name('bdd.myLocators');
+        Route::post('/locator/saveProfile', [BDDController::class, 'saveLocatorProfile'])->name('locator.save');
+    });
+    
     // Dashboard
     Route::get('dashboard', function () {
         $user = UserHelper::loadUserWithDetails();
@@ -50,7 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/list', [UserDetailsController::class, 'index'])->name('users.list');
             Route::post('/addUser', [UserDetailsController::class, 'store'])->name('userDetails.store');
         });
-
+   
 
     /*
     |--------------------------------------------------------------------------
@@ -69,7 +75,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         | BDD
         |--------------------------------------------------------------------------
         */
-        Route::get('/bdd', [BDDController::class, 'index'])->name('bddDashboard');
+        
         Route::prefix('sezad')->group(function () {
             Route::get('/', [SEZADController::class, 'index'])->name('sezadDashboard');
 
@@ -134,8 +140,30 @@ Route::get('/locatorsSignUp', [LocatorController::class, 'index'])->name('locato
 
 
 
+Route::prefix('temp')->name('temp.')->group(function () {
 
+    // GET /temp/login
+    Route::get('/login', function () {
+        return inertia('auth/TempLogin');
+    })->name('login');
 
+    // POST /temp/login
+    Route::post('/login', [TemporaryAuthController::class, 'login'])
+        ->name('login.submit');
+
+    // POST /temp/logout
+    Route::post('/logout', [TemporaryAuthController::class, 'logout'])
+        ->name('logout');
+    Route::get('/dashboard', function () {
+        return inertia('auth/TempDash');
+    });
+});
+//VENDOR
+Route::get('/locator-vendor',[LocatorVendorController::class,'index'])->name('locator.vendor.index');
+
+Route::get('/422', function(){
+   abort(422);
+});
 
 
 

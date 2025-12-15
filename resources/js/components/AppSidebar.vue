@@ -22,6 +22,14 @@ import type { PageProps } from '@inertiajs/core';
 import AppLogo from './AppLogo.vue';
 
 import { LayoutGrid, SquareUserRound, Folder, BookOpen, Clock, Eye } from 'lucide-vue-next';
+import { dashboard, usersDashboard, sezadDashboard} from '@/routes';
+import { type NavItem } from '@/types';
+import { Link } from '@inertiajs/vue3';
+
+import AppLogo from './AppLogo.vue';
+import { usePage } from '@inertiajs/vue3'
+import type { PageProps } from '@inertiajs/core'
+import { Users,UserRoundPen,BookOpen, Folder, LayoutGrid, SquareUserRound, Clock, Eye } from 'lucide-vue-next';
 import { ref, onMounted } from "vue";
 import * as Ably from "ably";
 
@@ -74,6 +82,26 @@ const user = propsAny.auth?.user ?? null;
     MAIN NAVIGATION
    =============================== */
 
+const BDD = 
+     user?.details &&
+    user.details.role_id === 2 &&
+   // user.details?.position_id === 54 &&
+    user.details.permission_id === 2 &&
+    user.details.department_id === 5 &&
+    user.details.division_id === null &&
+    user.details.user_function_id === 6
+
+const vendor = user?.details &&
+    user.details.permission_id == 2 &&
+    user.details.role_id == 7 &&
+    user.details.department_id == null &&
+    user.details.user_function_id == null
+//serviceProvider
+ const ServiceProvider = user?.details &&
+   user.details.role_id == 4 &&
+   user.details.permission_id == 2 &&
+   user.details.department_id == null &&
+   user.details.user_function_id == null   
 const mainNavItems: NavItem[] = [];
 
 /* ADMIN */
@@ -89,6 +117,43 @@ if (permissions.isAdmin) {
         { title: 'Create Application', href: '/loctr/applications/create', icon: SquareUserRound },
         { title: 'Pending Application', href: '/loctr/applications/pending', icon: Clock },
         { title: 'Approved Applications', href: '/loctr/applications/approved', icon: Eye },
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Users',
+            href: usersDashboard(),
+            icon: SquareUserRound,
+        },
+        {
+            title: 'SEZAD',
+            href: sezadDashboard(),
+            icon: Folder,
+        },
+        {
+            title: 'BDD Created Users',
+            href:'#',
+            icon: BookOpen,
+        }, {
+        title: 'Locator',
+        href: '/locator',
+        icon: LayoutGrid,
+    },
+        {
+            title: 'Create Application',
+            href: '/loctr/applications/create',
+            icon: SquareUserRound,
+        }, {
+        title: 'Pending Application',
+        href: '/loctr/applications/pending',
+        icon: Clock,
+    }, {
+        title: 'Approved Applications',
+        href: '/loctr/applications/approved',
+        icon: Eye,
+    },
     );
 }
 
@@ -117,6 +182,84 @@ else if (permissions.accreditationCeoc) {
         icon: LayoutGrid,
     });
 }
+        {
+            title: 'DASHBOARD',
+            href: sezadDashboard(),
+            icon: LayoutGrid,
+        }
+    );
+} else if(locator){
+    mainNavItems.push(
+        {
+            title: 'Create Application',
+            href: '/loctr/applications/create',
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Apply For ATO',
+            href: '/loctr/applications/create',
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Vedor Requests',
+            href:'/VendorVerify',
+            icon: LayoutGrid,
+        },
+        {
+            title:'My Vendors',
+            href: '/MyVendors',
+            icon: LayoutGrid,
+        },
+        
+    );
+}else if(BDD){
+   mainNavItems.push(
+    {
+            title: 'registered Locators',
+            href: '/bdd/dash',
+            icon: Users,
+            
+        },
+        {
+            title: 'Locator with Profiles',
+            href: '#',
+            icon: UserRoundPen,
+            
+        },
+   );
+}else if(vendor){
+    mainNavItems.push(
+
+        {
+            title: 'Vendor',
+            href: '/',
+            icon: LayoutGrid,
+            
+        },
+        {
+            title: 'Apply for Accreditation',
+            href: '/',
+            icon: Eye,
+        }
+    );
+
+}else if(ServiceProvider){
+    mainNavItems.push(
+
+        {
+            title: 'ServiceProvider',
+            href: '/#',
+            icon: LayoutGrid,
+            
+        },
+        {
+             title:'Acreditation',
+             href: '/#',
+             icon: LayoutGrid,
+        }
+    );
+}else{
+    mainNavItems.push(
 
 else if (permissions.accreditationTfbosta) {
     mainNavItems.push({

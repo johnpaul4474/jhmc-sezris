@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import UserInfo from '@/components/UserInfo.vue';
+//import UserInfo from '@/components/UserInfo.vue';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -47,11 +47,11 @@ function clearNotification() {
             <DropdownMenu>
                 <DropdownMenuTrigger as-child >
                     <SidebarMenuButton size="lg">
-                        <UserInfo
+                        <!-- <UserInfo
                             :user="props.user"
                             :has-notification="props.hasNotification"
                             @clear-notification="clearNotification"
-                        />
+                        /> -->
                     </SidebarMenuButton>
                 </DropdownMenuTrigger>
 

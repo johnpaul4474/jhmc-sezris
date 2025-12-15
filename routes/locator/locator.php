@@ -10,8 +10,13 @@ use App\Models\User;
 use App\Http\Controllers\Applications\ATOController;
 use App\Data\ATOmeta;
 use Carbon\Carbon;
-
-
+use App\Models\ATO\AtoApplication;
+Route::post('/locator/serviceProviderRequest/{id}/approve',[LocatorController::class, 'approveServiceProviderRequest'])->name('locator.serviceProvider.approve');
+Route::get('/MyServiceProviders',[LocatorController::class, 'MyServiceProviders'])->name('locator.MyServiceProviders');
+Route::get('/serviceProviderRequest', [LocatorController::class,'serviceProviderRequest'])->name('locator.serviProvider');
+Route:: get('/MyVendors',[LocatorController::class, 'myVendors'])->name('locator.myvendor');
+Route::get('/VendorVerify',[LocatorController::class, 'vendorRequest'])->name('locator.vendor.request');
+Route::post('/locator/vendor/{id}/approve', [LocatorController::class, 'approveVendorRequest'])->name('locator.vendor.approve');
 Route::get('/locator', [LocatorController::class, 'index'])->name('locator');
 Route:: get('/locator/{id}', [LocatorController::class, 'show'])->name('locator.app.show');
 Route::resource('approval', ApplicationForApprovalController::class);

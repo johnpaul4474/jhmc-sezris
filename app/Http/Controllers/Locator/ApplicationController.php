@@ -18,6 +18,7 @@ use App\Models\Locator\ApproverGroupApprover;
 use App\Models\Locator\ApplicationForApproval;
 use App\Helpers\AppConstants;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Gate;
 
 class ApplicationController extends Controller
 {
@@ -65,7 +66,9 @@ class ApplicationController extends Controller
      * Show the form for creating a new resource.
      */
     public function create()
-{    $form = Form::all();
+{   
+    
+    $form = Form::all();
      $user = auth()->user();
     return Inertia::render('Locator/Application/Create', [
         'user' => $user,
