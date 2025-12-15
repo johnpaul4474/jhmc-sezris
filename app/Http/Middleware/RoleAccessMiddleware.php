@@ -33,7 +33,7 @@ class RoleAccessMiddleware
             );
 
             $isSezadUser = null;
-            $isLocator = ($details->role_id == 3);
+            $isLocator = ($details->role_id == 2);
             $isOsac = ($details->position_id == 36 &&
                         $details->department_id == 12 &&
                         $details->role_id == 2 &&
@@ -58,10 +58,11 @@ class RoleAccessMiddleware
             // // Locator user: allow only /locator
             elseif ($isLocator) {
                 
-                     return redirect('/locator');
+                     return redirect('/bdd');
              
-             } elseif($isCco){
-                 return redirect('/cco');
+             } elseif($isCco)
+             {
+                  return redirect('/cco');
              }elseif($isOsac){
                 return redirect('/osac');
              }

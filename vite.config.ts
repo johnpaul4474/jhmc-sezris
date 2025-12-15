@@ -5,14 +5,15 @@ import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-    server: {
-        host: '0.0.0.0', // listen on all interfaces
-        strictPort: true,
-        port: 5173,
-        hmr: {
-            host: '192.168.100.185', // your LAN IP
-        },
-    },
+    // server: {
+    //     host: '0.0.0.0',
+    //     strictPort: true,
+    //     port: 5173,
+    //     hmr: {
+    //         host: '192.168.100.185',
+    //     },
+    // },
+
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.ts'],
@@ -36,12 +37,11 @@ export default defineConfig({
         }),
     ],
 
-    // ✅ Ably fix goes HERE (NOT inside plugins)
+    // ✅ Correct consolidated optimizeDeps block
     optimizeDeps: {
-        include: ["ably"]
-    },
-    
-    optimizeDeps: {
-        include: ['@vuepic/vue-datepicker'], // 💡 ADD THIS
+        include: [
+            'ably',
+            '@vuepic/vue-datepicker'
+        ],
     },
 });

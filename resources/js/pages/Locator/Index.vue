@@ -40,11 +40,6 @@ const status = {
 
 
 const app = page.props.applications[0] ? page.props.applications[0].status : null
-// if (app?.status === 'Pending') {
-//   status.atoCertified = 'ATO Expired'
-// } else if (app?.status === 'Approved') {
-//   status.atoCertified = 'ATO Certified'
-// }
 
 
 </script>
@@ -55,7 +50,7 @@ const app = page.props.applications[0] ? page.props.applications[0].status : nul
   <locatorAppSidebarLayout :breadcrumbs="breadcrumbs">
    
       <!-- Apply New -->
-     
+        
        <TopCard :stats="app"/>
         
     <!---table-->

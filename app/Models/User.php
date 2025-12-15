@@ -16,6 +16,7 @@ use App\Models\UserDetails\Role;
 use App\Models\UserDetails\Permission;
 use App\Models\UserDetails\Position;
 use App\Models\UserDetails\Location;
+use App\Models\Locator\LocatorModel;
 
 class User extends Authenticatable
 {
@@ -124,5 +125,8 @@ class User extends Authenticatable
     public function location()
     {
         return $this->belongsTo(Location::class);
+    }
+    public function profile(){
+        return $this->hasOne(LocatorModel::class);
     }
 }

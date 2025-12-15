@@ -3,7 +3,6 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/vue3';
-import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { ref } from "vue"
 import { Users, FileText, UserPlus } from "lucide-vue-next" // Lucide icons
 import users from '@/routes/users';
@@ -60,12 +59,10 @@ const stats = ref({
 <template>
 
     <Head title="Dashboard" />
-
-    <AppLayout :breadcrumbs="breadcrumbs">
       
+    <AppLayout :breadcrumbs="breadcrumbs">
      <div class="grid gap-6 md:grid-cols-3 px-6 py-6">
     <!-- Active Users -->
-    
     <div
       class="flex flex-col items-center rounded-2xl bg-blue-500 p-6 shadow-lg transition hover:shadow-xl dark:bg-[#1b1b18]"
     >

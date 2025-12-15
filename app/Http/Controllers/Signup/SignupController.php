@@ -63,9 +63,9 @@ class SignupController extends Controller
                 'locator'         => json_encode($validated['selectedLocators'] ?? []),
                 'status'          => 'new',
                 'remark'          => null,
-                'temp_password'   => encrypt($tempPassword),
+                'temp_password'   => bcrypt($tempPassword),
             ]);
-
+             
             Log::info('Temporary user created', [
                 'id' => $tempUser->id,
                 'email' => $tempUser->email,

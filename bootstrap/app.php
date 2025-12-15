@@ -24,11 +24,10 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        $middleware->alias([
-            'role.access' => \App\Http\Middleware\RoleAccessMiddleware::class,
+    
          $middleware->alias([
         'role.access' => \App\Http\Middleware\RoleAccessMiddleware::class,
-         'ensure.cco' => \App\Http\Middleware\EnsureUserIsCCO::class,
+        
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -37,15 +37,16 @@ function handleClick() {
 }
 </script>
 <template>
+    
     <div class="flex items-center gap-2 cursor-pointer" @click="handleClick">
         <Avatar class="h-8 w-8 overflow-hidden rounded-lg">
-            <AvatarImage v-if="showAvatar" :src="user.avatar!" :alt="user.name" />
-            <AvatarFallback class="rounded-lg text-black dark:text-white">{{ getInitials(user.name) }}</AvatarFallback>
+            <AvatarImage v-if="showAvatar" :src="props.user.avatar!" :alt="user.name" />
+            <AvatarFallback class="rounded-lg text-black dark:text-white">{{ getInitials(props.user.name) }}</AvatarFallback>
         </Avatar>
 
         <div class="flex flex-col">
-            <span class="truncate font-medium">{{ user.name }}</span>
-            <span v-if="showEmail" class="truncate text-xs text-muted-foreground">{{ user.email }}</span>
+            <span class="truncate font-medium">{{ props.user.name }}</span>
+            <span v-if="showEmail" class="truncate text-xs text-muted-foreground">{{ props.user.email }}</span>
         </div>
 
         <div class="relative">

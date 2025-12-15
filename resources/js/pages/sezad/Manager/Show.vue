@@ -12,6 +12,7 @@ const props = defineProps({
   application: { type: Object, required: true },
   approver_status: { type: String, required: true },
   group: { type: Object, required: true },
+  prev_approver:{type:String, required:true},
 });
 
 const showModal = ref(false);
@@ -63,7 +64,7 @@ const cancelAction = () => {
 
     <!-- Action Buttons -->
     <div 
-      v-if="props.approver_status === 'Pending'"
+       v-if="props.approver_status === 'Pending' && props.prev_approver === 'Approved'"
       class="flex justify-center gap-4 mt-8"
     >
       <Button

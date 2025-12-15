@@ -42,11 +42,15 @@ class SezadManagerController extends Controller
                         ->where('application_form_id', $application->id)
                         ->first();
                $group = ApproverGroup::where('id', $application->approval->approver_group_id)->first();
-         
+                 $prev_approver = ApproverGroupApprover::where('approver_group_id', $application->approval->approver_group_id)
+    ->where('sequence', ($approver->sequence - 1))
+    ->where('application_form_id', $application->id)
+    ->first();
        return Inertia::render('sezad/Manager/Show',[
                                           'application' => $application,
                                           'approver_status' => $approver->status,
                                           'group' => $group,
+                                          'prev_approver' => $prev_approver->status,
                             ]);
     }
 }

@@ -17,6 +17,10 @@ const props = defineProps({
    group:{
     type:Object,
     required:true,
+  },
+  prev_approver:{
+    type:String,
+    required:true,
   }
 })
 
@@ -81,10 +85,10 @@ const cancelAction = () => {
   <CcoAppSidebarLayout>
    
     <CcoViewer :application="props.application" :group="props.group"/>
-
+ 
     <!-- 🔥 Action bar -->
     <div
-      v-if="props.approver_status === 'Pending'"
+      v-if="props.approver_status === 'Pending' && props.prev_approver === 'Approved'"
       class="flex justify-center gap-4 mt-8"
     >
       <!-- APPROVE -->
