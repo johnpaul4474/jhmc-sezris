@@ -1,218 +1,167 @@
-<script setup lang="ts">
-import { ref, watch, computed } from 'vue'
-import { toast } from 'vue-sonner'
-import { router } from '@inertiajs/vue3'
-
-/** Props */
-const props = defineProps<{
-  mode: 'add' | 'renew'
-  initialData?: Record<string, any>
-}>()
-
-/** Emits */
-const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'saved', payload: any): void
-}>()
-
-/** Reactive form */
-const form = ref({
-  businessName: '',
-  parentCompany: '',
-  natureOfContract: '',
-  tradeName: '',
-  email: '',
-  location: '',
-  contactPerson: '',
-  contactNumber: '',
-  accreditation: '',
-  taxpayerName: '',
-  tin: '',
-  psicPrimary: '',
-  psicSecondary: '',
-  mainOffice: '',
-  documents: [] as File[],
-})
-
-/** Watch for incoming data to prefill */
-watch(
-  () => props.initialData,
-  (val) => {
-    if (val) {
-      form.value = {
-        ...form.value,
-        ...val,
-        documents: [],
-      }
-    }
-  },
-  { immediate: true }
-)
-
-/** Upload + drag/drop logic */
-const isDragging = ref(false)
-
-function handleFileChange(e: Event) {
-  const input = e.target as HTMLInputElement
-  if (input.files) addFiles(Array.from(input.files))
-  input.value = ''
-}
-function handleDragOver(e: DragEvent) {
-  e.preventDefault()
-  isDragging.value = true
-}
-function handleDragLeave(e: DragEvent) {
-  e.preventDefault()
-  isDragging.value = false
-}
-function handleDrop(e: DragEvent) {
-  e.preventDefault()
-  isDragging.value = false
-  const files = Array.from(e.dataTransfer?.files || [])
-  addFiles(files)
-}
-function addFiles(files: File[]) {
-  files.forEach((f) => form.value.documents.push(f))
-}
-function removeFile(idx: number) {
-  form.value.documents.splice(idx, 1)
-}
-function formatFileSize(size: number) {
-  if (size < 1024) return size + ' B'
-  if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB'
-  return (size / (1024 * 1024)).toFixed(2) + ' MB'
-}
-
-/** Computed title and color by mode */
-const title = computed(() =>
-  props.mode === 'add'
-    ? '➕ Add New Service Provider / Supplier'
-    : '♻️ Renew Service Provider / Supplier'
-)
-const headerColor = computed(() => (props.mode === 'add' ? '#3AB54A' : '#0F75BC'))
-
-/** Save handler */
-async function save() {
-  try {
-    const formData = new FormData()
-    Object.entries(form.value).forEach(([key, val]) => {
-      if (key === 'documents') {
-        (val as File[]).forEach((file) => formData.append('documents[]', file))
-      } else {
-        formData.append(key, val as any)
-      }
-    })
-
-    // Example: POST to Laravel endpoint
-    await router.post('/service-providers', formData, {
-      onSuccess: () => {
-        toast.success(`${props.mode === 'add' ? 'Added' : 'Renewed'} successfully!`)
-        emit('saved', form.value)
-        emit('close')
-      },
-      onError: () => {
-        toast.error('Something went wrong. Please try again.')
-      },
-    })
-  } catch (err) {
-    toast.error('Failed to save.')
-  }
-}
-</script>
-
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-auto max-h-[90vh]">
-      <!-- HEADER BAR -->
-      <div
-        class="sticky top-0 flex items-center justify-between px-6 py-4"
-        :style="{ backgroundColor: headerColor }"
-      >
-        <h3 class="text-lg font-semibold text-white">{{ title }}</h3>
+  <div v-if="showModal">
+    <!-- Overlay -->
+    <div class="fixed inset-0 bg-white/40 backdrop-blur-md flex items-center justify-center z-50">
+      <div class="bg-white w-full max-w-4xl rounded-xl shadow-xl p-6 overflow-y-auto max-h-[90vh] relative">
 
+        <!-- Close Button -->
         <button
-          @click="emit('close')"
-          class="text-white hover:text-white/80 ml-4 text-xl leading-none"
-          aria-label="Close"
+          @click="closeModal"
+          class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
         >
-          ✕
+          &times;
         </button>
-      </div>
 
-      <!-- BODY -->
-      <form @submit.prevent="save" class="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <input v-model="form.businessName" required placeholder="Business Name"
-               class="col-span-3 border rounded px-3 py-2" />
+        <h2 class="text-xl font-semibold mb-4">Accreditation for Service Providers / Suppliers</h2>
 
-        <input v-model="form.parentCompany" placeholder="Parent Company" class="border rounded px-3 py-2" />
-        <input v-model="form.natureOfContract" placeholder="Nature of Contract" class="border rounded px-3 py-2" />
-        <input v-model="form.tradeName" placeholder="Trade Name" class="border rounded px-3 py-2" />
+        <!-- FORM GRID -->
+        <div class="grid grid-cols-3 gap-4">
 
-        <input v-model="form.email" type="email" placeholder="Email" class="border rounded px-3 py-2" />
-        <input v-model="form.location" placeholder="Location (JHSEZ)" class="border rounded px-3 py-2" />
-        <input v-model="form.contactPerson" placeholder="Contact Person" class="border rounded px-3 py-2" />
-
-        <input v-model="form.contactNumber" placeholder="Contact Number" class="border rounded px-3 py-2" />
-        <input v-model="form.accreditation" placeholder="Accreditation" class="border rounded px-3 py-2" />
-        <input v-model="form.taxpayerName" placeholder="Taxpayer's Name" class="border rounded px-3 py-2" />
-
-        <div class="col-span-3 flex gap-3">
-          <input v-model="form.psicSecondary" placeholder="PSIC Secondary" class="flex-1 border rounded px-3 py-2" />
-          <input v-model="form.mainOffice" placeholder="Main Office Address" class="flex-1 border rounded px-3 py-2" />
-        </div>
-
-        <!-- Upload -->
-        <div
-          class="col-span-3"
-          @dragover.prevent="handleDragOver"
-          @dragleave.prevent="handleDragLeave"
-          @drop.prevent="handleDrop"
-        >
-          <label class="block mb-2 text-sm font-medium text-gray-700">Upload Documents</label>
-          <div
-            :class="[
-              'relative border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer',
-              isDragging ? 'border-green-600 bg-green-50' : 'border-gray-300 bg-white'
-            ]"
-          >
-            <svg class="w-8 h-8 mb-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M7 16v-4a4 4 0 014-4h1a4 4 0 014 4v4M7 16h10M7 16l-2 2m12-2 2 2" />
-            </svg>
-            <p class="text-sm text-gray-600 mb-2">Click or drag files here to upload</p>
-            <input
-              type="file"
-              multiple
-              @change="handleFileChange"
-              class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
+          <!-- Business Enterprise Name (Disabled) -->
+          <div class="col-span-3">
+            <label class="block text-sm font-medium mb-1">Business Enterprise Name</label>
+            <input type="text" v-model="form.business_name" disabled class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg bg-gray-100" />
           </div>
 
-          <ul v-if="form.documents.length" class="mt-3 space-y-2">
-            <li v-for="(file, idx) in form.documents" :key="idx"
-                class="flex items-center justify-between bg-gray-50 border rounded px-3 py-2">
-              <div class="truncate">
-                <div class="font-medium truncate">{{ file.name }}</div>
-                <div class="text-xs text-gray-500">{{ formatFileSize(file.size) }}</div>
-              </div>
-              <button type="button" @click="removeFile(idx)" class="text-red-600 hover:text-red-800 px-2 py-1 rounded">
-                Remove
-              </button>
-            </li>
-          </ul>
+          <!-- Parent Company -->
+          <div>
+            <label class="block text-sm font-medium mb-1">Parent Company (Optional)</label>
+            <input type="text" v-model="form.parent_company" class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg" />
+          </div>
+
+          <!-- Contract Type -->
+          <div class="col-span-3">
+            <label class="block text-sm font-medium mb-2">Contract Type</label>
+            <div class="flex items-center gap-6">
+              <label class="flex items-center gap-2">
+                <input type="radio" value="direct" v-model="form.contract_type" /> Direct Lease with BCDA/JHMC
+              </label>
+              <label class="flex items-center gap-2">
+                <input type="radio" value="sublessee" v-model="form.contract_type" /> Sublessee with Principal Locator
+              </label>
+            </div>
+            <div v-if="form.contract_type === 'sublessee'" class="mt-3">
+              <label class="block text-sm font-medium mb-1">If Sublessee, Principal Locator Name</label>
+              <input type="text" v-model="form.principal_locator" class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg" />
+            </div>
+          </div>
+
+          <!-- Taxpayer Name & TIN -->
+          <div>
+            <label class="block text-sm font-medium mb-1">Taxpayer's Name</label>
+            <input v-model="form.taxpayer_name" type="text" class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">TIN</label>
+            <input v-model="form.tin" type="text" class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg" />
+          </div>
+
+          <!-- PSIC & Line of Business -->
+          <div>
+            <label class="block text-sm font-medium mb-1">PSIC Primary Number</label>
+            <input v-model="form.psic_primary" type="text" class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Line of Business (Primary)</label>
+            <input v-model="form.lob_primary" type="text" class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">PSIC Secondary Number</label>
+            <input v-model="form.psic_secondary" type="text" class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Line of Business (Secondary)</label>
+            <input v-model="form.lob_secondary" type="text" class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg" />
+          </div>
+
+          <!-- Trade Name & Email -->
+          <div>
+            <label class="block text-sm font-medium mb-1">Trade Name</label>
+            <input v-model="form.trade_name" type="text" class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Email Address</label>
+            <input v-model="form.email" type="email" disabled class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg bg-gray-100" />
+          </div>
+
+          <!-- Location & Office Address -->
+          <div>
+            <label class="block text-sm font-medium mb-1">Location within JHSEZ</label>
+            <input v-model="form.jhsez_location" type="text" class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg" />
+          </div>
+          <div class="col-span-3">
+            <label class="block text-sm font-medium mb-1">Main Office Address</label>
+            <input v-model="form.office_address" type="text" class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg" />
+          </div>
+
+          <!-- Contact Person & Contact Number Side by Side -->
+          <div class="col-span-3 grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Contact Person</label>
+              <input v-model="form.contact_person" type="text" class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Contact Number</label>
+              <input v-model="form.contact_number" type="text" class="w-full px-3 py-2 border-2 border-[#0F75BC] rounded-lg" />
+            </div>
+          </div>
+
         </div>
 
         <!-- ACTION BUTTONS -->
-        <div class="col-span-3 flex justify-end gap-3 mt-3">
-          <button type="button" @click="emit('close')" class="px-4 py-2 bg-gray-100 rounded text-gray-700">Cancel</button>
-          <button type="submit" :class="[
-            'px-5 py-2 text-white rounded font-medium',
-            props.mode === 'add' ? 'bg-[#3AB54A]' : 'bg-[#0F75BC]'
-          ]">
-            {{ props.mode === 'add' ? 'Save' : 'Submit Renewal' }}
+        <div class="flex justify-end mt-6 gap-4">
+          <button
+            @click="closeModal"
+            class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+          >
+            Close
+          </button>
+          <button
+            @click="submitForm"
+            class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+          >
+            Submit
           </button>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </template>
+
+<script setup>
+import { ref } from "vue";
+import { usePage } from "@inertiajs/vue3";
+
+const page = usePage();
+const showModal = ref(true);
+
+const form = ref({
+  business_name: page.props.auth.user.name,
+  parent_company: null,
+  contract_type: null,
+  principal_locator: "",
+  taxpayer_name: "",
+  tin: "",
+  psic_primary: "",
+  lob_primary: "",
+  psic_secondary: "",
+  lob_secondary: "",
+  trade_name: "",
+  email: page.props.auth.user.email,
+  jhsez_location: "",
+  office_address: "",
+  contact_person: "",
+  contact_number: "",
+  documents: []
+});
+
+function closeModal() {
+  showModal.value = false;
+}
+
+function submitForm() {
+  console.log("Form submitted:", form.value);
+  // You can replace this with Inertia post or API call
+  // e.g. Inertia.post('/register-business', form.value)
+}
+</script>

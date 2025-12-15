@@ -254,7 +254,7 @@ function addUser() {
     form.department_id = newUser.department_id;
     form.division_id = newUser.division_id;
 
-    form.post('/user/addUser', {
+    form.post('/users/addUser', {
         onSuccess: () => {
             toast.success('✅ User saved successfully!', {
                 class: 'text-lg px-6 py-4 w-[400px]',

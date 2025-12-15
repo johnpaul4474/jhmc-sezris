@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, router } from '@inertiajs/vue3'
 import Vue3EasyDataTable from 'vue3-easy-data-table'
 import 'vue3-easy-data-table/dist/style.css'
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { ChevronDown } from 'lucide-vue-next'
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 import { Link, usePage } from '@inertiajs/vue3'
@@ -368,7 +368,12 @@ function openRenew(item?: any) {
 function closeDetails() { selectedItem.value = null }
 
 // // open add / renew modals
-function openAdd() { showAddModal.value = true }
+function openAdd() { 
+    selectedItem.value = null  // clear previous selection
+  showAddModal.value = false // ensure reactivity triggers
+  nextTick(() => {
+    showAddModal.value = true
+  })}
 
 // function closeAdd() { showAddModal.value = false }
 
@@ -390,6 +395,9 @@ const reviewed = () => {
 
 // navigation placeholder
 const goTo = (link: string) => router.visit(link)
+
+const addModalId = ref(0)
+
 </script>
 
 <template>

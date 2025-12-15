@@ -2,6 +2,7 @@
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
+
 import {
     Sidebar,
     SidebarContent,
@@ -11,6 +12,16 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+
+import { dashboard, usersDashboard, sezadDashboard, bddDashboard } from '@/routes';
+import type { NavItem } from '@/types';
+
+import { Link, usePage } from '@inertiajs/vue3';
+import type { PageProps } from '@inertiajs/core';
+
+import AppLogo from './AppLogo.vue';
+
+import { LayoutGrid, SquareUserRound, Folder, BookOpen, Clock, Eye } from 'lucide-vue-next';
 import { dashboard, usersDashboard, sezadDashboard} from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
@@ -21,86 +32,55 @@ import type { PageProps } from '@inertiajs/core'
 import { Users,UserRoundPen,BookOpen, Folder, LayoutGrid, SquareUserRound, Clock, Eye } from 'lucide-vue-next';
 import { ref, onMounted } from "vue";
 import * as Ably from "ably";
-import UserInfo from '@/components/UserInfo.vue';
 
+/* ===============================
+    TYPES
+   =============================== */
 
-interface UserDetails {
-    permission_id: number
-    role_id: number
-    department_id: number
-    division_id: number
-    user_function_id: number
+interface Permissions {
+    isAdmin: boolean
+    isLocator: boolean
+    sezadManager: boolean
+    accreditationSpsnbe: boolean
+    accreditationCeoc: boolean
+    accreditationTfbosta: boolean
+    accreditationVme: boolean
+    accreditationProvitional: boolean
+
 }
 
-interface AuthUser {
-    id: number
-    name: string
-    email: string
-    email_verified_at: string | null
-    created_at: string
-    updated_at: string
-    details?: UserDetails
-}
+/* ===============================
+    PAGE & PERMISSIONS
+   =============================== */
 
-interface CustomPageProps extends PageProps {
-    auth: {
-        user: AuthUser
-    }
-}
+// Use usePage without a risky generic, then cast props where needed.
+// This avoids trying to override Inertia's PageProps shape.
+const page = usePage<PageProps>();
 
-const page = usePage<CustomPageProps>()
-const user = page.props.auth.user
-const cco = user?.details && user.details.role_id ===2 && user.details.department_id === 12 && user.details.user_function_id === 2
-const locator = user?.details && user.details.role_id ===3
-    
-const admin =
-    user?.details &&
-    user.details.role_id === 1 &&
-    user.details.permission_id === 1 &&
-    user.details.department_id === 9 &&
-    user.details.division_id === 3 &&
-    user.details.user_function_id === null
+// page.props has unknown shape to TS by default; cast into our expected shape:
+const propsAny = page.props as unknown as {
+  auth?: { user?: any }
+  permissions?: Partial<Permissions>
+};
 
-//change this for other roles
-const sezadAccreditation =
-    user?.details &&
-    user.details.role_id === 2 &&
-    user.details.permission_id === 2 &&
-    user.details.department_id === 12 &&
-    user.details.division_id === null &&
-    user.details.user_function_id === 1
+// Safely derive typed permissions and user with fallbacks
+const permissions: Permissions = {
+  isAdmin: !!propsAny.permissions?.isAdmin,
+  isLocator: !!propsAny.permissions?.isLocator,
+  sezadManager: !!propsAny.permissions?.sezadManager,
+  accreditationSpsnbe: !!propsAny.permissions?.accreditationSpsnbe,
+  accreditationCeoc: !!propsAny.permissions?.accreditationCeoc,
+  accreditationTfbosta: !!propsAny.permissions?.accreditationTfbosta,
+  accreditationVme: !!propsAny.permissions?.accreditationVme,
+  accreditationProvitional: !!propsAny.permissions?.accreditationProvitional,
+  
+};
 
-const sezadCustoms =
-    user?.details &&
-    user.details.role_id === 2 &&
-    user.details.permission_id === 2 &&
-    user.details.department_id === 12 &&
-    user.details.division_id === null &&
-    user.details.user_function_id === 2
+const user = propsAny.auth?.user ?? null;
 
-const sezadLabor =
-    user?.details &&
-    user.details.role_id === 2 &&
-    user.details.permission_id === 2 &&
-    user.details.department_id === 12 &&
-    user.details.division_id === null &&
-    user.details.user_function_id === 3
-
-const sezadOSAC =
-    user?.details &&
-    user.details.role_id === 2 &&
-    user.details.permission_id === 2 &&
-    user.details.department_id === 12 &&
-    user.details.division_id === null &&
-    user.details.user_function_id === 4
-
-const sezadManager =
-    user?.details &&
-    user.details.role_id === 2 &&
-    user.details.permission_id === 2 &&
-    user.details.department_id === 12 &&
-    user.details.division_id === null &&
-    user.details.user_function_id === 5
+/* ===============================
+    MAIN NAVIGATION
+   =============================== */
 
 const BDD = 
      user?.details &&
@@ -124,8 +104,19 @@ const vendor = user?.details &&
    user.details.user_function_id == null   
 const mainNavItems: NavItem[] = [];
 
-if (admin) {
+/* ADMIN */
+if (permissions.isAdmin) {
     mainNavItems.push(
+        { title: 'Dashboard', href: '/dashboard ', icon: LayoutGrid },
+        { title: 'Users', href: '/users', icon: SquareUserRound },
+        { title: 'SEZAD', href: 'sezad', icon: Folder },
+        { title: 'BDD Created Users', href: 'bdd', icon: BookOpen },
+
+        // These are normal strings; keep as is
+        { title: 'Locator', href: '/locator', icon: LayoutGrid },
+        { title: 'Create Application', href: '/loctr/applications/create', icon: SquareUserRound },
+        { title: 'Pending Application', href: '/loctr/applications/pending', icon: Clock },
+        { title: 'Approved Applications', href: '/loctr/applications/approved', icon: Eye },
         {
             title: 'Dashboard',
             href: dashboard(),
@@ -164,20 +155,33 @@ if (admin) {
         icon: Eye,
     },
     );
-} else if (sezadManager) {
-    mainNavItems.push(
-
-        {
-            title: 'DASHBOARD',
-            href: sezadDashboard(),
-            icon: LayoutGrid,
-        }
-    );
 }
 
-else if (sezadOSAC) {
-    mainNavItems.push(
+/* SEZAD MANAGER */
+else if (permissions.sezadManager) {
+    mainNavItems.push({
+        title: 'SEZAD Dashboard',
+        href: '/sezad',
+        icon: LayoutGrid,
+    });
+}
 
+/* SPNSBE */
+else if (permissions.accreditationSpsnbe) {
+    mainNavItems.push({
+        title: 'Service Provider/Supplier',
+        href: '/dashboard',
+        icon: LayoutGrid,
+    });
+}
+
+else if (permissions.accreditationCeoc) {
+    mainNavItems.push({
+        title: 'Commercial Event Operator',
+        href: '/dashboard',
+        icon: LayoutGrid,
+    });
+}
         {
             title: 'DASHBOARD',
             href: sezadDashboard(),
@@ -257,33 +261,43 @@ else if (sezadOSAC) {
 }else{
     mainNavItems.push(
 
-        {
-            title: 'Others',
-            href: sezadDashboard(),
-            icon: LayoutGrid,
-            
-        }
-    );
+else if (permissions.accreditationTfbosta) {
+    mainNavItems.push({
+        title: 'Traid fairs & Bazaars',
+        href: '/dashboard',
+        icon: LayoutGrid,
+    });
+}
+else if (permissions.accreditationVme) {
+    mainNavItems.push({
+        title: 'Vendor and Micro Enterpreneurs',
+        href: '/dashboard',
+        icon: LayoutGrid,
+    });
 }
 
 
-const footerNavItems: NavItem[] = [
-    // {
-    //     title: 'Github Repo',
-    //     href: 'https://github.com/laravel/vue-starter-kit',
-    //     icon: Folder,
-    // },
-    // {
-    //     title: 'Documentation',
-    //     href: 'https://laravel.com/docs/starter-kits#vue',
-    //     icon: BookOpen,
-    // },
-];
+else if (permissions.accreditationProvitional) {
+    mainNavItems.push({
+        title: 'Provitional Grant',
+        href: '/dashboard',
+        icon: LayoutGrid,
+    });
+}
+
+/* ===============================
+    FOOTER NAV
+   =============================== */
+
+const footerNavItems: NavItem[] = [];
+
+/* ===============================
+    NOTIFICATIONS
+   =============================== */
 
 const hasNotification = ref(false);
 
 onMounted(() => {
-    // Load persisted notification state
     const saved = localStorage.getItem("hasNotification");
     hasNotification.value = saved === "true";
 
@@ -293,53 +307,52 @@ onMounted(() => {
     const client = new Ably.Realtime({ key: ablyKey });
     const channel = client.channels.get("notifications");
 
-    channel.subscribe((msg: any) => {
-        console.log("Ably message received:", msg);
-
+    channel.subscribe(() => {
         hasNotification.value = true;
-
-        // Persist notification state
         localStorage.setItem("hasNotification", "true");
     });
 });
 
 function clearNotification() {
-    //alert("Notifications cleared");
     hasNotification.value = false;
     localStorage.setItem("hasNotification", "false");
 }
-
-
 </script>
 
 <template>
     <Sidebar collapsible="icon" variant="inset">
-       
+
+        <!-- HEADER -->
         <SidebarHeader>
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link >
-
-                        <AppLogo class="h-8 w-auto" />
+                        <Link>
+                            <AppLogo class="h-8 w-auto" />
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
             </SidebarMenu>
         </SidebarHeader>
 
+        <!-- CONTENT -->
         <SidebarContent>
             <NavMain :items="mainNavItems" />
         </SidebarContent>
 
+        <!-- FOOTER -->
         <SidebarFooter>
-            
             <NavFooter :items="footerNavItems" />
-            <NavUser  
-            :user="user"
-            :has-notification="hasNotification" 
-            @clear-notification="clearNotification"/>
+
+            <NavUser
+                :user="user"
+                :has-notification="hasNotification"
+                @clear-notification="clearNotification"
+            />
         </SidebarFooter>
+
     </Sidebar>
+
+    <!-- PAGE CONTENT -->
     <slot />
 </template>

@@ -75,21 +75,47 @@ class SignupController extends Controller
             // 4️⃣ Determine recipients
             $recipients = [];
 
-            if (empty($validated['selectedLocators'])) {
-                // No locators chosen → all users in department 12
-                $users = UserDetail::where('department_id', 12)->with('user')->get();
-                foreach ($users as $userDetail) {
-                    if ($userDetail->user && $userDetail->user->email) {
-                        $recipients[] = $userDetail->user->email;
-                    }
+            // if (empty($validated['selectedLocators'])) {
+            //     // No locators chosen → all users in department 12
+            //     $users = UserDetail::where('department_id', 12)->with('user')->get();
+            //     foreach ($users as $userDetail) {
+            //         if ($userDetail->user && $userDetail->user->email) {
+            //             $recipients[] = $userDetail->user->email;
+            //         }
+            //     }
+            // } else {
+            //     // Locators chosen → send to each email in the array
+            //     $recipients = $validated['selectedLocators'];
+            // }
+
+            // // Ensure recipients is always an array and remove null/empty emails
+            // $recipients = array_filter($recipients ?? []);
+            $sezadRecipients = [];
+
+            $sezadUsers = UserDetail::where('department_id', 12)
+                ->with('user')
+                ->get();
+
+            foreach ($sezadUsers as $userDetail) {
+                if ($userDetail->user && $userDetail->user->email) {
+                    $sezadRecipients[] = $userDetail->user->email;
                 }
-            } else {
-                // Locators chosen → send to each email in the array
-                $recipients = $validated['selectedLocators'];
             }
 
-            // Ensure recipients is always an array and remove null/empty emails
-            $recipients = array_filter($recipients ?? []);
+            // Final recipients array
+            $recipients = $sezadRecipients; // SEZAD always included
+
+            // If locators exist → add them
+            if (!empty($validated['selectedLocators'])) {
+                foreach ($validated['selectedLocators'] as $locatorEmail) {
+                    if (!empty($locatorEmail)) {
+                        $recipients[] = $locatorEmail;
+                    }
+                }
+            }
+
+            // Remove duplicates and empty values
+            $recipients = array_unique(array_filter($recipients));
 
             // 5️⃣ Send emails
             foreach ($recipients as $email) {
@@ -100,9 +126,9 @@ class SignupController extends Controller
                     <strong>Email:</strong> {$tempUser->email}</p>
                     <p><strong>Temporary Password:</strong> {$tempPassword}</p>
                     <p>Please click the button below to login and set your password:</p>
-                    <a href='http://localhost/login' 
+                    <a href='http://192.168.100.185/settings/password' 
                     style='display:inline-block; padding:10px 20px; background-color:#1D4ED8; color:white; border-radius:5px; text-decoration:none;'>
-                    Approve User 
+                    Change password 
                     </a>
                 ";
 
@@ -152,7 +178,8 @@ class SignupController extends Controller
             $channel = $ably->channel('notifications');
             $channel->publish('new_notification', [
                 'title' => 'New Temporary User Signup',
-                'message' => 'Temporary user: ', $tempUser->email
+                'message' => 'Temporary user: ',
+                $tempUser->email
             ]);
 
             Log::info('New Notification', [
@@ -161,7 +188,7 @@ class SignupController extends Controller
                 'tempPassword' => $tempPassword
             ]);
 
-            
+
             return response()->json([
                 'message' => 'Signup successful.',
                 'data' => $tempUser,

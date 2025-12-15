@@ -110,6 +110,8 @@ class AuthenticatedSessionController extends Controller
             $user_details->permission_id == 2) {
 
             return redirect()->intended('/sezad');
+        }else{
+            return redirect()->intended(route('dashboard', absolute: false));
         }
 
         if ($user_details &&

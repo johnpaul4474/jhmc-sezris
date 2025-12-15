@@ -15,9 +15,9 @@ class FinanceController extends Controller
 {
      public function index(){
         $user = auth()->user();
-     if (Gate::denies('access-finance')) {
-        abort(403, 'Unauthorized');
-        }
+    //  if (Gate::denies('access-finance')) {
+    //     abort(403, 'Unauthorized');
+    //     }
                 $applications = ApproverGroupApprover::with('application')
                                 ->where('approver_id', auth()->id())
                                 ->orderBy('id', 'desc')
@@ -30,9 +30,9 @@ class FinanceController extends Controller
 {
     $user = auth()->user();
 
-    if (Gate::denies('access-finance')) {
-        abort(403, 'Unauthorized');
-    }
+    // if (Gate::denies('access-finance')) {
+    //     abort(403, 'Unauthorized');
+    // }
 
     $application = ApplicationModel::with(['articleDetails','approval', 'uploads', 'selections','options'])
                     ->find($id);

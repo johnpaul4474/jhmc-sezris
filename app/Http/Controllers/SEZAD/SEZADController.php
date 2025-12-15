@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
 class SEZADController extends Controller
 {
     public function index()
-    {     dd(sezadController);
+    {
         $user = Auth::user();
         $businessTypes = BusinessType::all();
         $tempUsers = TemporaryUser::latest()->get();
@@ -58,7 +58,11 @@ class SEZADController extends Controller
 
         // 2️⃣ Get temp user
         $tempUser = TemporaryUser::findOrFail($request->id);
-
+        
+        Log::info('Updating Temporary User', [
+            $tempUser
+            
+        ]);
         // 3️⃣ Decrypt temp password if exists
         $tempPassword = $tempUser->temp_password ? decrypt($tempUser->temp_password) : null;
 
@@ -74,7 +78,7 @@ class SEZADController extends Controller
         $tempUser->save();
 
         // 5️⃣ If approved, move to main users + details table
-        if ($request->status === 'approved') {
+        if ($request->status === 'approved' || $request->status === 'Approved') {
             DB::beginTransaction();
             try {
                 // Generate temporary password if not present
@@ -83,32 +87,24 @@ class SEZADController extends Controller
                 }
 
                 // Create main User
-                $fullName = trim("{$tempUser->first_name} {$tempUser->middle_name} {$tempUser->last_name}" .
-                    ($tempUser->suffix ? ", {$tempUser->suffix}" : ""));
-
+                
                 $user = User::create([
-                    'name' => $fullName,
+                    'name' => $tempUser->name,
                     'email' => $tempUser->email,
                     'password' => bcrypt($tempPassword),
                 ]);
 
-                // Create related UserDetails
-                // $user->details()->create([
-                //     'employee_id'    => $tempUser->employee_id,
-                //     'email'          => $tempUser->email,
-                //     'status'         => $tempUser->status,
-                //     'first_name'     => $tempUser->first_name,
-                //     'middle_name'    => $tempUser->middle_name,
-                //     'last_name'      => $tempUser->last_name,
-                //     'suffix'         => $tempUser->suffix,
-                //     'position_id'    => $tempUser->position_id,
-                //     'sex'            => $tempUser->sex,
-                //     'department_id'  => $tempUser->department_id,
-                //     'division_id'    => $tempUser->division_id,
-                //     'role_id'        => $tempUser->role_id,
-                //     'permission_id'  => $tempUser->permission_id,
-                //     'user_function_id' => $tempUser->user_function_id,
-                // ]);
+                $user->details()->create([
+                    'email'         => $tempUser->email,
+                    'first_name'    => $tempUser->name,       // FULL NAME HERE
+                     'last_name' => ' ',
+                    'status'        => 1,               // ACTIVE
+                    'role_id'       => $tempUser->business_type+3, // BUSINESS TYPE AS ROLE
+                    'department_id' => 12,              // Optional: assign default DEPT
+                    'division_id'   => null,            // Optional fields
+                    'permission_id' => null,
+                    'position_id'   => null,
+                ]);
 
                 DB::commit();
             } catch (\Throwable $e) {
@@ -126,10 +122,10 @@ class SEZADController extends Controller
         $buttonHtml = '';
         $tempPasswordHtml = '';
 
-        if ($request->status === 'approved') {
+        if ($request->status === 'approved' || $request->status === 'Approved') {
             $tempPasswordHtml = "<p><strong>Temporary Password:</strong> {$tempPassword}</p>";
             $buttonHtml = "
-                <a href='http://localhost/settings/password' 
+                <a href='http://192.168.100.185/settings/password' 
                    style='display:inline-block; padding:10px 20px; background-color:#1D4ED8; color:white; border-radius:5px; text-decoration:none;'>
                    Set Your Password
                 </a>
@@ -148,9 +144,10 @@ class SEZADController extends Controller
         try {
             Mail::html($htmlContent, function ($message) use ($tempUser) {
                 $message->to($tempUser->email)
-                        ->subject('Your Temporary Account Status');
+                    ->subject('Your Temporary Account Status');
             });
             Log::info("Approval email sent to {$tempUser->email}");
+            Log::info("Message in the email {$htmlContent}");
         } catch (\Exception $mailException) {
             Log::error('Failed to send approval email: ' . $mailException->getMessage());
         }

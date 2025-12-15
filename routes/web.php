@@ -71,7 +71,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         */
         
         /*
-        |--------------------------------------------------------------------------
+        |-------------------------------------------------------------------------
         | BDD
         |--------------------------------------------------------------------------
         */
@@ -104,7 +104,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::delete('/temporary-users/{id}', [TemporaryUserController::class, 'destroy']);
             });
             Route::post('/temp-users/update', [SEZADController::class, 'updateTempUser']);
-
+           
         });
     });
     /*

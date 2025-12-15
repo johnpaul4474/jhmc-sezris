@@ -32,6 +32,9 @@ class RoleAccessMiddleware
                 $details->permission_id == 1
             );
 
+            $isSezadUser = ($details->department_id == 12 &&
+                        $details->role_id == 2);
+            $isLocator = ($details->role_id == 3);
             $isSezadUser = null;
             $isLocator = ($details->role_id == 2);
             $isOsac = ($details->position_id == 36 &&
@@ -68,7 +71,7 @@ class RoleAccessMiddleware
              }
             // Optionally: handle users with unknown roles
             else {
-                return redirect('/login');
+                return redirect('/dashboard');
             }
         }
 
