@@ -27,6 +27,7 @@ const hasNotification = ref(false);
 
 console.log("hasNotification in UserMenuContent:", hasNotification.value);
 console.log('UserInfo props:', props.hasNotification );
+console.log('UserInfo user:', props.user );
 const emit = defineEmits(['clear-notification']);
 
 const { getInitials } = useInitials();
