@@ -102,104 +102,64 @@ class LocatorController extends Controller
         ->where('status','like','%approved%')
         ->where('business_type', 1)
         ->get();
+         $tempUsers = TemporaryUser::query()
+    ->where('locator', 'like', '%' . $user->email . '%')
+    ->where('status', 'new')
+    ->where('business_type', 1)
+    ->whereDoesntHave('signupApprovers', function ($q) use ($user) {
+        $q->where('approver_id', $user->id);
+    })
+    ->get();
         return Inertia::render('Locator/ServiceProvider/MyServiceProvider',[
                    'serviceProvider' => $tempUsers,  
                 ]);
     }
 
     
-    public function myVendors(){
-        $user = auth()->user();
-
-       $myvendors = SignupApprover::with('temporary_user') // make sure this relationship exists
-    ->where('approver_id', $user->id)
-    ->where('status', 'Approved')
-    ->get();
-         
-      
-    return Inertia::render('Locator/Vendor/MyVendor', [
-        'vendor' => $myvendors,
-    ]); 
-      
-    }
-    public function approveVendorRequest($id)
-{ 
-    $user = auth()->user();
-    $vendor = TemporaryUser::findOrFail($id);
-
-    // Get approver record (not exists)
-    $approver = SignupApprover::where('temporary_user_id', $vendor->id)
-        ->where('approver_id', $user->id)
-        ->first();
-     
-    // Already approved → STOP
-    if ($approver && $approver->status === 'Approved') {
-        return back()->with('error', 'You already approved this vendor');
-    }
-
-    // Update existing approver
-    if ($approver) {
-        $approver->update([
-            'status' => 'Approved',
-            'remark' => 'update',
-            'approved_at' => now(),
-        ]);
-        
-    }
-    
-    // Create new approver
-    else {
-        SignupApprover::create([
-            'temporary_user_id' => $vendor->id,
-            'approver_id' => $user->id,
-            'status' => 'Approved',
-            'remark' => 'approved',
-            'approved_at' => now(),
-        ]);
-        dd('vendor requesting for Approval to Locator');
-    }
-
-    /**
-     * ✅ Create actual user ONLY IF NOT EXISTS
-     */
-    if (!User::where('email', $vendor->email)->exists()) {
-
-        $newVendorUser = User::create([
-            'name' => $vendor->name,
-            'email' => $vendor->email,
-            'password' => $vendor->temp_password,
-        ]);
-
-        UserDetail::create([
-            'user_id' => $newVendorUser->id,
-            'email' => $newVendorUser->email,
-            'status' => 1,
-            'first_name' => $newVendorUser->name,
-            'role_id' => 7,
-            'permission_id' => 2,
-        ]);
-
-        // $vendor->update([
-        //     'status' => 'approved',
-        // ]);
-    }
-
-    Log::info(
-        'User '.$user->name.' approved vendor',
-        ['vendor_id' => $vendor->id]
-    );
-
-    return back()->with('success', 'Vendor approved successfully');
-}
-public function vendorRequest()
+    public function myVendors()
     {
         $user = auth()->user();
-
-    // Get all vendors where locator column contains the user's email
-    $tempUsers = TemporaryUser::where('locator', 'like', '%' . $user->email . '%')
-        ->where('status','like','%new%')
+        
+        $myvendors = SignupApprover::with('temporary_user') 
+        ->where('approver_id', $user->id)
+        ->where('status', 'Approved')
         ->get();
-       // dd($tempUsers);
+         
+        return Inertia::render('Locator/Vendor/MyVendor', [
+              'vendor' => $myvendors,
+         ]); 
+      
+    }
+    public function approveVendorRequest($id, Request $request)
+    {  
+    $user = auth()->user();
+    $vendor = TemporaryUser::findOrFail($id);
+    $request->validate([
+    'status' => 'required|in:Approved,Rejected',
+    'remark' => 'required|string|min:3',
+     ]);
+     SignupApprover::create([
+    'temporary_user_id' => $vendor->id,
+    'approver_id' => auth()->id(),
+    'status' => $request->status,
+    'remark' => $request->remark,
+    'approved_at' => now(),
+     ]);       
+    }
+     public function vendorRequest()
+    {
+    $user = auth()->user();
+    // compare SignupApprovers table to Tempusers table if locator had been already approved the vendor and get all new status that is requested
+    //by the vendor
+    $tempUsers = TemporaryUser::query()
+    ->where('locator', 'like', '%' . $user->email . '%')
+    ->where('status', 'new')
+    ->where('business_type', 4)
+    ->whereDoesntHave('signupApprovers', function ($q) use ($user) {
+        $q->where('approver_id', $user->id);
+    })
+    ->get();
+         
             return Inertia::render('Locator/Vendor/VendorRequest',[
             'vendor' => $tempUsers,
             
