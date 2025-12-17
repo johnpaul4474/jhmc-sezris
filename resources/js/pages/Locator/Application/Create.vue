@@ -2,7 +2,7 @@
 import { ref, watch, computed, onMounted } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import { File } from 'lucide-vue-next';
-
+import AppSidebarLayout from '@/layouts/app/AppSidebarLayout.vue';
 import LocatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue'
 import DynamicFormRepeater from '@/components/locator/DynamicFormRepeater.vue'
 import ApplicationOptionSelect from '@/components/locator/ApplicationOptionSelect.vue'
@@ -148,7 +148,7 @@ function selectForm(f: any) {
 </script>
 
 <template>
-  <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
+  <AppSidebarLayout :breadcrumbs="breadcrumbs">
    
   <TopCard :stats="stat" />
      
@@ -303,6 +303,6 @@ function selectForm(f: any) {
       </form>
       
     </div>
-  </LocatorAppSidebarLayout>
+  </AppSidebarLayout>
 </template>
 

@@ -35,5 +35,6 @@ class TemporaryUser extends Authenticatable
         return $this->hasMany(SignupApprover::class, 'temporary_user_id');
     }
     
+    
 
 }

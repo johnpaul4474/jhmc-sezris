@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import LocatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue';
+import AppSidebarLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { locator } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
@@ -29,7 +30,7 @@ const approveVendor = (item: any) => {
 <template>
   <Head title="Locator Dashboard" />
 
-  <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
+  <AppSidebarLayout :breadcrumbs="breadcrumbs">
     <h1 class="text-2xl font-bold mb-6 text-center">My Service Provider</h1>
 
     <div class="mt-6 overflow-x-auto bg-white rounded-lg shadow border">
@@ -69,5 +70,5 @@ const approveVendor = (item: any) => {
         </tbody>
       </table>
     </div>
-  </LocatorAppSidebarLayout>
+  </AppSidebarLayout>
 </template>

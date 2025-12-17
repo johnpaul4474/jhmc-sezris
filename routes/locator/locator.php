@@ -11,6 +11,9 @@ use App\Http\Controllers\Applications\ATOController;
 use App\Data\ATOmeta;
 use Carbon\Carbon;
 use App\Models\ATO\AtoApplication;
+use App\Http\Controllers\SERVICEPROVIDER\LocatorServiceProviderController;
+//ServiceProvider
+Route::get('/SP', [LocatorServiceProviderController::class,'index'])->name('locator.serviceProvider.index');
 Route::post('/locator/serviceProviderRequest/{id}/approve',[LocatorController::class, 'approveServiceProviderRequest'])->name('locator.serviceProvider.approve');
 Route::get('/MyServiceProviders',[LocatorController::class, 'MyServiceProviders'])->name('locator.MyServiceProviders');
 Route::get('/serviceProviderRequest', [LocatorController::class,'serviceProviderRequest'])->name('locator.serviProvider');

@@ -144,7 +144,8 @@ class LocatorController extends Controller
     'status' => $request->status,
     'remark' => $request->remark,
     'approved_at' => now(),
-     ]);       
+     ]); 
+       Log::info($vendor->email.' was Aprroved by: '.$user->email);     
     }
      public function vendorRequest()
     {

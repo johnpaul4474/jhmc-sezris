@@ -97,7 +97,7 @@ const ServiceProvider =
     user.details.permission_id === 2 &&
     user.details.department_id === null &&
     user.details.user_function_id === null;
-
+console.log(vendor);
 /* ===============================
    MAIN NAVIGATION
    =============================== */
@@ -171,14 +171,9 @@ else if (permissions.isLocator) {
         { title: 'Apply For ATO', href: '/loctr/applications/create', icon: LayoutGrid },
         { title: 'Vendor Requests', href: '/VendorVerify', icon: LayoutGrid },
         { title: 'My Vendors', href: '/MyVendors', icon: LayoutGrid },
-    );
-}
-
-/* BDD */
-else if (BDD) {
-    mainNavItems.push(
-        { title: 'Registered Locators', href: '/bdd/dash', icon: Users },
-        { title: 'Locator with Profiles', href: '#', icon: UserRoundPen },
+        {title: "My Service Providers",href: '/MyServiceProviders', icon:Users},
+        { title: 'Service Provider Requests', href: '/serviceProviderRequest', icon: Users },
+      
     );
 }
 
@@ -187,6 +182,7 @@ else if (vendor) {
     mainNavItems.push(
         { title: 'Vendor Dashboard', href: '/', icon: LayoutGrid },
         { title: 'Apply for Accreditation', href: '/', icon: Eye },
+        {title: 'Apply for Permit', href:'/loctr/applications/create', icon: LayoutGrid},
     );
 }
 
@@ -195,6 +191,7 @@ else if (ServiceProvider) {
     mainNavItems.push(
         { title: 'Service Provider', href: '/', icon: LayoutGrid },
         { title: 'Accreditation', href: '/', icon: LayoutGrid },
+        {title: 'Apply for Permit', href:'/loctr/applications/create', icon: LayoutGrid},
     );
 }
 

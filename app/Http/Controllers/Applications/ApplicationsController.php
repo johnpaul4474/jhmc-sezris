@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\ATO\AtoApplication;
 use App\Services\AppService;
 use Illuminate\Support\Facades\Gate;
+use App\Models\Signup\TemporaryUser;
+use App\Models\Signup\SignupApprover;
 
 class ApplicationsController extends Controller
 {
@@ -73,8 +75,9 @@ class ApplicationsController extends Controller
      */
     public function create()
 
-    {   //check if user has approved ATO if it does remove ATO to the Option
-         $user = auth()->user();
+    {   $user = auth()->user();
+        //check if user has approved ATO if it does remove ATO to the Option
+        
     //    if (Gate::denies('access-locator')) {
     //         abort(403, 'Unauthorized');
     //     } 

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Services\Contracts\ISezrisService;
-
+use App\Models\Signup\TemporaryUser;
 class ApplicationService implements ISezrisService
 {
 //     public function fetchData(array $filters): array
@@ -45,7 +45,9 @@ class ApplicationService implements ISezrisService
        public function getFormOptionsForUser()
     {
         $user = Auth::user();
-
+         $vendor = TemporaryUser::with(['signupApprovers'])
+                 ->where('temporary_user_id', $user->id)->get();
+                 dd($vendor);
         $applications = $user->applications()->where('form_title', 'ATO')->first();
 
         $applicationId = $applications->id ?? null;
