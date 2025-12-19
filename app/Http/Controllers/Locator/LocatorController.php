@@ -40,9 +40,7 @@ class LocatorController extends Controller
     public function show(String $id){
 
 
-        if (Gate::denies('access-locator')) {
-            abort(403, 'Unauthorized');
-        }
+       
        $application = ApplicationModel::with(['articleDetails', 'uploads', 'selections'])
     ->where('id', $id)
     ->first();

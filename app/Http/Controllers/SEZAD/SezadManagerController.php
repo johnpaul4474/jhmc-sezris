@@ -15,9 +15,9 @@ class SezadManagerController extends Controller
 {
    public function index()
    {
-      if (Gate::denies('access-sezadManager')) {
-               abort(403, 'Unauthorized');
-      }
+      // if (Gate::denies('access-sezadManager')) {
+      //          abort(403, 'Unauthorized');
+      // }
                $applications = ApproverGroupApprover::with('application')
                         ->where('approver_id', auth()->id())
                         ->orderBy('id', 'desc')
@@ -30,9 +30,9 @@ class SezadManagerController extends Controller
     public function show($id)
     {
         $user = auth()->user();
-         if (Gate::denies('access-sezadManager')) {
-            abort(403, 'Unauthorized');
-        }
+      //    if (Gate::denies('access-sezadManager')) {
+      //       abort(403, 'Unauthorized');
+      //   }
                $application = ApplicationModel::with(['articleDetails','approval', 'uploads', 'selections','options'])
                            ->where('id', $id)
                            ->first();

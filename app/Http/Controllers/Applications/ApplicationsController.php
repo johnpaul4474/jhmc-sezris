@@ -77,10 +77,6 @@ class ApplicationsController extends Controller
 
     {   $user = auth()->user();
         //check if user has approved ATO if it does remove ATO to the Option
-        
-    //    if (Gate::denies('access-locator')) {
-    //         abort(403, 'Unauthorized');
-    //     } 
         $formOptions = $this->service->getFormOptionsForUser();
 
     
@@ -127,9 +123,6 @@ class ApplicationsController extends Controller
      */
     public function show(String $id)
     {
-       if (Gate::denies('access-locator')) {
-        abort(403, 'Unauthorized');
-        }
        $data = $this->service->getApplicationData($id);
        $applicationForApproval = ApplicationForApproval::with('approverGroup.approvers')
                             ->where('application_id', $id)

@@ -101,16 +101,18 @@ class AppServiceProvider extends ServiceProvider
     );
 
     // SEZAD OSAC
+   
     Gate::define(
       'sezad-osac',
       fn($user) =>
+      optional($user->details)->position_id === 36 &&
       optional($user->details)->role_id === 2 &&
         optional($user->details)->permission_id === 2 &&
         optional($user->details)->department_id === 12 &&
         optional($user->details)->division_id === null &&
         optional($user->details)->user_function_id === 4
     );
-
+    
     // SEZAD Manager
     Gate::define(
       'sezad-manager',
@@ -180,7 +182,9 @@ class AppServiceProvider extends ServiceProvider
     Inertia::share([
       'permissions' => function () use ($roles) {
         return collect($roles)->mapWithKeys(fn($gate, $key) => [$key => Gate::allows($gate)])->toArray();
+
       }
+      
     ]);
   }
 }

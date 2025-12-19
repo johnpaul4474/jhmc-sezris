@@ -14,13 +14,11 @@ class OsacController extends Controller
    public function index()
    { 
       $user= auth()->user();
-      if (Gate::denies('access-osac')) {
-               abort(403, 'Unauthorized');
-      }
          $applications = ApproverGroupApprover::with('application')
                      ->where('approver_id', auth()->id())
                      ->orderBy('id', 'desc')
                      ->get();
+                     
       return Inertia::render('sezad/OSAC/Index',[
          'applications'=> $applications,
       ]);
@@ -33,9 +31,6 @@ class OsacController extends Controller
    public function show($id)
    {
       $user= auth()->user();
-      if (Gate::denies('access-osac')) {
-            abort(403, 'Unauthorized');
-      }
             $application = ApplicationModel::with(['articleDetails', 'uploads', 'options','selections','approval'])
                            ->where('id', $id)
                            ->first();
