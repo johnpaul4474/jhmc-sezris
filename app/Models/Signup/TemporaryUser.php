@@ -34,6 +34,10 @@ class TemporaryUser extends Authenticatable
     {
         return $this->hasMany(SignupApprover::class, 'temporary_user_id');
     }
+    public function businessType()
+    {
+    return $this->belongsTo(BusinessType::class, 'business_type');
+    }
     
     
 
