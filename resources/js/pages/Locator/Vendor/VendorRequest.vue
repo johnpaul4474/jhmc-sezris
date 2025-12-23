@@ -124,7 +124,7 @@ const submitAction = () => {
           <tr>
             <th class="px-3 py-2 border">#</th>
             <th class="px-3 py-2 border">Email</th>
-            <th class="px-3 py-2 border">Name</th>
+            <th class="px-3 py-2 border">Business Name</th>
             <th class="px-3 py-2 border">Business Type</th>
             <th class="px-3 py-2 border">Status</th>
             <th class="px-3 py-2 border text-center">Action</th>

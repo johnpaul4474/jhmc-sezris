@@ -168,6 +168,8 @@ Route::get('/422', function(){
 
 
 Route::get('/test-pdf', [TestPdfController::class, 'index']);
+Route::get('/pdf/{id}/generate', [TestPdfController::class, 'generate'])
+    ->name('pdf.generate');
 
 
 

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Locator\ApplicationForApproval;
 use App\Models\Locator\ApplicationModel;
 use Inertia\Inertia;
+use App\Helpers\PermitHelper;
 use App\Models\ApproverGroup;
 use App\Models\Locator\ApproverGroupApprover;
 use Illuminate\Support\Facades\DB;
@@ -67,9 +68,13 @@ class ApplicationForApprovalController extends Controller
      * Approve the application for the given approver.
      */
    public function approve(Request $request, $formNumber, $approverId)
-{    
-    $appForm = ApplicationModel::where('form_number', $formNumber)->firstOrFail();
+{  
     
+    $appForm = ApplicationModel::where('form_number', $formNumber)->firstOrFail();
+    if($request->user == 'finance'){
+            $appForm->control_number = PermitHelper::controlNumberGenerate();
+            $appForm->save();
+        }
     $applicationForApproval = ApplicationForApproval::where('application_id', $appForm->id)
         ->with('approverGroup.approvers')
         ->firstOrFail();
@@ -83,7 +88,8 @@ class ApplicationForApprovalController extends Controller
         $approverMember->status ='Approved';
         $approverMember->acted_at = now();
         $approverMember->save();
-       
+        
+        
       $remaining = ApproverGroupApprover::pending()
                 ->where('approver_group_id',$group->id)
                 ->where('application_form_id', $appForm->id)

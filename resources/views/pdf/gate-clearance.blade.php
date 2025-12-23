@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -22,31 +21,37 @@
 
 <div class="container">
 
+    {{-- HEADER --}}
     <div class="header">
-        <img src="{{ public_path('storage/loctr/T67wirLP4lcwOKlYZlLOaS8OUgDGppKwKgFxudVL.png') }}" alt="Logo" height="40">
-        <div class="title">{{$title}}</div>
-        <div><code>{{$status}}</code></div>
+        
+            <img src="{{asset('storage/loctr/T67wirLP4lcwOKlYZlLOaS8OUgDGppKwKgFxudVL.png')}}" height="40">
+       
+        <div class="title">{{ $application->form_title }}</div>
+        <div><code>{{ $application->status }}</code></div>
     </div>
 
+    {{-- FORM INFO --}}
     <div class="section">
         <table>
             <tr>
                 <td colspan="2">Document Code: N/A</td>
-                <td>Control No. {{ $control_no ?? '2025-09-085' }}</td>
+                <td>Control No. {{ $application->control_number ?? 'N/A' }}</td>
             </tr>
             <tr>
-                <td colspan="2">Effectivity Date: {{ $effectivity_date ?? '8 August 2025' }}</td>
-                <td>GP No. {{ $gp_no ?? '24075' }}</td>
+                <td colspan="2">Effectivity Date: {{ $application->created_at->format('F d, Y') }}</td>
+                <td>GP No. {{ $application->form_number }}</td>
             </tr>
             <tr>
                 <td colspan="3">
-                    Please allow <strong>{{ $company ?? 'Street Smart Magic Gen. Merch.' }}</strong>
-                    with vehicle plate no. <strong>{{ $plate_no ?? 'N/A' }}</strong> to pass the JHSEZ Gate with the following articles:
+                    Please allow <strong>{{ $application->company_name ?? 'N/A' }}</strong>
+                    with vehicle plate no. <strong>{{ $application->plate_no ?? 'N/A' }}</strong>
+                    to pass the JHSEZ Gate with the following articles:
                 </td>
             </tr>
         </table>
     </div>
 
+    {{-- ARTICLE DETAILS --}}
     <div class="section">
         <table>
             <thead>
@@ -58,31 +63,39 @@
                 </tr>
             </thead>
             <tbody>
+                @foreach($application->articleDetails as $item)
                 <tr>
-                    <td>N/A</td>
-                    <td>4 Units<br>469 Pcs</td>
-                    <td>Full Game Arcade<br>Desktop Monitor<br>(Nothing Follows)</td>
-                    <td>N/A<br>N/A</td>
+                    <td>{{ $item->marks_and_number }}</td>
+                    <td>{{ $item->qty }}</td>
+                    <td>{{ $item->detailed_description_of_article }}</td>
+                    <td>{{ $item->gross_weight }}</td>
                 </tr>
+                @endforeach
             </tbody>
         </table>
     </div>
 
+    {{-- PAYMENT & DATES --}}
+    @php 
+        $selection = $application->selections->first();
+    @endphp
+
     <div class="section">
         <table>
             <tr>
-                <td>SI NUMBER: September 26, 2025</td>
-                <td>FULLY PAID UNDER: September 26, 2025</td>
-                <td>AMOUNT: ₱20.00</td>
+                <td>SI NUMBER: {{ $application->created_at->format('F d, Y') }}</td>
+                <td>FULLY PAID UNDER: {{ $application->created_at->format('F d, Y') }}</td>
+                <td>AMOUNT: ₱{{ $selection->amount ?? '0.00' }}</td>
             </tr>
             <tr>
-                <td>DATE OF DELIVERY: September 26, 2025</td>
-                <td>DATE: September 26, 2025</td>
-                <td>EXPIRATION DATE: September 26, 2025</td>
+                <td>DATE OF DELIVERY: {{ $application->created_at->format('F d, Y') }}</td>
+                <td>DATE: {{ $application->created_at->format('F d, Y') }}</td>
+                <td>EXPIRATION DATE: {{ $selection->Expired_at ?? 'N/A' }}</td>
             </tr>
         </table>
     </div>
 
+    {{-- STATIC CHECKLIST AND NOTES --}}
     <div class="section">
         <table>
             <thead>
@@ -96,51 +109,55 @@
                     <td>
                         [ ] Invoice/s<br>
                         [ ] Packing List<br>
-                        [X] Delivery Receipt<br>
+                        [] Delivery Receipt<br>
                         [ ] Inventory List<br>
-                        [X] Purchase Order<br>
-                        [X] N/A (Local Articles)
+                        [] Purchase Order<br>
+                        [] N/A (Local Articles)
                     </td>
                     <td>
-                        [X] P10,000.00 and below, 1 Time Validity<br>
+                        @php
+                         $option= $application->options->first();
+                         @endphp
+                        {{ $option->name }}
+                        {{ $option->validity }}
+                        
+                        {{--application name validity
+                         [] P10,000.00 and below, 1 Time Validity<br>
                         [ ] P10,000.01 to P50,000.00, 1 Time Validity<br>
-                        [ ] More than P50,000.00, 1 Time Validity<br>
-                        [ ] Medium construction vehicles, 1 Day Validity<br>
-                        [ ] Heavy construction vehicles, 1 Day Validity<br>
-                        <br>
+                        [ ] More than P50,000.00, 1 Time Validity<br><br>
+
                         [ ] P10,000.00 and below, 5 Day Validity<br>
-                        [ ] P10,000.01 to P50,000.00, 5 Day Validity<br>
-                        [ ] More than P50,000.00, 5 Day Validity<br>
-                        <br>
+                        [ ] P10,000.01 to P50,000.00, 5 Day Validity<br><br>
+
                         [ ] P10,000.00 and below, 20 Day Validity<br>
-                        [ ] P10,000.01 to P50,000.00, 20 Day Validity<br>
-                        [ ] More than P50,000.00, 20 Day Validity
+                        [ ] P10,000.01 to P50,000.00, 20 Day Validity --}}
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
 
+    {{-- IMPORTANT NOTE --}}
     <div class="section">
         <div class="note">IMPORTANT NOTE:</div>
         <p>
-            This document serves as your official ENTRY PASS and must be presented to the security personnel on duty
-            at the sentry gate upon arrival at JHSEZ. Failure to produce this pass may result in denied access.
+            This document serves as your official ENTRY PASS and must be presented to the
+            security personnel at the JHSEZ gate. Failure to present this pass may result in
+            denied access.
         </p>
     </div>
 
+    {{-- SIGNATURE --}}
     <div class="signature-area">
         <div class="signature-block">
             <div class="signature-line">Customs Representative</div>
-            Permit No: {{ $gp_no ?? '24075' }}
+            Permit No: {{ $application->form_number }}
         </div>
         <div class="signature-block">
             <div class="signature-line">GERALD B. DUAGAN</div>
             SEZ/OSAC Manager
         </div>
     </div>
-
-    <p>Validity Date: September 26, 2025 to September 26, 2025</p>
 </div>
 
 </body>

@@ -34,7 +34,7 @@ const props = defineProps<{
   <tbody class="divide-y divide-gray-200">
 
     <tr>
-      <th class="bg-gray-100 px-4 py-2 text-left font-semibold w-40">Name</th>
+      <th class="bg-gray-100 px-4 py-2 text-left font-semibold w-40">Business Name</th>
       <td class="px-4 py-2">{{ props.spsnbe.name }}</td>
     </tr>
 

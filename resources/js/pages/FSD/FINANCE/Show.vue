@@ -53,7 +53,7 @@ const cancelReturn = () => { showReturnModal.value = false; Remark.value = ''; }
 const handleApprove = () => {
   router.post(
     `/application-for-approval/${props.application.form_number}/approvers/${page.props.auth.user.id}/approve`,
-    {},
+    { user: 'finance' },
     {
       onSuccess: () => console.log('Application approved!'),
       onError: (errors) => console.error('Approval failed', errors),
