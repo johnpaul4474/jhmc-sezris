@@ -183,8 +183,10 @@ public function returnApproval(Request $request, $formNumber, $approverId)
 
     return redirect()->back()->with('success', "Application has been {$status}.");
 }
-
-
+     public function invoice(Request $request, $formNumber, $approverId)
+    {
+        return dd($request->IS);
+    }
     /**
      * Remove the specified resource from storage.
      */

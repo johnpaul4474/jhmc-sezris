@@ -49,7 +49,10 @@ Route::group(['prefix' => 'loctr', 'middleware' => 'auth'], function () {
 //approve
 Route::post('application-for-approval/{form_number}/approvers/{approverId}/approve', [ApplicationForApprovalController::class, 'approve'])
     ->name('application-for-approval.approve');
-//Return
+//for invoice
+Route::post('application-for-approval/{form_number}/approvers/{approverId}/invoice',[ApplicationForApprovalController::class, 'invoice'])
+   ->name('application-for-approval.invoice');
+    //Return
 Route::post('application-for-approval/{id}/approvers/{approverId}/return', [ApplicationForApprovalController::class, 'returnApproval'])
     ->name('application-for-approval.return');
 //Reject

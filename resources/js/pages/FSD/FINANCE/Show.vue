@@ -27,12 +27,22 @@ const openReturnModal = () => showReturnModal.value = true;
 
 // Confirm Actions
 const confirmPayment = () => {
-    console.log('OR Number:', OR_Number.value)
-    showApprove.value = true;
-  if (!OR_Number.value.trim()) {
-    alert('Please enter OR Number to proceed');
-    return;
-  }
+  router.post(
+    `/application-for-approval/${props.application.form_number}/approvers/${page.props.auth.user.id}/invoice`,
+    { user: 'finance',
+      IS: OR_Number.value,
+     },
+    {
+      onSuccess: () =>  showApprove.value = true,
+      onError: (errors) => console.error('Approval failed', errors),
+    }
+  );
+  //   console.log('OR Number:', OR_Number.value)
+   
+  // if (!OR_Number.value.trim()) {
+  //   alert('Please enter OR Number to proceed');
+  //   return;
+  //}
   
   showPaymentModal.value = false;
   OR_Number.value = '';
