@@ -75,7 +75,6 @@ const handleApprove = () => {
 <template>
 <FinanceAppsidebarLayout>
   <FinanceViewer :application="props.application" :group="props.group" />
-
   <!-- ACTION BAR -->
   <div v-if="props.approver_status === 'Pending'" class="flex justify-center gap-4 mt-8">
     <Button

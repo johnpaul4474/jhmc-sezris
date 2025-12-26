@@ -71,9 +71,15 @@ class ApplicationForApprovalController extends Controller
 {  
     
     $appForm = ApplicationModel::where('form_number', $formNumber)->firstOrFail();
+    $forApprovaAfterIS = ApplicationForApproval::where('form_number', $formNumber)->firstOrFail();
+
     if($request->user == 'finance'){
             $appForm->control_number = PermitHelper::controlNumberGenerate();
             $appForm->save();
+            $forApprovaAfterIS->payment_status = 'Paid';
+            $forApprovaAfterIS->acted_at = now();
+            $forApprovaAfterIS->save();
+
         }
     $applicationForApproval = ApplicationForApproval::where('application_id', $appForm->id)
         ->with('approverGroup.approvers')
@@ -183,9 +189,18 @@ public function returnApproval(Request $request, $formNumber, $approverId)
 
     return redirect()->back()->with('success', "Application has been {$status}.");
 }
+     /**
+      * update form add the Invoice number
+      */
      public function invoice(Request $request, $formNumber, $approverId)
-    {
-        return dd($request->IS);
+    {   //value of invoice from frontend
+        $forInvoice = ApplicationForApproval::where('form_number', $formNumber)->first();
+        $forInvoice->IS_Number = $request->IS;
+        $forInvoice->save();
+       
+        return back()->with([
+        'success' => 'Approved Invoice Number successfully.',
+    ]);
     }
     /**
      * Remove the specified resource from storage.
