@@ -111,6 +111,20 @@ const props = defineProps({
         <p v-if="props.application.approval.remark"><strong>Remark:</strong> {{ props.application.approval.remark }}</p>
       </div>
     </div>
+     <!--Payment Status and Invoice number-->
+     <div>
+      <h3 class="text-lg bg-gray-500 text-white text-center font-semibold mb-2">
+        Payment Status and Invoice Number
+      </h3>
+      <div class="border rounded-lg p-4 bg-gray-50">
+       <p><strong>Payment Status:</strong>
+    {{ props.application.approval?.payment_status ? props.application.approval.payment_status : 'Not yet available' }}
+</p>
 
+<p class="py-1"><strong>ISNUMBER:</strong>
+    {{ props.application.approval?.IS_Number ? props.application.approval.IS_Number : 'Not yet available' }}
+</p>
+      </div>
+    </div>
   </div>
 </template>
