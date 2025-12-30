@@ -27,12 +27,22 @@ const openReturnModal = () => showReturnModal.value = true;
 
 // Confirm Actions
 const confirmPayment = () => {
-    console.log('OR Number:', OR_Number.value)
-    showApprove.value = true;
-  if (!OR_Number.value.trim()) {
-    alert('Please enter OR Number to proceed');
-    return;
-  }
+  router.post(
+    `/application-for-approval/${props.application.form_number}/approvers/${page.props.auth.user.id}/invoice`,
+    { user: 'finance',
+      IS: OR_Number.value,
+     },
+    {
+      onSuccess: () =>  showApprove.value = true,
+      onError: (errors) => console.error('Approval failed', errors),
+    }
+  );
+  //   console.log('OR Number:', OR_Number.value)
+   
+  // if (!OR_Number.value.trim()) {
+  //   alert('Please enter OR Number to proceed');
+  //   return;
+  //}
   
   showPaymentModal.value = false;
   OR_Number.value = '';
@@ -53,7 +63,7 @@ const cancelReturn = () => { showReturnModal.value = false; Remark.value = ''; }
 const handleApprove = () => {
   router.post(
     `/application-for-approval/${props.application.form_number}/approvers/${page.props.auth.user.id}/approve`,
-    {},
+    { user: 'finance' },
     {
       onSuccess: () => console.log('Application approved!'),
       onError: (errors) => console.error('Approval failed', errors),
@@ -65,7 +75,6 @@ const handleApprove = () => {
 <template>
 <FinanceAppsidebarLayout>
   <FinanceViewer :application="props.application" :group="props.group" />
-
   <!-- ACTION BAR -->
   <div v-if="props.approver_status === 'Pending'" class="flex justify-center gap-4 mt-8">
     <Button

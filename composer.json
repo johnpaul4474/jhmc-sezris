@@ -11,6 +11,7 @@
     "require": {
         "php": "^8.2",
         "ably/laravel-broadcaster": "*",
+        "barryvdh/laravel-dompdf": "*",
         "google/apiclient": "^2.18",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/fortify": "^1.30",
@@ -36,16 +37,16 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-        "app/Helpers/UserHelper.php"
-    ]
+            "app/Helpers/UserHelper.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
         },
         "files": [
-        "app/Helpers/UserHelper.php"
-    ]
+            "app/Helpers/UserHelper.php"
+        ]
     },
     "scripts": {
         "post-autoload-dump": [

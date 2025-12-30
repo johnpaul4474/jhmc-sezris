@@ -200,6 +200,7 @@ const handleSubmit = async () => {
   } catch (error: any) {
     let msg = "Something went wrong. Please try again.";
     if (error.response?.data?.message) msg = error.response.data.message;
+
     showToast(msg, "error");
   }
 

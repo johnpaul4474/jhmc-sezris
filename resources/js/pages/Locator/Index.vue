@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import locatorAppSidebarLayout from '@/layouts/locator/LocatorAppSidebarLayout.vue';
+import AppSidebarLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { locator } from '@/routes';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
@@ -47,7 +48,7 @@ const app = page.props.applications[0] ? page.props.applications[0].status : nul
 <template>
   <Head title="Locator Dashboard" />
    
-  <locatorAppSidebarLayout :breadcrumbs="breadcrumbs">
+  <AppSidebarLayout :breadcrumbs="breadcrumbs">
    
       <!-- Apply New -->
         
@@ -65,5 +66,5 @@ const app = page.props.applications[0] ? page.props.applications[0].status : nul
 </div>
 
 <!--end table-->
-  </locatorAppSidebarLayout>
+  </AppSidebarLayout>
 </template>

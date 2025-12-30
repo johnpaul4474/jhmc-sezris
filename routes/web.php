@@ -24,6 +24,7 @@ use App\Http\Controllers\Signup\BusinessTypeController;
 use App\Http\Controllers\Signup\LocatorController;
 use App\Http\Controllers\Signup\TemporaryUserController;
 use App\Http\Controllers\VENDOR\LocatorVendorController;
+use App\Http\Controllers\TestPdfController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -164,6 +165,11 @@ Route::get('/locator-vendor',[LocatorVendorController::class,'index'])->name('lo
 Route::get('/422', function(){
    abort(422);
 });
+
+
+Route::get('/test-pdf', [TestPdfController::class, 'index']);
+Route::get('/pdf/{id}/generate', [TestPdfController::class, 'generate'])
+    ->name('pdf.generate');
 
 
 

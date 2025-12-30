@@ -16,22 +16,17 @@ class CcoController extends Controller
     
     public function index(){
         $user = auth()->user();
-     if (Gate::denies('access-cco')) {
-        abort(403, 'Unauthorized');
-        }
                 $applications = ApproverGroupApprover::with('application')
                                 ->where('approver_id', auth()->id())
                                 ->orderBy('id', 'desc')
                                 ->get();
+
         return Inertia::render('sezad/CCO/Index',[
                                  'applications'=> $applications,
                                 ]);
         }
     public function show($id){
         $user = auth()->user();
-         if (Gate::denies('access-cco')) {
-            abort(403, 'Unauthorized');
-        }
         $application = ApplicationModel::with(['articleDetails','approval', 'uploads', 'selections','options'])
                         ->where('id', $id)
                         ->first();
@@ -44,6 +39,7 @@ class CcoController extends Controller
     ->where('sequence', ($approver->sequence - 1))
     ->where('application_form_id', $application->id)
     ->first();
+
        return Inertia::render('sezad/CCO/Show',[
         'application' => $application,
         'approver_status' => $approver->status,

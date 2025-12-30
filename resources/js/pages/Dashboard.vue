@@ -53,7 +53,7 @@ const user = page.props.auth.user
 
   <Head title="Dashboard" />
 
-  <AppLayout :breadcrumbs="breadcrumbs">
+ 
     <AppLayout :breadcrumbs="breadcrumbs">
       
      <div class="grid gap-6 md:grid-cols-3 px-6 py-6">
@@ -71,8 +71,9 @@ const user = page.props.auth.user
         </h3>
       </div>
       <p class="mt-6 text-4xl font-bold text-black-500">
-        {{ stats.activeUsers }}
+      
       </p>
+    </div>
     </div>
 
 

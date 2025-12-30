@@ -1,6 +1,7 @@
 <script setup>
 import { Image } from "lucide-vue-next";
 import LocatorAppSidebarLayout from "@/layouts/locator/LocatorAppSidebarLayout.vue";
+import AppSidebarLayout from "@/layouts/app/AppSidebarLayout.vue";
 
 const props = defineProps({
   ATOapplication: {
@@ -28,7 +29,7 @@ const validUntil =
 </script>
 
 <template>
-  <LocatorAppSidebarLayout :breadcrumbs="breadcrumbs">
+  <AppSidebarLayout :breadcrumbs="breadcrumbs">
 
     <!-- Header / Overview Card -->
     <div class="bg-white border rounded-xl shadow-sm p-6 mb-10">
@@ -113,5 +114,5 @@ const validUntil =
       </div>
     </div>
 
-  </LocatorAppSidebarLayout>
+  </AppSidebarLayout>
 </template>
