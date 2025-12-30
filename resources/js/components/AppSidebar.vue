@@ -107,7 +107,6 @@ const osac =
     user.details.permission_id === 2 &&
     user.details.department_id === null &&
     user.details.user_function_id === null;
-console.log(user?.details);
 /* ===============================
    MAIN NAVIGATION
    =============================== */
